@@ -3,9 +3,8 @@ import re
 import math
 import platform
 import threading
-from player import Player
-from Request import Session
-from convert import Convert
+from .player import Player
+from .Request import Session
 
 def converter(file_size):
     if file_size == 0:
@@ -32,11 +31,10 @@ class Media(Session):
         return super(Media,cls).__new__(cls)
 
     def __str__(self):
-        return "%s(%s('hot'))"%(self.__class__.__name__,self._get_media.__name__)
+        return "%s(%s('hot'))"%(self.__class__.__name__,self.mixtape.__name__)
 
     def __repr__(self):
-        pass
-        #return 'Media(%s)'%(self._get_media.__name__)
+        return 'Media(%s)'%(self.mixtape.__name__)
 
 
     def __init__(self, mixtape=None):
@@ -44,16 +42,13 @@ class Media(Session):
         if not mixtape:
             print('Mixtapes object must be pass to Media')
             raise ValueError()
-        self._get_media = mixtape
+        self.mixtape = mixtape
         #self.session = requests.Session()
         self._artist_name = None
         self._title_name = None
         self.album_link = None
         self._song_index = None
         self._selected_song = None
-        self._isWindows = platform.system() == 'Windows'
-        self._isLinux =  platform.system() == 'Linux'
-        self.Convert = Convert()
         self.soup =None
         self._downloaded_song = None
 
@@ -63,12 +58,12 @@ class Media(Session):
         '''Setup the media player and queue artist
         
         '''
-        choice = self._get_media._select(selection)
+        choice = self.mixtape._select(selection)
         if not choice:
             print("Media is not set!\n-->\tIncorrect Value: %s" % selection)
             return
-        self._artist_name = self._get_media.artists[choice[1]]
-        self._title_name = self._get_media.titles[choice[1]]
+        self._artist_name = self.mixtape.artists[choice[1]]
+        self._title_name = self.mixtape.titles[choice[1]]
         self.album_link = "http://www.datpiff.com"+choice[0]
         self._get_songs()
         self._player_links()
@@ -225,7 +220,6 @@ class Media(Session):
         t=threading.Thread(target =self._sample,args=(number,full))
         t.daemon = True
         t.start()
-        print("\nPLAYING DEMO THREAD")
 
 
     def _sample(self, track=None, full_song=False):
@@ -242,29 +236,29 @@ class Media(Session):
                     _index =  song_length - 1 
                 elif _index < 0:
                     _index = 0
+
             elif isinstance(track,str):
                 track = track.lower().strip() 
                 # check if the song in songlist
                 tmp = [s for s in self.songs\
                         if track  in s.lower().strip()
                       ]
-
                 if tmp:
                     if len(tmp) > 1:
-                        # select the first song index 
+                        # select the first song if multiple songs found
                         print('\nMultiple songs with "%s" found '%track) 
                         _index = self.songs.index(tmp[0])+1
                     else:
                         tmp = ''.join(tmp)
-                        _index = self.songs.index(tmp)+1
+                        _index = self.songs.index(tmp)
                 else:
                     print('\nNo song found ')
                     return None
 
-            if _index:
+
+            if _index is not None:
                 print('\nPreparing request')
                 link =  links[_index]
-                print('LINK: ',link)
             else:
                 print('\nNo request to make')
 
@@ -276,26 +270,30 @@ class Media(Session):
                 print("\nNo song was set\nset 'Media.song' first")
                 return
 
+        print('Link:',link)
         # Write songname to file
         if link:
             songname = self.songs[_index]
             with open(self.tempfile, "wb") as ws:
-                data = self.session.get(link)
+                data = self.method('GET',link)
                 content = data.content
                 if data.status_code == 200:
                     song_length = len(content)
                     if  full_song: # demo whole song
-                        print("\t\t--- Demo whole song ---")
                         chunk = content
+                        samp = int(song_length)
                     else: # demo partial song
                         samp = int(song_length/5)
                         start = int(samp/5)
-                        print("\nSample size:",converter(samp))
                         chunk = content[start:samp+start]
                     ws.write(chunk)
-                    print("\nPlaying Sample:",self.artist,songname)
+                    sorf = 'Demo' if not full_song else 'Full Song'
+                    print('\n\t\t-- %s --'%(sorf))
+                    print('Song: %s - %s'%(self.artist,songname))
+                    print("Size:",converter(samp))
                     self.player = Player()
-                    self.player.play(self.tempfile)
+                    songfile = os.path.abspath(self.tempfile)
+                    self.player.play(songfile)
 
                 else:
                     print("Error saving songname web-status-error")

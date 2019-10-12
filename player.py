@@ -19,7 +19,7 @@ class Player(object):
 
     def __init__(self):
         try:
-            self._vlc = vlc.Instance()
+            self._vlc = vlc.Instance('-q')
             self._player = self._vlc.media_player_new()
         except Exception as e:
             msg = PlayerError.error_msg('Instance') + e

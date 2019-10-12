@@ -3,7 +3,7 @@ import json
 import logging
 import user_agent as ua
 from functools import wraps
-from helper import String
+from .helper import String
 
 class RequestError(Exception):
   pass

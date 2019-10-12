@@ -17,7 +17,7 @@ from string import punctuation as strp
 from bs4 import BeautifulSoup 
 from builtins import print as _print
 #from media import Media
-from Request import Session
+from .Request import Session
 
 
 class DatpiffError(Exception):
@@ -28,14 +28,9 @@ class Verbose(object):
         self.verbose = verbose
 
     def print(self,*msg):
-        msg = " ".join(msg)
         if self.verbose:
-            _print(msg)
+            _print(*msg)
 print = Verbose().print
-
-
-   
-    
 
 class Mixtapes(Session):
     def __new__(cls, *args, **kwargs):
@@ -257,10 +252,7 @@ class Mixtapes(Session):
             title = [x.lower().strip() for x in self._titles]
             every = [x for x in artist] + [x for x in title]
 
-            if not isinstance(selection, (int)):
-                selection = selection.strip().lower()
-
-            elif isinstance(selection, (int)):
+            if isinstance(selection, (int)):
                 length = len(title)
                 if int(selection) > length:
                     selection = length
@@ -269,8 +261,11 @@ class Mixtapes(Session):
                     return link[selection], selection
                 else:
                     return link[selection-1], selection-1
+            else:
+                selection = selection.strip().lower()
 
-            elif any([selection in t for t in title]):
+
+            if any([selection in t for t in title]):
                 # Get link by title name
                 selection = "".join([t for t in title if selection.strip() in t])
                 selection = self._checkSize(selection)
@@ -292,11 +287,16 @@ class Mixtapes(Session):
             else:
                 
                 return None
-        except:
+        except DatpiffError as e:
             print(Fore.RED + "Error No Album Selected" + Fore.RESET)
+            print(e)
 
 
 
 if __name__ == "__main__":
+    from importlib import reload as rl 
+    from .media import Media as md
     mix = Mixtapes("hot")
+    media = md(mix)
     text = mix._responses['Start']['response'].text
+    
