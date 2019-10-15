@@ -33,6 +33,13 @@ class Player(object):
     @property
     def pause(self):
         self.player.pause()
+    
+    @property
+    def stop(self):
+        self.player.stop()
+
+    def close(self):
+        self.stop
 
     property
     def _format_time(self,pos):
