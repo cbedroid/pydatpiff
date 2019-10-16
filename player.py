@@ -1,7 +1,5 @@
 import re
 import vlc 
-import threading 
-import signal 
 from time import sleep
 
 class PlayerError(Exception):

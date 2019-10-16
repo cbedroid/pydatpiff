@@ -10,9 +10,7 @@ class RequestError(Exception):
 
 
 class Session(object):
-  ''' Dynamic way to way to keep the requests.Session 
-      through out whole programs
-  '''
+  '''Dynamic way to way to keep requests.Session through out whole programs.'''
   def __new__(cls,*args,**kwargs):
     log_level = kwargs.get('level',logging.WARNING)
     #logging.basicConfig(level=log_level)
