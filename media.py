@@ -32,10 +32,10 @@ class Media():
         return super(Media,cls).__new__(cls)
 
     def __str__(self):
-        return "%s(%s('hot'))"%(self.__class__.__name__,self.mixtape.__name__)
+        return "%s(%s)"%(self.__class__.__name__,self.mixtape)
 
     def __repr__(self):
-        return 'Media(%s)'%(self.mixtape.__name__)
+        return 'Media(%s)'%(self.mixtape)
 
 
     def __init__(self, mixtape=None):
@@ -139,6 +139,7 @@ class Media():
             return 
         text = response.text
         songs = re.findall(r'li[\s*].*title="(.*[\w\s]*)">',text)
+        songs = [re.sub(r'amp;','',x) for x in songs]
         self._songs = songs
         return songs
 
@@ -152,10 +153,12 @@ class Media():
         except TypeError:
             print("Please set Media first\nNo Artist name")
 
+
     @property
     def song(self):
         """Returns the current song set by user."""
         return self._selected_song
+
 
     @song.setter
     def song(self, name):
@@ -179,7 +182,7 @@ class Media():
             print('\n-- Media.song not set. Set "Media.song" to get mp3 link --')
             return None
         if hasattr(self,'_song_index'):
-            return self._mp3_links[self._song_index]
+            return self._player_tids[self._song_index]
         else:
             self._formatToHttps()
 
@@ -199,8 +202,30 @@ class Media():
             links = re.findall(r'meta\scontent\="(//[\w/?].*)"\sitemprop', text)
             if links:
                 links = ['https:'+link for link in links]
-                self._mp3_links = links # capturing as a variable 
+                self._player_tids = links # capturing as a variable 
                                         # to cache the response 
+
+                #TODO:: refactor self.album_link, there are alot of 
+                #   variables and function being set using this method
+                #   We need to refactor so we do not have to call both 
+                #   method "Media.album_link" and the code below 
+                #   ** self.album_link controls self.songs and self.mp3urls
+                #   WE NEED TO CHANGE METHOD " TOO MANY UNCALLED FOR METHODS"
+
+                # we parse the player link page to get the mp3 trackids
+                # and media number 
+                player_no = re.sub('\D','',self.album_link)
+                player_link = "".join(('https://embeds.datpiff.com/mixtape/'
+                                ,str(player_no),'?trackid=1&platform=desktop'))
+
+                try:
+                    self.player_link = player_link
+                    response  = requests.get(player_link)
+                    response.raise_for_status()
+                    text = response.text
+                    self._m4link = re.search('/mixtapes/([\w\/]*)',text).group(1)
+                except Exception as e:
+                    print(e)
                 return links
         else:
             print("\nBad album link:", self.album_link)
@@ -208,13 +233,14 @@ class Media():
 
     def _linksToUrls(self,*args,**kwargs):
         """Parse mp3 links and convert them into Datpiff mp3 url format."""
-        tid = self._mp3_links
-        pd = [re.search(r'(d[\w.]*)/player/(m\w*)\?.*=(\d*)',link) for link in tid]
+        tid = self._player_tids
+
+        pd = [re.search(r'(d[\w.]*)/player/m\w*\?.*=(\d*)',link) for link in tid]
         urls =[]
         for part ,song in zip(pd,self.songs):
-            song = re.sub('[^\w\s]','',song)
-            data =  [part[1],part[2],part[3].zfill(2),re.sub(' ','%20',song)]
-            urls.append('https://hw-mp3.{}/mixtapes/9/{}/{}%20-%20{}.mp3'.format(*data))
+            song = re.sub('[^\w\s()]','',song[:50])
+            data =  [part[1],self._m4link,part[2].zfill(2),re.sub(' ','%20',song)]
+            urls.append('https://hw-mp3.{}/mixtapes/{}/{}%20-%20{}.mp3'.format(*data))
         return urls
         
 
@@ -379,5 +405,3 @@ class Media():
             print('temp file did not delete. %s'%cls._tmpfile)
         else:
             print('tmpfile deleted successfully')
-
-
