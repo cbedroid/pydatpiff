@@ -214,10 +214,9 @@ class Media():
 
                 # we parse the player link page to get the mp3 trackids
                 # and media number
-                player_no = re.sub('\D', '', self.album_link)
+                player_no = re.search(r'\.(\d*)\.',self.album_link).group(1)
                 player_link = "".join(
                     ('https://embeds.datpiff.com/mixtape/', str(player_no), '?trackid=1&platform=desktop'))
-
                 try:
                     self.player_link = player_link
                     response = self._session.method('GET', player_link)
@@ -226,7 +225,8 @@ class Media():
                     self._m4link = re.search(
                         '/mixtapes/([\w\/]*)', text).group(1)
                 except Exception as e:
-                    Logger.warn('Media._formatToHttp Error')
+                    print(e)
+                    raise MediaError('Media._formatToHttp Error')
                 return links
         else:
             Logger.display("\nError Processing link:", self.album_link)
