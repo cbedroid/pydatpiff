@@ -5,39 +5,20 @@ __version__ = 'V1.0.1'
 
 import os
 import re
-from functools import wraps
-from builtins import print as _print
-from .Request import Session
 import requests
+from functools import wraps
+from .urls import Urls
+from .utils import Logger
+from .Request import Session
 
 
 class DatpiffError(Exception):
     pass
 
-class Verbose(object):
-    def __init__(self,verbose = True):
-        self.verbose = verbose
-
-    def print(self,*msg):
-        if self.verbose:
-            _print(*msg)
-print = Verbose().print
-
-
 class Mixtapes(object):
     def __new__(cls, *args, **kwargs):
- 
-        cls._category = {"hot":"http://www.datpiff.com/mixtapes/hot",
-                        "new":"http://www.datpiff.com/mixtapes",
-                        "top":"http://www.datpiff.com/mixtapes-top",
-                        "celebrated":"http://www.datpiff.com/mixtapes/celebrated",
-                        "popular":"http://www.datpiff.com/mixtapes-popular.php",
-                        "exclusive":"http://www.datpiff.com/mixtapes-exclusive",
-                        "most download":"http://www.datpiff.com/mixtapes-popular.php?sort=downloads",
-                        "most listen":"http://www.datpiff.com/mixtapes-popular.php?filter=month&sort=listens",
-                        "most favorite":"http://www.datpiff.com/mixtapes-popular.php?sort=favorites",
-                        "highest rating":"http://www.datpiff.com/mixtapes-popular.php?filter=month&sort=rating"
-                    }
+        cls._category = Urls.category
+
         return super(Mixtapes, cls).__new__(cls)
 
 
@@ -47,8 +28,7 @@ class Mixtapes(object):
         @@params: category:  -- see Mixtapes.category
         '''
         super(Mixtapes,self).__init__(*args,**kwargs)
-        self._session = requests.Session()
-        self.main_url = "http://www.datpiff.com"
+        self._session = Session()
         page = self._selectCategory(category)  or self._category['hot']
         self._Start(page,search)
         self._setup()
@@ -65,13 +45,14 @@ class Mixtapes(object):
     def search(self,artist):
         """search for an artist mixtapes."""
         try:
-            print('\nSearching for %s mixtapes ..'%artist)
-            url = 'https://www.datpiff.com/mixtapes-search'
-            data = {'submit':'MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx','criteria':artist}
-            web = requests.post(url,data=data,timeout=10)
-            web.raise_for_status()
+            Logger.display('\nSearching for %s mixtapes ...'%artist)
+            url = Urls.url['search']
+            data = {'submit':'MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx',
+                    'criteria':artist
+                    }
+            web = self._session.method('POST',url,data=data)
         except:
-            print('Error searching for %s mixtape'%artist)
+            Logger.display('Can not find %s mixtape'%artist)
         else:
             return web
 
@@ -90,11 +71,8 @@ class Mixtapes(object):
         """Initial variable and set attributes on page load up."""
         self.artists = '<div class\="artist">(.*[.\w\s]*)</div>'
         self.mixtapes  = '"\stitle\="listen to ([^"]*)">[\r\n\t\s]?.*img'
-        #[.\w\s\&]*)[^">]'
-        #(.*[\w\s]*)'
         self.links   = 'title"><a href\=\"(.*[\w\s]*\.html)"'
         self.views   = '<div class\="text">Listens: <span>([\d,]*)</span>'
-
 
 
     def _Start(self, url_page,search=None):
@@ -106,14 +84,13 @@ class Mixtapes(object):
         if search:
             body = self.search(search)
             if not body.text: # if the search requests fails then get default page 
-                print('search Failed')
                 # discard search then we recalls the _Start 
                 return self._Start(url_page,None)
         else:
             if not url_page: 
                 # although it should be set. we check again incase of user mistake
                 url_page = self._category['hot']
-            body = self._session.get(url_page)
+            body = self._session.method('GET',url_page)
         self._responses = body
         return body
 
@@ -121,9 +98,9 @@ class Mixtapes(object):
     @property
     def category(self):
         """All category of Mixtapes that users can choose from."""
-        print("\n--- URL CATEGORY ---")
+        Logger.display("\n--- URL CATEGORY ---")
         for key, val in self._category.items():
-            print("%s" % (key))
+            Logger.display("%s" % (key))
 
 
     def _searchTree(f):
@@ -210,7 +187,8 @@ class Mixtapes(object):
         links = self._links
         data = zip(self._artists, self._mixtapes, links, self._views)
         for count,(a, t, l, v) in list(enumerate(data,start=1)):
-            print("# %s\nArtist: %s\nAlbum: %s\nLinks: %s\nViews: %s\n%s"
+            display = Logger.display
+            display("# %s\nArtist: %s\nAlbum: %s\nLinks: %s\nViews: %s\n%s"
                     % (count, a, t, l[1:], v, "-"*40))
 
 
@@ -231,9 +209,7 @@ class Mixtapes(object):
                 index = (min(choice)[0]) - 1
                 return self._links[index],index
             else:
-                print('\n\t -- No Mixtape was found --')
-                return 
+                Logger.display('\n\t -- No Mixtape was found --')
         except DatpiffError as e:
-            print("Error No Album Selected")
-            print(e)
+            Logger.display("No Album Selected")
 
