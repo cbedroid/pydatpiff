@@ -11,6 +11,7 @@ from .mixtapes import Mixtapes
 from .errors import MediaError
 from .Request import Session
 from .utils import Logger, converter
+from .filehandler  import Tmp
 
 
 class Media():
@@ -18,7 +19,9 @@ class Media():
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_tmpfile'):
-            cls._tmpfile = tempfile.NamedTemporaryFile(delete=False)
+            Tmp.removeTmpOnstart()
+            tmp = tempfile.NamedTemporaryFile
+            cls._tmpfile = tmp(suffix='_datpiff',delete=False)
             atexit.register(cls._remove_temp)
         return super(Media, cls).__new__(cls)
 
@@ -36,7 +39,7 @@ class Media():
 
         @@params: mixtape - Datpiff.Mixtapes object
         """
-        Logger.display('Media initailize')
+        Logger.display('Media initialized')
         if not mixtape:
             raise MediaError(1)
 
@@ -114,6 +117,9 @@ class Media():
         """ Return all album songs."""
         if hasattr(self, '_songs'):
             return self._songs
+        else:
+            msg = "\nuse Media.setMedia('artist name') to set media first"
+            Logger.display(msg)
 
 
     def _getSongs(self):
@@ -240,7 +246,8 @@ class Media():
               for link in tid]
         urls = []
         for part, song in zip(pd, self.songs):
-            song = re.sub('[^\w\s().,]', '', song[:50])
+            song = re.sub(r'\&','amp',song) # this may need to go after below
+            song = re.sub('[^\w\s()&.,]', '', song[:50].strip())
             data = [part[1], self._m4link, part[2].zfill(
                 2), re.sub(' ', '%20', song)]
             urls.append(
@@ -288,6 +295,8 @@ class Media():
                 return response
 
 
+    
+
     def play(self, track=None, demo=False):
         """ 
         Play song (uses vlc media player) 
@@ -334,10 +343,12 @@ class Media():
             Logger.display('\n%s %s %s' % ('-'*20, sorf, '-'*20))
             Logger.display('Song: %s - %s' % (self.artist, songname))
             Logger.display("Size:", converter(samp))
+
             if not hasattr(self, 'player'):
                 self.player = Player()
             self._cacheSong(songname, response)
-            self.player.play(self._tmpfile.name)
+            self.player.setTrack(self._tmpfile.name)
+            self.player.play
 
 
     def download(self, track=False, output="", name=None):

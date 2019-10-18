@@ -23,7 +23,7 @@ class Logger(object):
     logging.basicConfig(level=logging.INFO,format = '%(message)s')
 
     handler = logging.FileHandler('logs.log')
-    handler.setLevel(logging.WARNING)
+    handler.setLevel(logging.INFO)
     _format = logging.Formatter(fixdate(),datefmt="%m/%d/%Y %I:%M:%S %p %Z")
     handler.setFormatter(_format)
     logger.addHandler(handler)

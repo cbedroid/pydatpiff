@@ -57,6 +57,35 @@ class Mixtapes(object):
             return web
 
 
+    def _Start(self,category=None, search=None):
+        '''
+        Starts the web page from category selected by user
+        (see Mixtapes.__init__)
+        '''
+        # return the url page request by user
+        if search:
+            body = self.search(search)
+            if not body.text: # if the search requests fails then get default page 
+                # discard search then we recalls the _Start 
+                return self._Start(category,None)
+        else:
+            category = 'hot' if not category else category 
+            category_url = self._category[category]
+            body = self._session.method('GET',category_url)
+
+        self._responses = body
+        return body
+
+
+
+   
+    def _setup(self):
+        """Initial variable and set attributes on page load up."""
+        self.artists = '<div class\="artist">(.*[.\w\s]*)</div>'
+        self.mixtapes  = '"\stitle\="listen to ([^"]*)">[\r\n\t\s]?.*img'
+        self.links   = 'title"><a href\=\"(.*[\w\s]*\.html)"'
+        self.views   = '<div class\="text">Listens: <span>([\d,]*)</span>'
+
     def _selectCategory(self,index):
         """Helper function for selecting a category on startup
         @@params: index - category to search for. 
@@ -67,32 +96,6 @@ class Mixtapes(object):
             return min(choosen)
 
 
-    def _setup(self):
-        """Initial variable and set attributes on page load up."""
-        self.artists = '<div class\="artist">(.*[.\w\s]*)</div>'
-        self.mixtapes  = '"\stitle\="listen to ([^"]*)">[\r\n\t\s]?.*img'
-        self.links   = 'title"><a href\=\"(.*[\w\s]*\.html)"'
-        self.views   = '<div class\="text">Listens: <span>([\d,]*)</span>'
-
-
-    def _Start(self, url_page,search=None):
-        '''
-        Starts the web page from category selected by user
-        (see Mixtapes.__init__)
-        '''
-        # return the url page request by user
-        if search:
-            body = self.search(search)
-            if not body.text: # if the search requests fails then get default page 
-                # discard search then we recalls the _Start 
-                return self._Start(url_page,None)
-        else:
-            if not url_page: 
-                # although it should be set. we check again incase of user mistake
-                url_page = self._category['hot']
-            body = self._session.method('GET',url_page)
-        self._responses = body
-        return body
 
 
     @property
