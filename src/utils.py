@@ -4,6 +4,7 @@ import math
 import subprocess
 
 def fixdate():
+    date = None
     _f = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     if platform.system() == "Linux":
         try:

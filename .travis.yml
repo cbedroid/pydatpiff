@@ -7,13 +7,12 @@ cache: pip
 
 before_install: 
   - pip install -U pip
-  - pip intall -U pytest
+  - pip install -U pytest
   - pip install codecov 
 
 install:
   - pip install -r requirements.txt
+  - pip install ".[test]" . 
 
-script: pytest
+script: pytest TestDatpiff.py
 
-after_success:
-  - codecov
