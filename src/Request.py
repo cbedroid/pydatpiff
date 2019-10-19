@@ -14,13 +14,13 @@ class Session(object):
         try:
             #GET
             if String.lower(method) == "get":
-                web = self.session.get(url,**kwargs,timeout=10)
+                web = self.session.get(url,timeout=10,**kwargs)
             #POST
             if String.lower(method) == "post":
-                web = self.session.post(url,**kwargs,timeout=10)
+                web = self.session.post(url,timeout=10,**kwargs)
             #PUT
             if String.lower(method) == "put":
-                web = self.session.put(url,**kwargs,timeout=10)
+                web = self.session.put(url,timeout=10,**kwargs)
             #HEAD
             if String.lower(method) == "head":
                 web = self.session.head(url,timeout=10)
@@ -28,7 +28,7 @@ class Session(object):
             raise RequestError(1)
             return 
         except Exception as e:
-            raise RequestsError(2)
+            raise RequestError(2)
             return 
          
         status = web.status_code

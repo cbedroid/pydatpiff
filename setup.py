@@ -1,4 +1,4 @@
-from seuptools import setup,find_packages
+from setuptools import setup,find_packages
 
 setup( name='Datpiff',
        version='1.0.1',
