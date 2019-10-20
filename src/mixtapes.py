@@ -4,16 +4,15 @@ __description__ =''' Datpiff music player that lets user control,download, and p
 __version__ = 'V1.0.1'
 
 import os
+import sys
 import re
 import requests
 from functools import wraps
 from .urls import Urls
 from .utils import Logger
 from .Request import Session
+from .errors import MixtapesError
 
-
-class DatpiffError(Exception):
-    pass
 
 class Mixtapes(object):
     def __new__(cls, *args, **kwargs):
@@ -29,8 +28,7 @@ class Mixtapes(object):
         '''
         super(Mixtapes,self).__init__(*args,**kwargs)
         self._session = Session()
-        page = self._selectCategory(category)  or self._category['hot']
-        self._Start(page,search)
+        self._Start(category,search)
         self._setup()
 
     def __str__(self):
@@ -44,6 +42,9 @@ class Mixtapes(object):
 
     def search(self,artist):
         """search for an artist mixtapes."""
+        artist = str(artist).strip()
+        if not artist: 
+            return 
         try:
             Logger.display('\nSearching for %s mixtapes ...'%artist)
             url = Urls.url['search']
@@ -57,7 +58,7 @@ class Mixtapes(object):
             return web
 
 
-    def _Start(self,category=None, search=None):
+    def _Start(self,category='hot', search=None):
         '''
         Starts the web page from category selected by user
         (see Mixtapes.__init__)
@@ -65,14 +66,20 @@ class Mixtapes(object):
         # return the url page request by user
         if search:
             body = self.search(search)
-            if not body.text: # if the search requests fails then get default page 
+            if not body or body is None: 
+                 # if the search requests fails then get default page 
                 # discard search then we recalls the _Start 
-                return self._Start(category,None)
+                return self._Start('hot')
         else:
-            category = 'hot' if not category else category 
-            category_url = self._category[category]
-            body = self._session.method('GET',category_url)
+            _filter = self._parseCategory 
+            category_url = self._category.get(_filter(category))
+            if not category_url: # user mistake, then correct it
+                raise MixtapesError(2)
+                Logger.display('Invalid category selected')
+                Logger.display('Setting category to default: "hot"')
+                category_url = self._category.get('hot')
 
+            body = self._session.method('GET',category_url)
         self._responses = body
         return body
 
@@ -86,7 +93,7 @@ class Mixtapes(object):
         self.links   = 'title"><a href\=\"(.*[\w\s]*\.html)"'
         self.views   = '<div class\="text">Listens: <span>([\d,]*)</span>'
 
-    def _selectCategory(self,index):
+    def _parseCategory(self,index):
         """Helper function for selecting a category on startup
         @@params: index - category to search for. 
                 (See --> "Mixtapes.category" for all category)
@@ -211,8 +218,7 @@ class Mixtapes(object):
             if choice:
                 index = (min(choice)[0]) - 1
                 return self._links[index],index
-            else:
-                Logger.display('\n\t -- No Mixtape was found --')
-        except DatpiffError as e:
-            Logger.display("No Album Selected")
+        except MixtapesError as e:
+            raise MixtapesError(1,True)
+            sys.exit(1)
 

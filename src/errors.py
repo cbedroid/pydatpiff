@@ -1,3 +1,4 @@
+import sys 
 import re
 import requests
 import logging
@@ -11,7 +12,7 @@ class MediaError(Exception):
         2: 'Media not set'
     }
 
-    def __init__(self, error):
+    def __init__(self, error,critical=False):
         if error and error in self.ERRORS:
             e_msg = '\n*--> '+self.ERRORS[error]+' <--*\n'
         elif isinstance(error, str):
@@ -22,14 +23,19 @@ class MediaError(Exception):
             class_name = re.match(r'.*\.(\w*)', str(self.__class__)).group(1)
             e_msg = '\n*--> %s occured <--*\n' % class_name
 
-        Logger.warn(e_msg)
+        if not critical:
+            Logger.warn(e_msg)
+        else:
+            Logger.failed(e_msg)
+            sys.exit(1)
+
 
 
 class MixtapesError(MediaError):
     """ handle all the Media errors"""
     ERRORS = {
-        1: 'No Mixtape was pass to Media',
-        2: 'Media not set',
+        1: 'No Mixtapes Found',
+        2: 'Invalid category selected',
     }
 
 

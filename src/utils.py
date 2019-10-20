@@ -24,20 +24,35 @@ class Logger(object):
     logging.basicConfig(level=logging.INFO,format = '%(message)s')
 
     handler = logging.FileHandler('logs.log')
-    handler.setLevel(logging.INFO)
+    handler.setLevel(logging.WARNING)
     _format = logging.Formatter(fixdate(),datefmt="%m/%d/%Y %I:%M:%S %p %Z")
     handler.setFormatter(_format)
     logger.addHandler(handler)
 
     @classmethod
-    def display(cls,*msg):
+    def _parseLog(cls,*msg,level='info'):
+
         msg = ' '.join(msg)
-        cls.logger.info(msg)
+        if level == 'info':
+            cls.logger.info(msg)
+        elif level == 'warning':
+            cls.logger.warning(msg)
+        elif level == 'critical':
+            cls.logger.critical(msg)
+
+
+    @classmethod
+    def display(cls,*msg):
+        cls._parseLog(*msg,level='info')
 
     @classmethod
     def warn(cls,*msg):
-        ' '.join(msg)
-        cls.logger.warning(msg)
+        cls._parseLog(*msg,level='warning')
+    
+    def failed(cls,*msg):
+        cls._parseLog(*msg,level='critical')
+    
+
 
 
 def converter(file_size):

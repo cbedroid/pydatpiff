@@ -366,7 +366,8 @@ class Media():
         if os.path.isdir(output):
             location = output
         else:
-            location = os.getcwd()
+            Logger.display('Invalid directory: %s'%output)
+            return 
         link = self.mp3urls[selection]
         song = self.songs[selection]
         songname = '/'.join((location, self.artist +
@@ -389,12 +390,15 @@ class Media():
             Logger.display('Cannot download song %s' % songname)
 
 
-    def downloadAlbum(self, location=None):
-        if not location or os.path.isdir(location):
-            location = os.getcwd()
+    def downloadAlbum(self, output=None):
+        if not output:
+            output = os.getcwd()
+        elif not os.path.isdir(output):
+            Logger.display('Invalid directory: %s'%output)
+            return
 
-        fname = location + "\\"+self.artist + "-" + self.album
-        fname = re.sub(' ', '_', fname)
+        fname = output +'\\'+ "-".join((self.artist, self.album))
+        fname = re.sub('[^A-Za-z1-9_\-\.] ', '_', fname)
         # make a directory to store all the ablum's songs
         if not os.path.isdir(fname):
             os.mkdir(fname)
