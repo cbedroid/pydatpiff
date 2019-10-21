@@ -1,7 +1,7 @@
 import re
 import vlc 
 from time import sleep
-from .utils import Logger
+from .utils.logger import Logger
 
 class PlayerError(Exception):
 

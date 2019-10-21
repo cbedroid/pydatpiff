@@ -1,6 +1,2 @@
-urllib3
 request
 python-vlc
-
-
-

@@ -6,11 +6,10 @@ __version__ = 'V1.0.1'
 import os
 import sys
 import re
-import requests
 from functools import wraps
 from .urls import Urls
-from .utils import Logger
-from .Request import Session
+from .utils.logger import Logger
+from .utils.request import Session
 from .errors import MixtapesError
 
 
@@ -74,9 +73,6 @@ class Mixtapes(object):
             _filter = self._parseCategory 
             category_url = self._category.get(_filter(category))
             if not category_url: # user mistake, then correct it
-                raise MixtapesError(2)
-                Logger.display('Invalid category selected')
-                Logger.display('Setting category to default: "hot"')
                 category_url = self._category.get('hot')
 
             body = self._session.method('GET',category_url)
@@ -210,10 +206,18 @@ class Mixtapes(object):
             combine = list(zip(self.artists,self.mixtapes))
             select = 1 if select == 0 else select
             mixtapes  = dict(enumerate(combine,start=1))
-            choice = list(filter(lambda x: select in x \
-                            or str(select).lower().strip() in x[1][0].lower()
-                            or str(select).lower().strip() in x[1][1].lower(),
-                            (mixtapes.items())
+
+            # checking from index 
+            if isinstance(select,int):
+                length = len(self.artists) + 1
+                if select >= 0 and select < length:
+                    select = 1 if select == 0 else select
+                    return self._links[select-1],select-1
+
+            #checking from words
+            select = str(select).lower().strip()
+            choice = list(filter(lambda x: select in x[1][0].lower()
+                                or select in x[1][1].lower(),(mixtapes.items())
                              ))
             if choice:
                 index = (min(choice)[0]) - 1

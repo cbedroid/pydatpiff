@@ -8,16 +8,15 @@ cache: pip
 before_install: 
   - pip install -U pip
   - pip install  pytest
-  - pip install requests
-  - pip install urllib3
   - pip install codecov 
   - python setup.py install
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 install:
   - pip install -r requirements.txt
-  - pip install  . 
+  - pip install -e . 
 
-script: pytest TestDatpiff.py
+script: pytest tests/TestDatpiff.py
 
 after_success: 
   - codecov

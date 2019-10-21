@@ -1,7 +1,6 @@
 import os
 import re
 import threading
-import atexit
 from functools import wraps
 import tempfile
 from time import sleep
@@ -9,9 +8,10 @@ from .urls import Urls
 from .player import Player
 from .mixtapes import Mixtapes
 from .errors import MediaError
-from .Request import Session
-from .utils import Logger, converter
-from .filehandler  import Tmp
+from .utils.request import Session
+from .utils.handler import converter
+from .utils.logger import Logger
+from .utils.filehandler import Tmp
 
 
 class Media():
@@ -22,7 +22,6 @@ class Media():
             Tmp.removeTmpOnstart()
             tmp = tempfile.NamedTemporaryFile
             cls._tmpfile = tmp(suffix='_datpiff',delete=False)
-            atexit.register(cls._remove_temp)
         return super(Media, cls).__new__(cls)
 
 
@@ -68,26 +67,23 @@ class Media():
         """
         choice = self.mixtape._select(selection)
         if not choice:
-            return
+            raise MediaError(2)
         self._artist_name = self.mixtape.artists[choice[1]]
         self.album_name = self.mixtape.mixtapes[choice[1]]
         self.album_link = "".join((Urls.url['album'], choice[0]))
+
         self._getSongs()
-        self._formatToHttps()
+        self._getPlayerEndpoint()
+        self._getTidsUrl()
         Logger.display('Setting Media to %s - %s' % (self.artist, self.album))
 
 
-    def _threader(f):
-        """Threading wrapper function. """
-        @wraps(f)
 
-        def inner(self, *a, **kw):
-            t = threading.Thread(target=f, args=(a,), kwargs=kw)
-            t.daemon = True
-            t.start()
-            return t
-        return inner
-
+    @property
+    def _albumResponse(self):
+        if hasattr(self,'album_link'):
+            response = self._session.method('GET',self.album_link)
+            return response
 
     @property
     def artist(self):
@@ -126,17 +122,10 @@ class Media():
         """ Collect all songs from current Mixtapes album.
             Do not use use Media.songs instead.
         """
-        if not self.album_link:
-            raise MediaError(2)
-            Logger.display("\nuse Media.setMedia('artist name') to set media")
-            return None
+        response = self._albumResponse
+        if not response:
+            raise MediaError(3)
 
-        web_link = self.album_link
-        response = self._session.method('GET', web_link)
-        status = response.status_code
-        if status != 200:
-            Logger.display("No Media data available")
-            return
         text = response.text
         songs = re.findall(r'li[\s*].*title="(.*[\w\s]*)">', text)
         # Need to replace these below too :: Found in source file
@@ -186,85 +175,84 @@ class Media():
             return None
 
         if hasattr(self, '_song_index'):
-            return self._player_tids[self._song_index]
+            return self._tid_urls[self._song_index]
         else:
-            self._formatToHttps()
+            self._getTidsUrl()
 
 
     @property
     def mp3urls(self):
         """Returns the parsed mp3 url"""
-        return self._linksToUrls()
-
-
-    def _formatToHttps(self):
-        """Get the raw mp3 link and convert them to https format"""
-        if not self.album_link:
-            return
-        response = self._session.method('GET', self.album_link)
-        if response.status_code == 200:
-            text = response.text
-            links = re.findall(
-                r'meta\scontent\="(//[\w/?].*)"\sitemprop', text)
-            if links:
-                links = ['https:'+link for link in links]
-                self._player_tids = links  # capturing as a variable
-                # to cache the response
-
-                # TODO:: refactor self.album_link, there are alot of
-                #   variables and function being set using this method
-                #   We need to refactor so we do not have to call both
-                #   method "Media.album_link" and the code below
-                #   ** self.album_link controls self.songs and self.mp3urls
-                #   WE NEED TO CHANGE METHOD " TOO MANY UNCALLED FOR METHODS"
-
-                # we parse the player link page to get the mp3 trackids
-                # and media number
-                player_no = re.search(r'\.(\d*)\.',self.album_link).group(1)
-                player_link = "".join(
-                    ('https://embeds.datpiff.com/mixtape/', str(player_no), '?trackid=1&platform=desktop'))
-                try:
-                    self.player_link = player_link
-                    response = self._session.method('GET', player_link)
-                    response.raise_for_status()
-                    text = response.text
-                    self._m4link = re.search(
-                        '/mixtapes/([\w\/]*)', text).group(1)
-                except Exception as e:
-                    print(e)
-                    raise MediaError('Media._formatToHttp Error')
-                return links
-        else:
-            Logger.display("\nError Processing link:", self.album_link)
-
-
-    def _linksToUrls(self, *args, **kwargs):
-        """Parse mp3 links and convert them into Datpiff mp3 url format."""
-        tid = self._player_tids
-
+        tid = self._tid_urls
         pd = [re.search(r'(d[\w.]*)/player/m\w*\?.*=(\d*)', link)
               for link in tid]
         urls = []
         for part, song in zip(pd, self.songs):
             song = re.sub(r'\&','amp',song) # this may need to go after below
             song = re.sub('[^\w\s()&.,]', '', song[:50].strip())
-            data = [part[1], self._m4link, part[2].zfill(
+            data = [part[1], self.m_ids, part[2].zfill(
                 2), re.sub(' ', '%20', song)]
             urls.append(
                 'https://hw-mp3.{}/mixtapes/{}/{}%20-%20{}.mp3'.format(*data))
         return urls
 
 
+    def _getPlayerEndpoint(self):
+        """
+        Return the embeds player endpoint
+
+        https://www.datpiff.com/player/ --> m97454a7 <-- ?tid=1 "
+        """
+        player_no = re.search(r'\.(\d*)\.html',self.album_link).group(1)
+        player_link = "".join(('https://embeds.datpiff.com/mixtape/', 
+                                str(player_no),
+                                '?trackid=1&platform=desktop'))
+        try:
+            response = self._session.method('GET', player_link)
+            response.raise_for_status()
+            text = response.text
+
+        except Exception as e:
+            print(e)
+            raise MediaError('Media._Endpoint Error')
+        else:
+            self.m_ids = re.search(
+                '/mixtapes/([\w\/]*)', text).group(1)
+
+
+    def _getTidsUrl(self):
+        """Get the raw mp3 link and convert them to https format"""
+        response = self._albumResponse
+
+        if not response:
+            raise MediaError(2)
+        text = response.text
+        links = re.findall(
+            r'meta\scontent\="(//[\w/?].*)"\sitemprop', text)
+        if links:
+            links = ['https:'+link for link in links]
+            self._tid_urls = links  # capturing as a variable
+            return links
+
+       
     def _parseSelection(self, select):
         """Parse all user selection and return the correct songs
            @@params: select  - Media.songs name or index of Media.songs 
         """
         select = 1 if select == 0 else select
         songs = dict(enumerate(self.songs, start=1))
-        selection = list(filter(lambda x: select in x
-                                or str(select).lower().strip() in x[1].lower(),
-                                (songs.items())
-                                ))
+
+        # checking from index 
+        if isinstance(select,int):
+            length = len(self.songs) + 1
+            if select >= 0 and select < length:
+                select = 1 if select == 0 else select
+                return select-1
+
+        select = str(select).lower().strip()
+        selection = list(filter(lambda x: select in x[1].lower(),(songs.items()
+                            )))
+
         if selection:
             return (min(selection)[0]) - 1
         else:
@@ -294,8 +282,6 @@ class Media():
                 response = self._song_cache[in_cache]
                 return response
 
-
-    
 
     def play(self, track=None, demo=False):
         """ 
@@ -407,16 +393,3 @@ class Media():
             self.download(song, output=fname)
         Logger.display("\n%s %s saved" % (self.artist, self.album))
 
-
-    @classmethod
-    def _remove_temp(cls):
-        try:
-            if hasattr(cls, 'player'):
-                cls.player.stop()
-                sleep(.5)
-            cls._tmpfile.close()
-            name = cls._tmpfile.name
-            os.unlink(cls._tmpfile.name)
-        except Exception as e:
-            msg = 'temp file did not delete. %s' % cls._tmpfile.name
-            Logger.display(msg)
