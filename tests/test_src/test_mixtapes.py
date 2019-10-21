@@ -1,9 +1,9 @@
+#myPath = os.path.dirname(os.path.abspath(__file__))
+#sys.path.insert(0, myPath + '..')
+
 import os
 import sys 
 import unittest
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + '/../')
-
 from src.mixtapes import Mixtapes
 from src.urls import Urls
 
