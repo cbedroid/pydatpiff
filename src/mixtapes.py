@@ -8,11 +8,17 @@ import sys
 import re
 from functools import wraps
 from .urls import Urls
-from .utils.logger import Logger
+from .logger import Logger
 from .utils.request import Session
 from .errors import MixtapesError
 
-
+'''
+class Logger():
+    @classmethod
+    def display(cls,*args):
+        msg = '  '.join(args)
+        print(msg)
+'''
 class Mixtapes(object):
     def __new__(cls, *args, **kwargs):
         cls._category = Urls.category

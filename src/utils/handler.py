@@ -30,7 +30,3 @@ def converter(file_size):
     result = round(file_size / power,2)
     return '%s %s'%(result,size_name[change])
  
-
-
-
-

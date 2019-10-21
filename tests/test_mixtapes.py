@@ -1,11 +1,7 @@
-#myPath = os.path.dirname(os.path.abspath(__file__))
-#sys.path.insert(0, myPath + '..')
-
 import os
 import sys 
 import unittest
-from src.mixtapes import Mixtapes
-from src.urls import Urls
+from . import Mixtapes
 
 class TestMixtapes(unittest.TestCase):
     def testCategory(self):

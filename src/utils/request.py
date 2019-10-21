@@ -1,7 +1,7 @@
 import requests
 from .helper import String
-from .logger import Logger
-from ..errors import RequestError
+from src.logger import Logger
+from src.errors import RequestError
 
 
 class Session(object):

@@ -1,6 +1,6 @@
 import sys 
 import re
-from .utils.logger import Logger
+from .logger import Logger
 
 class MediaError(Exception):
     """ handle all the Media errors"""

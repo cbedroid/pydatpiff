@@ -6,11 +6,10 @@ import tempfile
 from time import sleep
 from .urls import Urls
 from .player import Player
-from .mixtapes import Mixtapes
 from .errors import MediaError
+from .logger import Logger
 from .utils.request import Session
 from .utils.handler import converter
-from .utils.logger import Logger
 from .utils.filehandler import Tmp
 
 

@@ -1,7 +1,3 @@
-import os
-from unittest import TestLoader
-
-
-def discover_suite():
-    return TestLoader().discover(os.path.dirname(__file__))
-
+import src
+from src.mixtapes import Mixtapes
+from src.media import Media

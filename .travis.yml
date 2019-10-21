@@ -1,22 +1,15 @@
 language: python 
 
-matrix:
-    include:
-        - python: "3.5"
-        - python: "3.6"
-        - python: "3.7"
-            dist: xenial
+python: 
+    - 3.7
 
-
-cache: pip 
-
-before_script:
-  - export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 before_install: 
   - pip install -U pip
   - python setup.py install
+  - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
   - pip install  pytest
+  - pip install nose 
   - pip install codecov 
 
 install:
@@ -24,9 +17,14 @@ install:
   - pip install -e . 
   - pip install ".[test]" .
 
-script: 
-    - pytest tests/test_src/test_mixtapes.py 
+script:  
+  - pytest
+#- "nosetests --with-coverage --cover-package Datpiff"
 
+#"python setup.py develop && nosetests -w tests/"
+#
+#iscript:  python -m pytest -m 
+#
 after_success: 
   - codecov
 
