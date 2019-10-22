@@ -1,17 +1,13 @@
 import os
 import sys 
 import unittest
-from . import Mixtapes
+from unittest.mock import Mock,patch
+from ..src import mixtapes as mt
 
 class TestMixtapes(unittest.TestCase):
     def testCategory(self):
         """testing Mixtapes"""
 
         # testing category
-        results = Mixtapes('hot').artists
+        results = mt.Mixtapes('hot').artists
         self.assertIsNotNone(results)
-
-        # testing user input error fix
-        results = Mixtapes('hkokodokwodjk').artists
-        self.assertIsNotNone(results)
-

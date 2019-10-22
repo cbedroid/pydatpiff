@@ -8,17 +8,9 @@ import sys
 import re
 from functools import wraps
 from .urls import Urls
-from .logger import Logger
 from .utils.request import Session
 from .errors import MixtapesError
 
-'''
-class Logger():
-    @classmethod
-    def display(cls,*args):
-        msg = '  '.join(args)
-        print(msg)
-'''
 class Mixtapes(object):
     def __new__(cls, *args, **kwargs):
         cls._category = Urls.category
@@ -51,14 +43,14 @@ class Mixtapes(object):
         if not artist: 
             return 
         try:
-            Logger.display('\nSearching for %s mixtapes ...'%artist)
+            print('\nSearching for %s mixtapes ...'%artist)
             url = Urls.url['search']
             data = {'submit':'MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx',
                     'criteria':artist
                     }
             web = self._session.method('POST',url,data=data)
         except:
-            Logger.display('Can not find %s mixtape'%artist)
+            print('Can not find %s mixtape'%artist)
         else:
             return web
 
@@ -110,9 +102,9 @@ class Mixtapes(object):
     @property
     def category(self):
         """All category of Mixtapes that users can choose from."""
-        Logger.display("\n--- URL CATEGORY ---")
+        print("\n--- URL CATEGORY ---")
         for key, val in self._category.items():
-            Logger.display("%s" % (key))
+            print("%s" % (key))
 
 
     def _searchTree(f):
@@ -199,7 +191,7 @@ class Mixtapes(object):
         links = self._links
         data = zip(self._artists, self._mixtapes, links, self._views)
         for count,(a, t, l, v) in list(enumerate(data,start=1)):
-            display = Logger.display
+            display = print
             display("# %s\nArtist: %s\nAlbum: %s\nLinks: %s\nViews: %s\n%s"
                     % (count, a, t, l[1:], v, "-"*40))
 

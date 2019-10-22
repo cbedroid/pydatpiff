@@ -1,7 +1,6 @@
 import requests
 from .helper import String
-from src.logger import Logger
-from src.errors import RequestError
+from ..errors import RequestError
 
 
 class Session(object):
@@ -62,7 +61,6 @@ class Session(object):
         try:
             web.raise_for_status()
         except:
-            Logger.warn('Request Failed: StatusCode: %s URL: %s'%(web.status_code,url))
             raise RequestError(3)
         else:
             url = url.strip()

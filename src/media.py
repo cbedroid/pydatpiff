@@ -6,10 +6,9 @@ import tempfile
 from time import sleep
 from .urls import Urls
 from .player import Player
+from .handler import converter
 from .errors import MediaError
-from .logger import Logger
 from .utils.request import Session
-from .utils.handler import converter
 from .utils.filehandler import Tmp
 
 
@@ -37,7 +36,7 @@ class Media():
 
         @@params: mixtape - Datpiff.Mixtapes object
         """
-        Logger.display('Media initialized')
+        print('Media initialized')
         if not mixtape:
             raise MediaError(1)
 
@@ -74,7 +73,7 @@ class Media():
         self._getSongs()
         self._getPlayerEndpoint()
         self._getTidsUrl()
-        Logger.display('Setting Media to %s - %s' % (self.artist, self.album))
+        print('Setting Media to %s - %s' % (self.artist, self.album))
 
 
 
@@ -114,7 +113,7 @@ class Media():
             return self._songs
         else:
             msg = "\nuse Media.setMedia('artist name') to set media first"
-            Logger.display(msg)
+            print(msg)
 
 
     def _getSongs(self):
@@ -141,7 +140,7 @@ class Media():
             songs = self.songs
             [print('%s: %s' % (a+1, b)) for a, b in enumerate(songs)]
         except TypeError:
-            Logger.display("Please set Media first\nNo Artist name")
+            print("Please set Media first\nNo Artist name")
 
 
     @property
@@ -169,7 +168,7 @@ class Media():
     def _song_link(self):
         """Current song album link"""
         if self._song_index is None:
-            Logger.display('\n-- Media.song not set --',
+            print('\n-- Media.song not set --',
                            '\nSet "Media.song" to get mp3 link')
             return None
 
@@ -255,7 +254,7 @@ class Media():
         if selection:
             return (min(selection)[0]) - 1
         else:
-            Logger.display('\n\t -- No song was found --')
+            print('\n\t -- No song was found --')
 
 
     def _cacheSong(self, song, data):
@@ -294,6 +293,7 @@ class Media():
         if selection is not None:
             link = self.mp3urls[selection]
             songname = self.songs[selection]
+            self.song= selection
 
             # Write songname to file
             response = self._checkCache(songname)
@@ -308,7 +308,7 @@ class Media():
                 except:
                     status = response.status_code
                     song = " - ".join((self.artist, songname))
-                    Logger.display(
+                    print(
                         '\n%s song can not play. Try again ' % (song))
                     return
 
@@ -325,9 +325,9 @@ class Media():
             with open(self._tmpfile.name, "wb") as ws:
                 ws.write(chunk)
             sorf = 'Demo' if demo else 'Full Song'
-            Logger.display('\n%s %s %s' % ('-'*20, sorf, '-'*20))
-            Logger.display('Song: %s - %s' % (self.artist, songname))
-            Logger.display("Size:", converter(samp))
+            print('\n%s %s %s' % ('-'*20, sorf, '-'*20))
+            print('Song: %s - %s' % (self.artist, songname))
+            print("Size:", converter(samp))
 
             if not hasattr(self, 'player'):
                 self.player = Player()
@@ -346,12 +346,12 @@ class Media():
         """
         selection = self._parseSelection(track)
         if selection is None:
-            Logger.display('\n\t No song found to download')
+            print('\n\t No song found to download')
             return
         if os.path.isdir(output):
             location = output
         else:
-            Logger.display('Invalid directory: %s'%output)
+            print('Invalid directory: %s'%output)
             return 
         link = self.mp3urls[selection]
         song = self.songs[selection]
@@ -367,19 +367,18 @@ class Media():
 
             with open(songname, "wb") as ws:
                 ws.write(response.content)
-                Logger.display('\nSONGNAME: ', songname,
+                print('\nSONGNAME: ', songname,
                                '\nSIZE:  ', converter(len(response.content)))
             self._cacheSong(songname, response)
         except:
-            Logger.warn("Error saving song Non-200 status")
-            Logger.display('Cannot download song %s' % songname)
+            print('Cannot download song %s' % songname)
 
 
     def downloadAlbum(self, output=None):
         if not output:
             output = os.getcwd()
         elif not os.path.isdir(output):
-            Logger.display('Invalid directory: %s'%output)
+            print('Invalid directory: %s'%output)
             return
 
         fname = output +'\\'+ "-".join((self.artist, self.album))
@@ -390,5 +389,5 @@ class Media():
 
         for num, song in enumerate(self.songs):
             self.download(song, output=fname)
-        Logger.display("\n%s %s saved" % (self.artist, self.album))
+        print("\n%s %s saved" % (self.artist, self.album))
 

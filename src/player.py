@@ -2,10 +2,6 @@ import re
 import vlc 
 from time import sleep
 
-class Logger():
-    @classmethod
-    def display(*args):
-        pass
 
 class PlayerError(Exception):
 
@@ -73,7 +69,7 @@ class Player(object):
             self.player.set_mrl(media)
             self._track_set = True
         else:
-            Logger.display('No media to play')
+            print('No media to play')
         
 
     @property
@@ -86,9 +82,9 @@ class Player(object):
 
         l_min,l_sec = self._format_time(self.player.get_length())
         l_sec = l_sec if len(str(l_sec)) >1 else str(l_sec).zfill(2) 
-        Logger.display('MODE:',self._state)
+        print('MODE:',self._state)
         pos = 'POSITION: {0}:{1} of {2}:{3}'.format(c_min,c_sec,l_min,l_sec)
-        Logger.display(pos)
+        print(pos)
              
         
     @property
@@ -145,7 +141,7 @@ class Player(object):
                 elif way == 'exact':
                     vol = 0 if vol < min_vol else vol 
                     vol = 100 if vol > max_vol else vol
-                Logger.display('volume: %s'%vol)
+                print('volume: %s'%vol)
             except:
                 pass
         self.player.audio_set_volume(vol)

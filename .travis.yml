@@ -18,13 +18,8 @@ install:
   - pip install ".[test]" .
 
 script:  
-  - pytest
-#- "nosetests --with-coverage --cover-package Datpiff"
+  - "nosetests --with-coverage --cover-package Datpiff"
 
-#"python setup.py develop && nosetests -w tests/"
-#
-#iscript:  python -m pytest -m 
-#
 after_success: 
   - codecov
 

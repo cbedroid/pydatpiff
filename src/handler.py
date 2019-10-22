@@ -3,22 +3,6 @@ import math
 import subprocess
 
 
-def fixdate():
-    date = None
-    _f = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    if platform.system() == "Linux":
-        try:
-            _f = 'date +"%m/%d/%y  %I:%M:%S %p"'
-            date = subprocess.check_output(_f).decode('utf-8').strip()
-            date += ' %(name)s - %(levelname)s - %(message)s'
-        except:
-            pass
-    else:
-        date = _f
-    return date
-
-
-
 def converter(file_size):
     """Convert file size and returns user readable size""" 
     if file_size == 0:
