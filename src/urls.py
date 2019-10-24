@@ -18,3 +18,10 @@ class Urls:
                 "highest rating":"http://www.datpiff.com/mixtapes-popular.php?filter=month&sort=rating"
                 }
 
+    @staticmethod
+    def payload(artist):
+        data = {'submit':'MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx',
+                        'criteria':artist
+               }
+        return data
+

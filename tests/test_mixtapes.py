@@ -11,3 +11,4 @@ class TestMixtapes(unittest.TestCase):
         # testing category
         results = mt.Mixtapes('hot').artists
         self.assertIsNotNone(results)
+

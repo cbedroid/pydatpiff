@@ -1,8 +1,3 @@
-__author__ = 'Cornelius Brooks'
-__date__ = 'Feb 3, 2019'
-__description__ =''' Datpiff music player that lets user control,download, and play  music from cmdline  '''
-__version__ = 'V1.0.1'
-
 import os
 import sys
 import re
@@ -14,7 +9,6 @@ from .errors import MixtapesError
 class Mixtapes(object):
     def __new__(cls, *args, **kwargs):
         cls._category = Urls.category
-
         return super(Mixtapes, cls).__new__(cls)
 
 
@@ -45,12 +39,10 @@ class Mixtapes(object):
         try:
             print('\nSearching for %s mixtapes ...'%artist)
             url = Urls.url['search']
-            data = {'submit':'MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx',
-                    'criteria':artist
-                    }
-            web = self._session.method('POST',url,data=data)
-        except:
+            web = self._session.method('POST',url,data=Urls.payload(artist))
+        except Exception as e:
             print('Can not find %s mixtape'%artist)
+            print(e)
         else:
             return web
 
@@ -92,17 +84,15 @@ class Mixtapes(object):
         @@params: index - category to search for. 
                 (See --> "Mixtapes.category" for all category)
         """
-        choosen = list(filter(lambda x: str(index) in x,self._category))
-        if choosen:
-            return min(choosen)
-
-
+        chosen = list(filter(lambda x: str(index) in x,self._category))
+        if chosen:
+            return min(chosen)
 
 
     @property
     def category(self):
         """All category of Mixtapes that users can choose from."""
-        print("\n--- URL CATEGORY ---")
+        print("\n--- AVAILABLE CATEGORY ---")
         for key, val in self._category.items():
             print("%s" % (key))
 
@@ -129,6 +119,7 @@ class Mixtapes(object):
                     if pat is not None)
 
             if hasattr(self,'_artists'):
+                # we map all attributes length to _artists length 
                 data = data[:len(self._artists)]
             dunder = '_'+name
             setattr(self,dunder,data)

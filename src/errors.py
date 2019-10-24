@@ -58,9 +58,9 @@ class Logger(object):
 class MediaError(Exception):
     """ handle all the Media errors"""
     ERRORS = {
-        1: 'No Mixtape was pass to Media',
-        2: 'Media not set'
-    }
+                1: 'No Mixtape was pass to Media',
+                2: 'Media not set'
+            }
 
     def __init__(self, error,critical=False):
         if error and error in self.ERRORS:
@@ -84,14 +84,24 @@ class MediaError(Exception):
 class MixtapesError(MediaError):
     """ handle all the Media errors"""
     ERRORS = {
-        1: 'No Mixtapes Found',
-        2: 'Invalid category selected',
-    }
+                1: 'No Mixtapes Found',
+                2: 'Invalid category selected',
+             }
+
+class AlbumError(MediaError):
+    ERRORS = {
+                1: 'Mixtapes Not Found',
+                2: 'Invalid category selected',
+             }
+
+class Mp3Error(AlbumError):
+    pass
 
 
 class RequestError(MediaError):
-   # _type = self.__class__._qualname__
-    ERRORS = {1: 'Invalid url scheme',
-              2: 'Request failed',
-              3: 'Request Non-200 status code',
+    # _type = self.__class__._qualname__
+    ERRORS = {
+               1: 'Invalid url scheme',
+               2: 'Request failed',
+               3: 'Request Non-200 status code',
               }

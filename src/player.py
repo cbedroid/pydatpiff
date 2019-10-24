@@ -21,6 +21,7 @@ class Player(object):
             self._vlc = vlc.Instance('-q')
             self._player = self._vlc.media_player_new()
             self._track_set = False
+            self.song = None
         except Exception as e:
             msg = PlayerError.error_msg('Instance') + e
         
@@ -64,8 +65,9 @@ class Player(object):
             self._track_set = False
         return
 
-    def setTrack(self,media=None):
+    def setTrack(self,song,media=None):
         if  media:
+            self.song = song
             self.player.set_mrl(media)
             self._track_set = True
         else:
@@ -82,8 +84,10 @@ class Player(object):
 
         l_min,l_sec = self._format_time(self.player.get_length())
         l_sec = l_sec if len(str(l_sec)) >1 else str(l_sec).zfill(2) 
+        
+        print('TRACK:',self.song)
         print('MODE:',self._state)
-        pos = 'POSITION: {0}:{1} of {2}:{3}'.format(c_min,c_sec,l_min,l_sec)
+        pos = 'POSITION: {0}:{1} - {2}:{3}'.format(c_min,c_sec,l_min,l_sec)
         print(pos)
              
         

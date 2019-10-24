@@ -129,7 +129,6 @@ class Media():
         songs = re.findall(r'li[\s*].*title="(.*[\w\s]*)">', text)
         # Need to replace these below too :: Found in source file
         # replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;")A
-        songs = [re.sub(r'amp;', '', x) for x in songs]
         self._songs = songs
         return songs
 
@@ -188,7 +187,7 @@ class Media():
         urls = []
         for part, song in zip(pd, self.songs):
             song = re.sub(r'\&','amp',song) # this may need to go after below
-            song = re.sub('[^\w\s()&\[\]]', '', song[:50].strip())
+            song = re.sub('[^\w\s()&.,]', '', song[:50].strip())
             data = [part[1], self.m_ids, part[2].zfill(
                 2), re.sub(' ', '%20', song)]
             urls.append(
@@ -290,15 +289,11 @@ class Media():
                               False: play full song 
                               *default: False
         """
-        if track is None:
-            print('\n\t -- No song was entered --')
-            return 
-
         selection = self._parseSelection(track)
         if selection is not None:
             link = self.mp3urls[selection]
             songname = self.songs[selection]
-            self.song= selection + 1
+            self.song= selection
 
             # Write songname to file
             # check if song has been already downloaded 
