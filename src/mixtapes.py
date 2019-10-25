@@ -36,15 +36,10 @@ class Mixtapes(object):
         artist = str(artist).strip()
         if not artist: 
             return 
-        try:
-            print('\nSearching for %s mixtapes ...'%artist)
-            url = Urls.url['search']
-            web = self._session.method('POST',url,data=Urls.payload(artist))
-        except Exception as e:
-            print('Can not find %s mixtape'%artist)
-            print(e)
-        else:
-            return web
+
+        print('\nSearching for %s mixtapes ...'%artist)
+        url = Urls.url['search']
+        return  self._session.method('POST',url,data=Urls.payload(artist))
 
 
     def _Start(self,category='hot', search=None):

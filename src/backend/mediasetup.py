@@ -1,15 +1,22 @@
 import re
-from .urls import Urls
-from .utils.request import Session
-from .utils.parser import Reparse
-from .errors import AlbumError
+from .parser import Reparse
+from ..urls import Urls
+from ..utils.request import Session
+from ..errors import AlbumError
 
 #Change album to just get start url response embed url response
 class Album():
     def __init__(self,link):
         self.link = ''.join((Urls.url['album'] ,link))
         self._session = Session()
-    
+
+
+    @property
+    def name(self):
+        text = self.embed_response.text
+        return re.search(r'title">(.*[\w\s]*)\</div',text).group(1)
+
+
     @property
     def ID(self):
         """Album ID Number  """
@@ -57,15 +64,18 @@ class Mp3():
             #Not a requests object
             raise Mp3Error(2)
 
+
     @property
     def song_duration(self):
         """Duration of songs"""
         return Reparse.duration(self.content)
 
+
     @property
     def songs(self):
         """Songs from mixtape album."""
         return Reparse.to_songs(self.content)
+
 
     @property
     def prefix_tracks(self):
@@ -89,16 +99,14 @@ class Mp3():
         except:
             Mp3Error(1)
 
-
+    
+    
     @property
     def mp3Urls(self):
         mp3 = []
         prefix = 'https://hw-mp3.datpiff.com/mixtapes/'
         for track in self.prefix_tracks:
             endpoint = '{}{}'.format(self.media_id,track)
-            mp3.append(''.join((prefix,endpoint)))
+            yield ''.join((prefix,endpoint))
 
-        if not mp3:
-            raise Mp3Error(1)
-        return mp3
-
+            

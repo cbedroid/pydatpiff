@@ -13,12 +13,14 @@ class Session(object):
     def __init__(self):
         self.session = requests.Session()
 
+
     def put_in_cache(self,url,response):
         url = url.strip()
         self.cache[url] = dict(count=1,response=response)
 
+
     def check_cache(self,url):
-        """Checks if url already have an response.
+        """Checks if url already have a response.
         Stop from calling the request method more than once.
         Great for saving mobile data on mobile devices.
         """
@@ -27,6 +29,8 @@ class Session(object):
             if url in self.cache.keys():
                 self.cache[url]['count'] +=1
                 return self.cache[url]['response']
+        except MemoryError:
+            self.cache = {}
         except:
             pass 
             

@@ -55,53 +55,93 @@ class Logger(object):
     def failed(cls,*msg):
         cls._parseLog(*msg,level='critical')
  
-class MediaError(Exception):
+
+
+class Error(Exception):
+    __error__ = {
+                 1:'invalid mixtapes object',
+                 2:'no mixtapes found'}
+
+    code = None
+    message='Unknown'
+
+
+    def __init__(self,code,detail=''):
+        self._code = code
+        code = self.create(code,detail)
+        super().__init__(code)
+
+
+    def logError(self, error,critical=False):
+        if error and error in self.__error__:
+            if not critical:
+                Logger.warn(self.__error__[error])
+            else:
+                Logger.failed(self.__error__[error])
+                sys.exit(1)
+
+
+    def show(self,code):
+        return self.__error__.get(code)
+
+
+    @staticmethod
+    def makeError(code):
+        #code = code or self.message
+        cont = []
+        for x  in code.split(' '):
+            cont.append(x.capitalize())
+        cont = ''.join(cont)
+        return cont
+
+
+    @classmethod
+    def create(cls,export_to,long_msg=''):
+        if isinstance(export_to,str):
+            max_e = max(cls.__error__)
+            cls.__error__[max_e+1] = Error.makeError(export_to)
+            return Error.create(max_e+1)
+        elif export_to in cls.__error__:
+            for c,a in cls.__error__.items():
+                name = Error.makeError(a)
+                e = type(name,(cls,),{
+                    'code': c,
+                    'message':a,
+                    })
+                cls.__error__[c] = e  
+            return "".join((str(cls.__error__[export_to]),'\n'+long_msg))
+   
+
+class MixtapesError(Error):
     """ handle all the Media errors"""
-    ERRORS = {
-                1: 'No Mixtape was pass to Media',
-                2: 'Media not set'
-            }
-
-    def __init__(self, error,critical=False):
-        if error and error in self.ERRORS:
-            e_msg = '\n*--> '+self.ERRORS[error]+' <--*\n'
-        elif isinstance(error, str):
-            e_msg = '\n%s\n' % error
-            print(type(e_msg))
-        else:
-            error = error
-            class_name = re.match(r'.*\.(\w*)', str(self.__class__)).group(1)
-            e_msg = '\n*--> %s occured <--*\n' % class_name
-
-        if not critical:
-            Logger.warn(e_msg)
-        else:
-            Logger.failed(e_msg)
-            sys.exit(1)
-
-
-
-class MixtapesError(MediaError):
-    """ handle all the Media errors"""
-    ERRORS = {
+    __error__ = {
                 1: 'No Mixtapes Found',
                 2: 'Invalid category selected',
              }
 
-class AlbumError(MediaError):
-    ERRORS = {
+class MediaError(Error):
+    """ handle all the Media errors"""
+    __error__ = {
+                 1:'invalid mixtapes object',
+                 2:'no mixtapes found'}
+
+
+class AlbumError(Error):
+    __error__ = {
                 1: 'Mixtapes Not Found',
                 2: 'Invalid category selected',
              }
 
-class Mp3Error(AlbumError):
+class Mp3Error(Error):
     pass
 
 
-class RequestError(MediaError):
+class RequestError(Error):
     # _type = self.__class__._qualname__
-    ERRORS = {
+    __error__ = {
                1: 'Invalid url scheme',
                2: 'Request failed',
                3: 'Request Non-200 status code',
               }
+    
+
