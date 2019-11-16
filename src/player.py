@@ -23,7 +23,7 @@ class Player(object):
             self._track_set = False
             self.song = None
         except Exception as e:
-            msg = PlayerError.error_msg('Instance') + e
+            msg = PlayerError.error_msg('Instance') + str(e)
         
 
     @property
@@ -64,6 +64,7 @@ class Player(object):
             self.player.play()
             self._track_set = False
         return
+
 
     def setTrack(self,song,media=None):
         if  media:
@@ -107,6 +108,7 @@ class Player(object):
     def volumeDown(self,vol=5):
         """Turn the media volume down"""
         self._set_volume(vol,way='down')
+
 
     def volume(self,vol=None):
         """Set the volume to exact number"""
@@ -156,30 +158,30 @@ class Player(object):
         """Pause the media song"""
         self.player.pause()
 
+
     def rewind(self,pos=10):
         """
         Rewind the media song
              vlc time is in milliseconds
              @params: pos:: time(second) to rewind media. default:10(sec)
         """
-        self._ffwd_rewind(pos,True)
+        self._seeker(pos,True)
+
 
     def ffwd(self,pos=10):
         """Fast forward media 
              vlc time is in milliseconds
              @params: pos:: time(second) to rewind media. default:10(sec)
         """
-        self._ffwd_rewind(pos,False)
+        self._seeker(pos,False)
 
 
-    def _ffwd_rewind(self,pos=10,rew=True):
+    def _seeker(self,pos=10,rew=True):
         if self._state == 'No Media':
             return 
-
         if rew: 
             to_postion = self.player.get_time() - (pos * 1000)
         else:
             to_postion = self.player.get_time() + (pos * 1000)
-
         self.player.set_time(to_postion)
 

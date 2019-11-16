@@ -8,7 +8,7 @@ from .errors import MediaError
 from .utils.request import Session
 from .backend.handler import converter,Tmp,Path
 from .backend.mediasetup import Album,Mp3
-
+from .androidplayer import Android
 
 class Media():
     """ Media player that control the songs selected from Mixtapes """
@@ -76,13 +76,20 @@ class Media():
             str - will search for an artist from Mixtapes.artists (default)
                   or album from Mixtapes.ablum. 
         """
-        link,choice = self.mixtape._select(selection)
+        try:
+            link,choice = self.mixtape._select(selection)
+        except:
+            print('No mixtapes found')
+            return 
+
         if choice is None:
             raise MediaError(2)
         self._artist_name = self.mixtape.artists[choice]
         self.album_name = self.mixtape.mixtapes[choice]
         self._setup(link)
         print('Setting Media to %s - %s' % (self.artist, self.album))
+        # only returning to check if choice was set
+        return choice
 
 
     def _setup(self,link):
@@ -269,11 +276,14 @@ class Media():
         print('\n%s %s %s' % ('-'*20, sorf, '-'*20))
         print('Song: %s - %s' % (self.artist, songname))
         print("Size:", converter(samp))
-
-        if not hasattr(self, 'player'):
-            self.player = Player()
         song = " - ".join((self.artist, songname))
-        self.player.setTrack(song,self._tmpfile.name)
+        try:
+            if not hasattr(self, 'player'):
+                self.player = Player()
+            self.player.setTrack(song,self._tmpfile.name)
+        except:
+            self.player = Android(self._tmpfile.name)
+
         self.player.play
 
 
