@@ -30,6 +30,11 @@ class Mixtapes(object):
     def __repr__(self):
         return "%s('hot')"%self.__class__.__name__
 
+    def __len__(self):
+        if hasattr(self,'_artists'):
+            return len(self._artists)
+        else:
+            return 0
 
     def search(self,artist):
         """search for an artist mixtapes."""
@@ -63,7 +68,6 @@ class Mixtapes(object):
             body = self._session.method('GET',category_url)
         self._responses = body
         return body
-
 
 
    
@@ -188,15 +192,15 @@ class Mixtapes(object):
         '''
         try:
             combine = list(zip(self.artists,self.mixtapes))
-            select = 1 if select == 0 else select
             mixtapes  = dict(enumerate(combine,start=1))
 
             # checking from index 
             if isinstance(select,int):
+                select-=1
                 length = len(self.artists) + 1
-                if select >= 0 and select < length:
-                    select = 1 if select == 0 else select
-                    return self._links[select-1],select-1
+                # catch index errors if user choose a mixtape out of range
+                select = 0 if (0 >= select or select > len(self)) else select
+                return self._links[select],select
 
             #checking from words
             select = str(select).lower().strip()
@@ -207,6 +211,5 @@ class Mixtapes(object):
                 index = (min(choice)[0]) - 1
                 return self._links[index],index
         except MixtapesError as e:
-            raise MixtapesError(1,True)
-            sys.exit(1)
+            raise MixtapesError(1)
 

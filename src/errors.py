@@ -122,8 +122,10 @@ class MixtapesError(Error):
 class MediaError(Error):
     """ handle all the Media errors"""
     __error__ = {
-                 1:'invalid mixtapes object',
-                 2:'no mixtapes found'}
+                 1:'no mixtapes found',
+                 2:'invalid mixtapes object',
+                 3:"Media album not set",
+                 4: "invaild track index"}
 
 
 class AlbumError(Error):

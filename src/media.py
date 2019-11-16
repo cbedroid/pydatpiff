@@ -8,7 +8,7 @@ from .errors import MediaError
 from .utils.request import Session
 from .backend.handler import converter,Tmp,Path
 from .backend.mediasetup import Album,Mp3
-from .androidplayer import Android
+
 
 class Media():
     """ Media player that control the songs selected from Mixtapes """
@@ -27,6 +27,12 @@ class Media():
     def __repr__(self):
         return 'Media(%s)' % (self.mixtape)
 
+    def __len__(self):
+        if hasattr(self,'songs'):
+            return len(self.songs)
+        else:
+            return 0
+
 
     def __init__(self, mixtape=None):
         """ Initialize Media 
@@ -34,7 +40,7 @@ class Media():
         @@params: mixtape - Datpiff.Mixtapes object
         """
         if 'mixtapes.Mixtapes' not in str(type(mixtape)):
-            raise MediaError(1,'must pass a mixtape object to Media class')
+            raise MediaError(2,'must pass a mixtape object to Media class')
 
         print('Media initialized')
         if not mixtape:
@@ -76,14 +82,12 @@ class Media():
             str - will search for an artist from Mixtapes.artists (default)
                   or album from Mixtapes.ablum. 
         """
-        try:
-            link,choice = self.mixtape._select(selection)
-        except:
-            print('No mixtapes found')
-            return 
+        results = self.mixtape._select(selection)
+        if not results:
+            e_msg = '\n--> Mixtape "%s" was not found'%selection
+            raise MediaError(1,e_msg)
+        link,choice = results
 
-        if choice is None:
-            raise MediaError(2)
         self._artist_name = self.mixtape.artists[choice]
         self.album_name = self.mixtape.mixtapes[choice]
         self._setup(link)
@@ -150,6 +154,9 @@ class Media():
     @property
     def songs(self):
         """ Return all album songs."""
+        if not hasattr(self,'_Mp3'):
+            e_msg = 'Set media by calling -->  Media.setMedia("Album name")'
+            raise MediaError(3,e_msg)
         return self._Mp3.songs
 
 
@@ -255,7 +262,12 @@ class Media():
             print('\n\t -- No song was entered --')
             return 
 
+        if isinstance(track,int):
+            if track > len(self):
+                raise MediaError(4) 
+
         content = self.mp3Content(track).read()
+
         if not content:
             print('\n\t-- No song was found --')
 
@@ -277,13 +289,10 @@ class Media():
         print('Song: %s - %s' % (self.artist, songname))
         print("Size:", converter(samp))
         song = " - ".join((self.artist, songname))
-        try:
-            if not hasattr(self, 'player'):
-                self.player = Player()
-            self.player.setTrack(song,self._tmpfile.name)
-        except:
-            self.player = Android(self._tmpfile.name)
-
+        if not hasattr(self, 'player'):
+            self.player = Player()
+        
+        self.player.setTrack(song,self._tmpfile.name)
         self.player.play
 
 
@@ -297,7 +306,6 @@ class Media():
         """
         selection = self._parseSelection(track)
         if selection is None:
-            print('\n\t No song found to download')
             return
 
         output = output or os.getcwd()
