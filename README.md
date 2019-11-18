@@ -1,9 +1,9 @@
 <<<<<<< HEAD
 
-# PyDatPiff
+# DatPiff
 ![alt text](https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png)
 
-[![Build Status](https://travis-ci.com/cbedroid/Datpiff.svg?token=MfxUXqtaex7vkTXGGmqu&branch=master)](https://travis-ci.com/cbedroid/Datpiff)
+[![Build Status]('https://travis-ci.org/cbedroid/Datpiff.svg?branch=master')
 
 =======
 # PyDatPiff
@@ -13,7 +13,7 @@
 [![Build Status](https://travis-ci.com/cbedroid/Datpiff.svg?token=MfxUXqtaex7vkTXGGmqu&branch=master)](https://travis-ci.com/cbedroid/Datpiff)
 >>>>>>> 8db2f70... Add readme
 # Introduction :
-#### PyDapiff - is a python program that interact with Datpiff Mixtapes 
+#### Datpiff - is a python program that interact with Datpiff Mixtapes 
   - supports windows,mac,and linux
   - python 3.4 - above 
 <<<<<<< HEAD
@@ -28,7 +28,7 @@ see requirements:  [requirements.txt](https://github.com/cbedroid/Datpiff/blob/m
  
 ### Installation
 
-PyDatpiff requires:  **python3.4 - above** .
+Datpiff requires:  **python3.4 - above** .
 ```bash
 pip install Datpiff
 ```
@@ -48,15 +48,15 @@ download', ' most listen', 'most favorite',' highest rating'*
 |\|	Category		|		Description	\||
 |-------------------|-------------------|
 |__"hot"__			| Mixtapes that are hot for the week. 
-|__"new"__			| Mixtapes that are brand-new or just release.	
+|__"new"__			| Mixtapes that are brand-new or just release.
 |__"top"__			| Mixtapes that top-ranking.
-|__"celebrated"__	| Top ranking celebrity mixtapes 		
-|__"popular"__		| Popular mixtapes  available   
-|__"exclusive"__	| Exclusive mixtapes 
-|__"most download"__| Most downloaded mixtapes
-|__"most listen"__	| Most listen mixtapes
-|__"most favorite"__| Favorite mixtapes 
-|__"highest rating"__| Mixtapes with the highest rating
+|__"celebrated"__	| Top ranking celebrity mixtapes.
+|__"popular"__		| Popular mixtapes  available.   
+|__"exclusive"__	| Exclusive mixtapes.
+|__"most download"__| Most downloaded mixtapes.
+|__"most listen"__	| Most listen mixtapes.
+|__"most favorite"__| Favorite mixtapes. 
+|__"highest rating"__| Mixtapes with the highest rating.
 ---
 =======
 ## Quick Start
