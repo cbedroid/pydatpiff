@@ -266,10 +266,11 @@ class Media():
             if track > len(self):
                 raise MediaError(4) 
 
-        content = self.mp3Content(track).read()
-
-        if not content:
+        try
+            content = self.mp3Content(track).read()
+        except:
             print('\n\t-- No song was found --')
+            return 
 
         songname = self.songs[self._song_index]
         track_size = len(content)
