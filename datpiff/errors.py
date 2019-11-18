@@ -22,7 +22,7 @@ def fixdate():
 
 
 class Logger(object):
-    logit = logging.getLogger()
+    logit = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO,format = '%(message)s')
 
     handler = logging.FileHandler('logs.log')

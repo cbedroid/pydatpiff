@@ -1,3 +1,4 @@
-request
-python-vlc
+requests
+python-vlc 
 pytest
+

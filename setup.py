@@ -4,9 +4,9 @@ with open('README.md',encoding='utf-8') as f:
     readme = f.read()
 
 setup( name='Datpiff',
-       version='0.1.1',
+       version='0.1.4',
+       description='Datpiff Mixtape player',
        url='https://github.com/cbedroid/Datpiff',
-       decription='Datpiff Mixtape player',
        long_description=readme,
        long_description_content_type='text/markdown',
        author='Cornelius Brooks',

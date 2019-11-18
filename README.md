@@ -2,7 +2,7 @@
 # DatPiff
 ![alt text](https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png)
 
-[![Build Status]('https://travis-ci.org/cbedroid/Datpiff.svg?branch=master')
+[![Build Status](https://travis-ci.org/cbedroid/Datpiff.svg?branch=master)](https://travis-ci.com/cbedroid/Datpiff)
 
 # PyDatPiff
 ![alt text](https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png)
@@ -72,16 +72,16 @@ Import Datpiff module and Intialize Mixtapes class
 : artist name or artist mixtape name
 
 ```python 
-import Datpiff
-mix = Datpiff.Mixtapes(category='hot')
+import datpiff
+mix = datpiff.Mixtapes(category='hot')
 
 #OR
 
 #search for an artist mixtapes
-mix = Datpiff.Mixtapes(search='Jay-Z')
+mix = datpiff.Mixtapes(search='Jay-Z')
 ```
 # Media 
-`Datpiff.Media` -  is class that controls the Datpiff Media Player.
+`datpiff.Media` -  is class that controls the Datpiff Media Player.
 >#### THINGS YOU CAN DO: 
 >> - `play`  - plays songs from album
 >> - `download` - download song
@@ -91,11 +91,11 @@ mix = Datpiff.Mixtapes(search='Jay-Z')
 #### Now Initailize Media class
 
 ```python
-import Datpiff
+import datpiff
 
-mix = Datpiff.Mixtapes(search='Jay-Z')
+mix = datpiff.Mixtapes(search='Jay-Z')
 # we pass in Mixtapes' instance to the Media class
-media = Datpiff.Media(mix)
+media = datpiff.Media(mix)
 
 
 #### To view all available Mixtapes Ablums
