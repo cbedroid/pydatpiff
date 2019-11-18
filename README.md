@@ -1,22 +1,19 @@
-<<<<<<< HEAD
 
 # DatPiff
 ![alt text](https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png)
 
 [![Build Status]('https://travis-ci.org/cbedroid/Datpiff.svg?branch=master')
 
-=======
 # PyDatPiff
 ![alt text](https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png)
 <img src="https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png" width="400" height="790">
 
-[![Build Status](https://travis-ci.com/cbedroid/Datpiff.svg?token=MfxUXqtaex7vkTXGGmqu&branch=master)](https://travis-ci.com/cbedroid/Datpiff)
->>>>>>> 8db2f70... Add readme
+[![Build Status]('https://travis-ci.org/cbedroid/Datpiff.svg?branch=master')
+
 # Introduction :
 #### Datpiff - is a python program that interact with Datpiff Mixtapes 
   - supports windows,mac,and linux
   - python 3.4 - above 
-<<<<<<< HEAD
    
 ### Dependencies:
 - see requirements:  [requirements.txt](https://github.com/cbedroid/Datpiff/blob/master/requirements.txt) 
@@ -24,15 +21,12 @@
 =======
 #### Dependencies:
 see requirements:  [requirements.txt](https://github.com/cbedroid/Datpiff/blob/master/requirements.txt)
->>>>>>> 8db2f70... Add readme
- 
 ### Installation
 
 Datpiff requires:  **python3.4 - above** .
 ```bash
 pip install Datpiff
 ```
-<<<<<<< HEAD
 # Quick Start
 >##  Mixtapes
  __Import Datpiff module and Intialize Mixtapes class__
@@ -77,8 +71,6 @@ Import Datpiff module and Intialize Mixtapes class
 `search`: 
 : artist name or artist mixtape name
 
->>>>>>> 8db2f70... Add readme
-
 ```python 
 import Datpiff
 mix = Datpiff.Mixtapes(category='hot')
@@ -88,7 +80,6 @@ mix = Datpiff.Mixtapes(category='hot')
 #search for an artist mixtapes
 mix = Datpiff.Mixtapes(search='Jay-Z')
 ```
-<<<<<<< HEAD
 # Media 
 `Datpiff.Media` -  is class that controls the Datpiff Media Player.
 >#### THINGS YOU CAN DO: 
@@ -96,7 +87,6 @@ mix = Datpiff.Mixtapes(search='Jay-Z')
 >> - `download` - download song
 >>- `downloadAlbum` - download all songs from mixtape album
 =======
->>>>>>> 8db2f70... Add readme
 
 #### Now Initailize Media class
 
@@ -106,7 +96,6 @@ import Datpiff
 mix = Datpiff.Mixtapes(search='Jay-Z')
 # we pass in Mixtapes' instance to the Media class
 media = Datpiff.Media(mix)
-<<<<<<< HEAD
 
 
 #### To view all available Mixtapes Ablums
@@ -213,4 +202,3 @@ media.setMedia(1)
 #### or
 
 media.play('Welcome 2')
->>>>>>> 8db2f70... Add readme
