@@ -13,7 +13,7 @@ setup( name='Datpiff',
        author_email='cbedroid1614@gmail.com',
        install_requires=open('requirements.txt').readline(),
        license='MIT',
-       test_requires=['pytest==5.2.4'],
+       tests_require=['pytest==5.2.4'],
        classifiers=[
                     'License :: OSI Approved :: MIT License',
                     'Intended Audience :: Developers',
