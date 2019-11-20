@@ -1,9 +1,10 @@
+import os 
 import sys 
 import re
 import subprocess
 import platform 
+import tempfile 
 import logging 
-
 
 def fixdate():
     date = None
@@ -24,8 +25,8 @@ def fixdate():
 class Logger(object):
     logit = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO,format = '%(message)s')
-
-    handler = logging.FileHandler('logs.log')
+    logfile = os.path.join(tempfile.gettempdir(),'pydatpiff.log')
+    handler = logging.FileHandler(logfile)
     handler.setLevel(logging.WARNING)
     _format = logging.Formatter(fixdate(),datefmt="%m/%d/%Y %I:%M:%S %p %Z")
     handler.setFormatter(_format)
