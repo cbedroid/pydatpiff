@@ -5,6 +5,13 @@ from functools import wraps
 from .urls import Urls
 from .utils.request import Session
 from .errors import MixtapesError
+<<<<<<< HEAD:datpiff/mixtapes.py
+=======
+from .frontend.display import Print,Verbose
+from .backend.config import User,Datatype
+from .backend.webhandler import Html
+
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/mixtapes.py
 
 class Mixtapes(object):
     def __new__(cls, *args, **kwargs):
@@ -42,7 +49,7 @@ class Mixtapes(object):
         if not artist: 
             return 
 
-        print('\nSearching for %s mixtapes ...'%artist)
+        Verbose('\nSearching for %s mixtapes ...'%artist)
         url = Urls.url['search']
         return  self._session.method('POST',url,data=Urls.payload(artist))
 
@@ -59,6 +66,7 @@ class Mixtapes(object):
                  # if the search requests fails then get default page 
                 # discard search then we recalls the _Start 
                 return self._Start('hot')
+<<<<<<< HEAD:datpiff/mixtapes.py
         else:
             _filter = self._parseCategory 
             category_url = self._category.get(_filter(category))
@@ -66,6 +74,12 @@ class Mixtapes(object):
                 category_url = self._category.get('hot')
 
             body = self._session.method('GET',category_url)
+=======
+        else: # Select from category instead of searching 
+            select = User.choice_is_str
+            choice = select(category,self._category) or select('hot',self._category)
+            body = self._session.method('GET',choice)
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/mixtapes.py
         self._responses = body
         return body
 
@@ -77,6 +91,7 @@ class Mixtapes(object):
         self.mixtapes  = '"\stitle\="listen to ([^"]*)">[\r\n\t\s]?.*img'
         self.links   = 'title"><a href\=\"(.*[\w\s]*\.html)"'
         self.views   = '<div class\="text">Listens: <span>([\d,]*)</span>'
+<<<<<<< HEAD:datpiff/mixtapes.py
 
     def _parseCategory(self,index):
         """Helper function for selecting a category on startup
@@ -86,6 +101,9 @@ class Mixtapes(object):
         chosen = list(filter(lambda x: str(index) in x,self._category))
         if chosen:
             return min(chosen)
+=======
+        Verbose('Found %s Mixtapes'%len(self))
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/mixtapes.py
 
 
     @property
@@ -113,7 +131,11 @@ class Mixtapes(object):
             name = f.__name__
             path = f(self,*args,**kwargs)
             pattern = re.compile(path)
+<<<<<<< HEAD:datpiff/mixtapes.py
             data = list( re.sub('amp;','',pat.group(1))\
+=======
+            data = list(Html.remove_ampersands(pat.group(1))[0]\
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/mixtapes.py
                     for pat in pattern.finditer(response_text)\
                     if pat is not None)
 
@@ -181,8 +203,12 @@ class Mixtapes(object):
         links = self._links
         data = zip(self._artists, self._mixtapes, links, self._views)
         for count,(a, t, l, v) in list(enumerate(data,start=1)):
+<<<<<<< HEAD:datpiff/mixtapes.py
             display = print
             display("# %s\nArtist: %s\nAlbum: %s\nLinks: %s\nViews: %s\n%s"
+=======
+            Print("# %s\nArtist: %s\nAlbum: %s\nLinks: %s\nViews: %s\n%s"
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/mixtapes.py
                     % (count, a, t, l[1:], v, "-"*40))
 
 
@@ -191,6 +217,7 @@ class Mixtapes(object):
          or by index number of title or artist
         '''
         try:
+<<<<<<< HEAD:datpiff/mixtapes.py
             combine = list(zip(self.artists,self.mixtapes))
             mixtapes  = dict(enumerate(combine,start=1))
 
@@ -211,5 +238,13 @@ class Mixtapes(object):
                 index = (min(choice)[0]) - 1
                 return self._links[index],index
         except MixtapesError as e:
+=======
+            # Return the user select by either integer or str
+            # we map the integer to artists and str to mixtapes 
+            return User.selection(select,self.artists,self.mixtapes)
+
+        except MixtapesError as e:
+            Print(e)
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/mixtapes.py
             raise MixtapesError(1)
 

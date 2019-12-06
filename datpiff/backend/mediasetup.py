@@ -1,10 +1,11 @@
 import re
-from .parser import Reparse
+from .webhandler import Html
 from ..urls import Urls
 from ..utils.request import Session
 from ..errors import AlbumError
 
-#Change album to just get start url response embed url response
+#TODO::Change album to just get start url response embed url response
+
 class Album():
     def __init__(self,link):
         self.link = ''.join((Urls.url['album'] ,link))
@@ -20,7 +21,7 @@ class Album():
     @property
     def ID(self):
         """Album ID Number  """
-        return Reparse.get_end_digits(self.link)
+        return Html.get_end_digits(self.link)
 
 
     @property
@@ -68,13 +69,13 @@ class Mp3():
     @property
     def song_duration(self):
         """Duration of songs"""
-        return Reparse.duration(self.content)
+        return Html.get_duration_from(self.content)
 
 
     @property
     def songs(self):
         """Songs from mixtape album."""
-        return Reparse.to_songs(self.content)
+        return Html.find_song_names(self.content)
 
 
     @property
@@ -84,7 +85,7 @@ class Mp3():
         Return url encoded song index joined with song name 
         Ex: 02) - Off the Wall.mp3' -->  02)%20-%20Off%20the%20Wall.mp3
         """
-        return Reparse.encodeMp3(self.content)
+        return Html.find_name_of_mp3(self.content)
 
 
     @property
@@ -95,7 +96,7 @@ class Mp3():
         Ex: 6/m1393dba
         """
         try:
-            return Reparse.toId(self.content)
+            return Html.toId(self.content)
         except:
             Mp3Error(1)
 

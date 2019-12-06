@@ -2,12 +2,20 @@ import os
 import io
 import re
 from functools import wraps
+from .frontend.display import Print,Verbose
 from .urls import Urls
 from .player import Player
 from .errors import MediaError
 from .utils.request import Session
+<<<<<<< HEAD:datpiff/media.py
 from .backend.handler import converter,Tmp,Path
 from .backend.mediasetup import Album,Mp3
+=======
+from .backend.filehandler import file_size,Tmp,Path
+from .backend.mediasetup import Album,Mp3
+from .backend.config import User,Datatype,Queued
+import traceback
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
 
 
 class Media():
@@ -42,7 +50,7 @@ class Media():
         if 'mixtapes.Mixtapes' not in str(type(mixtape)):
             raise MediaError(2,'must pass a mixtape object to Media class')
 
-        print('Media initialized')
+        Verbose('Media initialized')
         if not mixtape:
             raise MediaError(1)
 
@@ -57,18 +65,36 @@ class Media():
 
     
     def findSong(self,songname):
-        songname = songname.strip().lower()
+        songname = Datatype.strip_lowered(songname)
         links = self.mixtape.links
-
+        links = list(enumerate(links,start=1))
+        results = Queued(self._search,links,songname).run()
+        if not results:
+            Print('No song was found with this title ')
+        results = Datatype.removeNone(results)
+        return results
+        """ 
+        links = lists(enumerate(links,start=1))
         collector = []
         for index, link in enumerate(links,start=1):
             album = Album(link)
             name = album.name
             tracks = Mp3(album.embed_response).songs
-            if any(songname in track.lower().strip() for track in tracks):
+            if any(songname in Datatype.strip_lowered(track) for track in tracks):
                 collector.append((index,name)) 
 
         return collector
+        """
+        
+    def _search(self,links,song):
+        index,link = links
+        album = Album(link)
+        name = album.name
+        tracks = Mp3(album.embed_response).songs
+        if any(song in Datatype.strip_lowered(track) for track in tracks):
+            return index,name 
+
+       
         
 
     def setMedia(self, selection):
@@ -82,16 +108,31 @@ class Media():
             str - will search for an artist from Mixtapes.artists (default)
                   or album from Mixtapes.ablum. 
         """
+<<<<<<< HEAD:datpiff/media.py
         results = self.mixtape._select(selection)
         if not results:
+=======
+        result = self.mixtape._select(selection)
+        if result is None:
+            Verbose('SELECTION:',selection)
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
             e_msg = '\n--> Mixtape "%s" was not found'%selection
             raise MediaError(1,e_msg)
         link,choice = results
 
+<<<<<<< HEAD:datpiff/media.py
         self._artist_name = self.mixtape.artists[choice]
         self.album_name = self.mixtape.mixtapes[choice]
         self._setup(link)
         print('Setting Media to %s - %s' % (self.artist, self.album))
+=======
+        self._artist_name = self.mixtape.artists[result]
+        self.album_name = self.mixtape.mixtapes[result]
+        link = self.mixtape._links
+        self._setup(link[result])
+        
+        Verbose('Setting Media to %s - %s' % (self.artist, self.album))
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
         # only returning to check if choice was set
         return choice
 
@@ -107,6 +148,7 @@ class Media():
         """Parse all user selection and return the correct songs
            @@params: select  - Media.songs name or index of Media.songs 
         """
+<<<<<<< HEAD:datpiff/media.py
         select = 1 if select == 0 else select
         songs = dict(enumerate(self.songs, start=1))
 
@@ -125,6 +167,13 @@ class Media():
             return (min(selection)[0]) - 1
         else:
             print('\n\t -- No song was found --')
+=======
+        try:
+            return User.selection(select,self.songs,[x.lower() for x in self.songs])
+        except MediaError as e:
+            raise MediaError(5)
+
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
 
 
     @property
@@ -168,12 +217,12 @@ class Media():
 
     @property
     def show_songs(self):
-        """Pretty way to display all song names"""
+        """Pretty way to Print all song names"""
         try:
             songs = self.songs
-            [print('%s: %s' % (a+1, b)) for a, b in enumerate(songs)]
+            [Print('%s: %s' % (a+1, b)) for a, b in enumerate(songs)]
         except TypeError:
-            print("Please set Media first\nNo Artist name")
+            Print("Please set Media first\nNo Artist name")
 
 
     @property
@@ -194,7 +243,7 @@ class Media():
             self._selected_song = songs[index]
             self._current_index = index
         else:
-            self.display('\n\t song was not found')
+            Print('\n\t song was not found')
 
 
     def _cacheSong(self, song, data):
@@ -259,7 +308,7 @@ class Media():
                               *default: False
         """
         if track is None:
-            print('\n\t -- No song was entered --')
+            Print('\n\t -- No song was entered --')
             return 
 
         if isinstance(track,int):
@@ -268,8 +317,13 @@ class Media():
 
         try
             content = self.mp3Content(track).read()
+<<<<<<< HEAD:datpiff/media.py
         except:
             print('\n\t-- No song was found --')
+=======
+        except Exception:
+            Print('\n\t-- No song was found --')
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
             return 
 
         songname = self.songs[self._song_index]
@@ -286,9 +340,9 @@ class Media():
         with open(self._tmpfile.name, "wb") as ws:
             ws.write(chunk)
         sorf = 'Demo' if demo else 'Full Song'
-        print('\n%s %s %s' % ('-'*20, sorf, '-'*20))
-        print('Song: %s - %s' % (self.artist, songname))
-        print("Size:", converter(samp))
+        Verbose('\n%s %s %s' % ('-'*20, sorf, '-'*20))
+        Verbose('Song: %s - %s' % (self.artist, songname))
+        Verbose("Size:", file_size(samp))
         song = " - ".join((self.artist, songname))
         if not hasattr(self, 'player'):
             self.player = Player()
@@ -311,7 +365,7 @@ class Media():
 
         output = output or os.getcwd()
         if not Path.is_dir(output):
-            print('Invalid directory: %s'%output)
+            Print('Invalid directory: %s'%output)
             return 
 
         link = self.mp3urls[selection]
@@ -330,18 +384,18 @@ class Media():
 
             with open(songname, "wb") as ws:
                 ws.write(response.content)
-                print('\nSONGNAME: ', songname,
-                               '\nSIZE:  ', converter(len(response.content)))
+                Verbose('\nSONGNAME: ', songname,
+                               '\nSIZE:  ', file_size(len(response.content)))
             self._cacheSong(songname, response)
         except:
-            print('Cannot download song %s' % songname)
+            Print('Cannot download song %s' % songname)
 
 
     def downloadAlbum(self, output=None):
         if not output:
             output = os.getcwd()
         elif not os.path.isdir(output):
-            print('Invalid directory: %s'%output)
+            Print('Invalid directory: %s'%output)
             return
 
 
@@ -355,5 +409,5 @@ class Media():
 
         for num, song in enumerate(self.songs):
             self.download(song, output=fname)
-        print("\n%s %s saved" % (self.artist, self.album))
+        Print("\n%s %s saved" % (self.artist, self.album))
 

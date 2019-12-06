@@ -23,6 +23,12 @@ setup( name='Datpiff',
                     'Programming Language :: Python :: 3.6',
                     'Programming Language :: Python :: 3.7',
                     'Programming Language :: Python :: 3.8',
+<<<<<<< HEAD
+=======
+                    'Operating System :: OS Independent',
+                    'Topic :: Multimedia :: Sound/Audio :: Players',
+
+>>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function
                     ],
        zip_safe=False,
        packages=find_packages(exclude=['tests'])

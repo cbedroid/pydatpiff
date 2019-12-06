@@ -1,5 +1,6 @@
 import re
 import vlc 
+from .frontend.display import Print
 from time import sleep
 
 
@@ -72,7 +73,7 @@ class Player(object):
             self.player.set_mrl(media)
             self._track_set = True
         else:
-            print('No media to play')
+            Print('No media to play')
         
 
     @property
@@ -86,10 +87,10 @@ class Player(object):
         l_min,l_sec = self._format_time(self.player.get_length())
         l_sec = l_sec if len(str(l_sec)) >1 else str(l_sec).zfill(2) 
         
-        print('TRACK:',self.song)
-        print('MODE:',self._state)
+        Print('TRACK:',self.song)
+        Print('MODE:',self._state)
         pos = 'POSITION: {0}:{1} - {2}:{3}'.format(c_min,c_sec,l_min,l_sec)
-        print(pos)
+        Print(pos)
              
         
     @property
@@ -147,7 +148,7 @@ class Player(object):
                 elif way == 'exact':
                     vol = 0 if vol < min_vol else vol 
                     vol = 100 if vol > max_vol else vol
-                print('volume: %s'%vol)
+                Print('volume: %s'%vol)
             except:
                 pass
         self.player.audio_set_volume(vol)
