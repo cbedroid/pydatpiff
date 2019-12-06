@@ -4,7 +4,6 @@
    Stdout can be disable on startup by setting frontend verbose flag False.
    example:: frontend.verbose = True
 """
-
 import logging
 import pydatpiff 
 

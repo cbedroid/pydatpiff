@@ -22,7 +22,7 @@ class Queued():
     def set_queue(self):
         if Datatype.isList(self.input):
             # setting the queue from ^
-            for obj in self.input: #      |
+            for obj in self.input: # |
                 self.q.put(obj)
 
 
@@ -46,7 +46,7 @@ class Queued():
             if self.q.empty():
                 break
         # data will not be filter here for 'None type' in list
-        # must catch all None type from the function called this method 
+        # must catch all None types in the base method 
         return self.results
 
 
