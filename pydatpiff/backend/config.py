@@ -107,6 +107,7 @@ class Datatype():
             raise NotImplementedError('datatype is not a List')
         return [cls.strip_lowered(x) for x in data]
 
+
 class User():
     @staticmethod
     def choice_is_str(choice,data):
@@ -125,6 +126,7 @@ class User():
 
         if val:
             return min(val)
+
 
     @staticmethod
     def choice_is_int(choice,data):

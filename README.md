@@ -2,14 +2,22 @@
 # DatPiff
 ![alt text](https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png)
 
+<<<<<<< HEAD
 [![Build Status](https://travis-ci.org/cbedroid/Datpiff.svg?branch=master)](https://travis-ci.com/cbedroid/Datpiff)
 
 # PyDatPiff
 ![alt text](https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png)
 <img src="https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png" width="400" height="790">
+=======
+**PyDatpiff**   -  Unofficial Datpiff python program that interact with online [Datpiff](https://www.datpiff.com) Mixtapes. PyDatpiff allow users to play and download songs from thier favorite music artist.
+
+  - supports windows, mac, and linux
+  - python 3.3 - above
+>>>>>>> 85ee64f... More refactoring
 
 [![Build Status]('https://travis-ci.org/cbedroid/Datpiff.svg?branch=master')
 
+<<<<<<< HEAD
 # Introduction :
 #### Datpiff - is a python program that interact with Datpiff Mixtapes 
   - supports windows,mac,and linux
@@ -22,6 +30,14 @@
 #### Dependencies:
 see requirements:  [requirements.txt](https://github.com/cbedroid/Datpiff/blob/master/requirements.txt)
 ### Installation
+=======
+**PyDatpiff requires:**
+ - see requirements:  [requirements.txt](https://github.com/cbedroid/pydatpiff/blob/master/requirements.txt)
+- *python>= 3.3*
+- [VLC](https://www.videolan.org/vlc/index.html)- VideoLan Client media player and framework
+# Installation
+Install [VLC](https://www.videolan.org/vlc/index.html)  *(if not already install)*
+>>>>>>> 85ee64f... More refactoring
 
 Datpiff requires:  **python3.4 - above** .
 ```bash
