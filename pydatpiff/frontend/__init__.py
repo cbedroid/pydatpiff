@@ -1,1 +1,1 @@
-import pydatpiff
+from pydatpiff import pydatpiff 
