@@ -7,7 +7,7 @@
 import os
 import sys 
 import logging
-import pydatpiff
+from .. import output      
 
 rootLogger = logging.getLogger()
 rootLogger.setLevel(logging.INFO)
@@ -23,16 +23,25 @@ except:
             print(text)
 
 
+def handlespace(w): # for correcting joined args
+    return w if any(w.endswith(x) for x in ['\n','\t','\r',' ']) else w +' '
+
+
 def Print(*args):
     if args:
-        args = "  ".join(args)
+        output = "  ".join(args)
         if shell: # check for shell:: Python IDLE will return None
-            rootLogger.info(args)
+            rootLogger.info(output)
         else:
-            dummy_call = str(color_text.write(args,'stdout'))
+            args = list(args)
+            args.extend(['\n'])
+            for out in args:
+                dummy_call = str(color_text.write(handlespace(out),'stdout'))
+                
 
 def Verbose(*args):
-    if not pydatpiff.pydatpiff.verbose:
+    verbose = output()
+    if not verbose:
         return 
     Print(*args)
 

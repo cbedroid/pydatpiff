@@ -22,6 +22,7 @@ class Mixtapes(object):
     def __init__(self, category=None,search=None,*args,**kwargs):
         '''
         Mixtapes Initialize 
+
         @@params: category:  -- see Mixtapes.category
         '''
         super(Mixtapes,self).__init__(*args,**kwargs)
@@ -120,7 +121,7 @@ class Mixtapes(object):
         After parsing and filtering the responses text, it then creates a 
         dunder variable from the parent function name. 
         
-        params: (wrapper function) 
+        @@params: f  (wrapper function) 
          #----------------------------------------------------------
          example: "function()" will create an attribute "_function"
          #----------------------------------------------------------
@@ -213,8 +214,11 @@ class Mixtapes(object):
 
 
     def _select(self,select):
-        ''' select ablums_link by artist name, album name ('title')
-         or by index number of title or artist
+        '''
+        User select function that queue an ablum to the media player
+        
+        @@params:: select - (int) user selection by indexing an artist name or album name
+                            (str)
         '''
         try:
 <<<<<<< HEAD:datpiff/mixtapes.py

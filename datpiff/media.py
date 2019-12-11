@@ -145,8 +145,10 @@ class Media():
 
        
     def _parseSelection(self, select):
-        """Parse all user selection and return the correct songs
-           @@params: select  - Media.songs name or index of Media.songs 
+        """
+        Parse all user selection and return the correct songs
+
+        @@params: select  - Media.songs name or index of Media.songs 
         """
 <<<<<<< HEAD:datpiff/media.py
         select = 1 if select == 0 else select
@@ -235,6 +237,7 @@ class Media():
     def song(self, name):
         """ 
         Set current song
+
         @@params: name  - Media.songs name or index of Media.songs 
         """
         songs = self.songs
@@ -302,6 +305,7 @@ class Media():
     def play(self, track=None, demo=False):
         """ 
         Play song (uses vlc media player) 
+
          @@params: track - name or index of song type(str or int)
          @@params: demo  - True: demo sample of song
                               False: play full song 
@@ -354,6 +358,7 @@ class Media():
     def download(self, track=False, output="", name=None):
         """
         Download song from Datpiff
+
         @@params: track - name or index of song type(str or int)
         @@output: location to save the song (optional)
         @@name:   rename the song (optional)
