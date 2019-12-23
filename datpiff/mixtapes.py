@@ -1,5 +1,3 @@
-import os
-import sys
 import re
 from functools import wraps
 from .urls import Urls
@@ -9,6 +7,7 @@ from .errors import MixtapesError
 =======
 from .frontend.display import Print,Verbose
 from .backend.config import User,Datatype
+from .backend.mixsetup import Pages
 from .backend.webhandler import Html
 
 >>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/mixtapes.py
@@ -63,9 +62,13 @@ class Mixtapes(object):
         # return the url page request by user
         if search:
             body = self.search(search)
+<<<<<<< HEAD:datpiff/mixtapes.py
             if not body or body is None: 
                  # if the search requests fails then get default page 
                 # discard search then we recalls the _Start 
+=======
+            if not body or body is None: # on failure return response from a category 
+>>>>>>> 9677925... implemented method for more mixtapes, Added backend/mixsetup.py:pydatpiff/mixtapes.py
                 return self._Start('hot')
 <<<<<<< HEAD:datpiff/mixtapes.py
         else:
@@ -88,6 +91,9 @@ class Mixtapes(object):
    
     def _setup(self):
         """Initial variable and set attributes on page load up."""
+        # all method below are property setter method 
+        # each "re string" get pass to the corresponding html response text
+
         self.artists = '<div class\="artist">(.*[.\w\s]*)</div>'
         self.mixtapes  = '"\stitle\="listen to ([^"]*)">[\r\n\t\s]?.*img'
         self.links   = 'title"><a href\=\"(.*[\w\s]*\.html)"'
@@ -115,6 +121,7 @@ class Mixtapes(object):
             print("%s" % (key))
 
 
+
     def _searchTree(f):
         '''
         Wrapper function that parse and filter all requests response content.
@@ -133,6 +140,7 @@ class Mixtapes(object):
             path = f(self,*args,**kwargs)
             pattern = re.compile(path)
 <<<<<<< HEAD:datpiff/mixtapes.py
+<<<<<<< HEAD:datpiff/mixtapes.py
             data = list( re.sub('amp;','',pat.group(1))\
 =======
             data = list(Html.remove_ampersands(pat.group(1))[0]\
@@ -140,10 +148,13 @@ class Mixtapes(object):
                     for pat in pattern.finditer(response_text)\
                     if pat is not None)
 
+=======
+            data = Pages(response_text).getReData(pattern)
+>>>>>>> 9677925... implemented method for more mixtapes, Added backend/mixsetup.py:pydatpiff/mixtapes.py
             if hasattr(self,'_artists'):
                 # we map all attributes length to _artists length 
                 data = data[:len(self._artists)]
-            dunder = '_'+name
+            dunder = '_' + name
             setattr(self,dunder,data)
             return data
         return inner

@@ -1,7 +1,6 @@
 import os
 import io
 import re
-from functools import wraps
 from .frontend.display import Print,Verbose
 from .urls import Urls
 from .player import Player
@@ -14,8 +13,11 @@ from .backend.mediasetup import Album,Mp3
 from .backend.filehandler import file_size,Tmp,Path
 from .backend.mediasetup import Album,Mp3
 from .backend.config import User,Datatype,Queued
+<<<<<<< HEAD:datpiff/media.py
 import traceback
 >>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
+=======
+>>>>>>> 9677925... implemented method for more mixtapes, Added backend/mixsetup.py:pydatpiff/media.py
 
 
 class Media():
