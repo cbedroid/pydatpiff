@@ -2,35 +2,48 @@ import re
 from ..urls import Urls
 from ..utils.request import Session
 from .webhandler import Html
+from .config import User,Datatype,Queued
+from ..errors import MixtapesError
 
 class Pages():
+    RETRY = 3 # TODO: fix retry:: some reason parsePages fails on first try
 
-    def __init__(self,base_text):
-        self.base_text = base_text # captures the queried response text
+    def __init__(self,base_response):
+        self.base_response = base_response # Session.response
         self.base_url = Urls().url['base']
         self._session = Session()
+        self.trys = 1
 
     @property
-    def getPageLinks(self):
+    def findPagesLinks(self):
         '''
         Return the href link from mix category or search page
         @params:: text  - the Mixtapes() _Start requests response text
             #The start up page from Mixtapes() all the page numbers
             # We grab that data and return all the page's link 
         '''
-        path = re.findall(r'class\="links"(.*[\n\r]*.*\d)*</a>'
-                            ,self.base_text)
-        links = [re.search('href\=.*/(.*=\d{1,2})"',x).group(1)\
-                                for x in path[0].split('</a>')]
+        try:
+            # captures the queried response text
+            XPath = re.findall(r'class\="links"(.*[\n\r]*.*\d)*</a>'
+                                ,self.base_response.text)
+            convert_href = [re.search('href\=.*/(.*=\d{1,2})"',x).group(1)\
+                                    for x in XPath[0].split('</a>')]
         
-        # map the links to the base_url 
-        return [''.join((self.base_url,link)) for link in links]
-    
+            # map the convert_href to the base_url 
+            return [''.join((self.base_url,link)) for link in convert_href]
+        except: 
+            # No page numbers in original url text,then return the original url
+            return [self.base_response.url]
 
 
-    def getReData(self,re_string):
+    def _Response(self,url):
+        ''' This is only for Queued use only'''
+        return self._session.method('GET',url).text
+
+
+    def parsePages(self,re_string):
         '''
-        Return the combine data from eachMixtapes links page
+        Return the combine data from eachMixtapes convert_href page
 
         @params:: re_string - python re pattern 
         
@@ -39,17 +52,26 @@ class Pages():
         This re_string will return all the pattern in the Mixtapes link's page text
         '''
         data = []
-        pattern = re.compile(re_string)
+        re_Xpath = re.compile(re_string)
         # each page requests response data
-        pages_text = [self._session.method('GET',links).text\
-                            for links in self.getPageLinks]
+        # Map each page links url to request.Session and 
+        # place Session in 'queue and thread' 
+        lrt = Queued(self._Response,self.findPagesLinks).run()
+        list_response_text = Datatype.removeNone(lrt)
 
-
+        #Remove all unwanted characters from Xpath 
         [data.extend(list(Html.remove_ampersands(pat.group(1))[0]\
-                        for pat in pattern.finditer(pt)\
+                        for pat in re_Xpath.finditer(RT)\
                         if pat is not None))
-                        for pt in pages_text]
+                        for RT in list_response_text]
+
+        # hackable way to fix this function from not return data on first try
+        # recalling the function if its returns None 
+        if not data:
+            if self.trys < self.RETRY:
+                self.trys+=1
+                return self.parsePages(re_string)
+            else:
+                raise MixtapesError(3)
         return data
-
-
 

@@ -75,18 +75,6 @@ class Media():
             Print('No song was found with this title ')
         results = Datatype.removeNone(results)
         return results
-        """ 
-        links = lists(enumerate(links,start=1))
-        collector = []
-        for index, link in enumerate(links,start=1):
-            album = Album(link)
-            name = album.name
-            tracks = Mp3(album.embed_response).songs
-            if any(songname in Datatype.strip_lowered(track) for track in tracks):
-                collector.append((index,name)) 
-
-        return collector
-        """
         
     def _search(self,links,song):
         index,link = links
@@ -96,8 +84,6 @@ class Media():
         if any(song in Datatype.strip_lowered(track) for track in tracks):
             return index,name 
 
-       
-        
 
     def setMedia(self, selection):
         """

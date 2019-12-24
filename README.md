@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+
+<img src="https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png" width="800" height                                                                                                ="200">
+>>>>>>> 0d81f33... Added threading to mixsetup, Optimize speed of Mixtapes class
 
 # DatPiff
 ![alt text](https://i-love-png.com/images/c7ce1da7ed7ace50867927d6a6520e62.png)
@@ -114,10 +119,18 @@ mix = datpiff.Mixtapes(search='Jay-Z')
 media = datpiff.Media(mix)
 
 
+<<<<<<< HEAD
 #### To view all available Mixtapes Ablums
 >>> mix.mixtapes 
 ```
     ['Creative Control', 'Carter Collection (15th Anniversary)', 'Viva La Hova', 'The Best Of Jay-z: 25th Anniversary', 'Jay-z - If I Should Die Vol. 1 (the Best Of Jay-z)', 'Jay-Z: The Unheard Classics', 'Jay-z Underground Mixes And Mashes Disk 2', 'Iceburgz Ent Dj Smokeshop Presents -big Tingz-pt.1 Classic Beefs Nas,jay-z And More', 'The Best Of Jay-z Old Vs New', 'The Best Of Jay-z & Biggie Smalls', 'Jay-z Live From Glastonbury ', 'Jay-z Underground Mixes And Mashes disk 1', 'Jay-z - Remixes',..etc ]
+=======
+ _THINGS YOU CAN DO:_
+ - `findSong` - find any song by an artist
+ - `play`  - plays songs from album
+ - `download` - download song
+ - `downloadAlbum` - download all songs from album
+>>>>>>> 0d81f33... Added threading to mixsetup, Optimize speed of Mixtapes class
 
 ### Set Media Player with a Mixtape Album
 
@@ -131,7 +144,21 @@ media.setMedia(1) # set media to 'Creative Control'
 #TO VIEW ALL AVAILABLE SONGS     
 >>> media.songs 
 ```
+<<<<<<< HEAD
  [ 'Jay-Z - Intro', 'Jay-Z - Advantage Carter (Prod. By Green Lantern)', 'Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street', "Jay-Z - Jay's Back ASAP", 'Jay-Z - Live In London', 'Jay-Z - Green Magic', 'Jay-Z - Brooklyn Sound Boy', 'Jay-Z - Child Abuse (Prod. By Green Lantern)', 'Jay-Z - Jay-Z Speaks On Green Lantern', 'Jay-Z - Flashy Life', 'Jay-Z - Got Me On My Shit (Prod. By Green Lantern)',..etc ]
+=======
+ [ 'Jay-Z - Intro', 'Jay-Z - Advantage Carter (Prod. By Green Lantern)', 'Jay-Z - Welcome 2 Atla                                                                                                nta V103 Feat. Young Jeezy & DJ Greg Street', "Jay-Z - Jay's Back ASAP", 'Jay-Z - Live In London                                                                                                ', 'Jay-Z - Green Magic', 'Jay-Z - Brooklyn Sound Boy', 'Jay-Z - Child Abuse (Prod. By Green Lan                                                                                                tern)', 'Jay-Z - Jay-Z Speaks On Green Lantern', 'Jay-Z - Flashy Life', 'Jay-Z - Got Me On My Sh                                                                                                it (Prod. By Green Lantern)',..etc ]
+
+--- --
+# Find A Song 
+<img src="https://www.google.com/url?sa=i&source=images&cd=&ved=2ahUKEwjP_M7noM3mAhUMVd8KHVMrAPMQjRx6BAgBEAQ&url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2F288230444899254713%2F&psig=AOvVaw2Qo2Uv_-KwUf0GU1FxohsW&ust=1577241545675361" width="100" height="100"> Cant find a song??
+```python
+   media.findSong('green lan')
+```
+
+[(1, 'Creative Control'), (36, 'Headliner & Legends (Jay-Z Freestyles) '), (69, 'Power Us Up( Jay-z, Kanye West, Swizz Beatz)'), (172, 'J3 Rocnation '), (254, "Bakin' Session")]
+
+>>>>>>> 0d81f33... Added threading to mixsetup, Optimize speed of Mixtapes class
 --- ---
  ### PLAYING SONG
  >- Songs can be played either by referencing the song  **index** or   **name**.  

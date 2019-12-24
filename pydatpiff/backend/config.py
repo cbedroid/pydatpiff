@@ -6,18 +6,32 @@
 import threading
 from queue import Queue
 from functools import wraps
+from ..utils.request import Session
 
 
 class Queued():
-    def __init__(self,main_job,input_work,search):
+        
+    THREAD_COUNT = 75
+    def __init__(self,main_job,input_work,search=None):
         self.input = input_work # work to put in queue
         self.main_job = main_job # job to perform with work
         # song to search for TODO: move this to main function
         self.search = search
-
-        self.THREAD_COUNT = 75
         self.results = []
         self.q = Queue()
+
+
+    @classmethod
+    def _setup(cls):
+        '''Stops the requests session from timing out before queue is finish'''
+        cls._session_timeout = Session.TIMEOUT
+        Session.TIMEOUT = 60
+
+
+    @classmethod
+    def _teardown(cls):
+        '''Sets the requests Session back to its original timeout'''
+        Session.TIMEOUT = cls._session_timeout
 
     def set_queue(self):
         if Datatype.isList(self.input):
@@ -28,7 +42,10 @@ class Queued():
 
     def put_worker_to_work(self):
         worker = self.q.get()
-        self.results.append(self.main_job(worker,self.search))
+        if self.search:
+            self.results.append(self.main_job(worker,self.search))
+        else:
+            self.results.append(self.main_job(worker))
         self.q.task_done()
 
 
@@ -38,8 +55,8 @@ class Queued():
              t.daemon = True
              t.start()
 
-    
     def run(self):
+        self._setup()
         self.set_queue()
         while True:
             self.start_thread()
@@ -47,6 +64,7 @@ class Queued():
                 break
         # data will not be filter here for 'None type' in list
         # must catch all None types in the base method 
+        self._teardown()
         return self.results
 
 

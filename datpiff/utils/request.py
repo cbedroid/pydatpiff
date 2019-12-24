@@ -5,6 +5,8 @@ from ..errors import RequestError
 
 class Session(object):
     '''Dynamic way to way to keep requests.Session through out whole programs.'''
+    
+    TIMEOUT = 10
     def __new__(cls,*args,**kwargs):
         if not hasattr(cls,'cache'):
             cls.cache = {}
@@ -44,16 +46,16 @@ class Session(object):
         try:
             #GET
             if method == "get":
-                web = self.session.get(url,timeout=10,**kwargs)
+                web = self.session.get(url,timeout=self.TIMEOUT,**kwargs)
             #POST
             if method == "post":
-                web = self.session.post(url,timeout=10,**kwargs)
+                web = self.session.post(url,timeout=self.TIMEOUT,**kwargs)
             #PUT
             if method == "put":
-                web = self.session.put(url,timeout=10,**kwargs)
+                web = self.session.put(url,timeout=self.TIMEOUT,**kwargs)
             #HEAD
             if method == "head":
-                web = self.session.head(url,timeout=10)
+                web = self.session.head(url,timeout=self.TIMEOUT)
         except requests.exceptions.InvalidURL as e:
             raise RequestError(1)
             return 

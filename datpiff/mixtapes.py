@@ -8,7 +8,6 @@ from .errors import MixtapesError
 from .frontend.display import Print,Verbose
 from .backend.config import User,Datatype
 from .backend.mixsetup import Pages
-from .backend.webhandler import Html
 
 >>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/mixtapes.py
 
@@ -135,10 +134,10 @@ class Mixtapes(object):
         '''
         @wraps(f) 
         def inner(self, *args,**kwargs):
-            response_text  = self._responses.text
             name = f.__name__
             path = f(self,*args,**kwargs)
             pattern = re.compile(path)
+<<<<<<< HEAD:datpiff/mixtapes.py
 <<<<<<< HEAD:datpiff/mixtapes.py
 <<<<<<< HEAD:datpiff/mixtapes.py
             data = list( re.sub('amp;','',pat.group(1))\
@@ -151,6 +150,9 @@ class Mixtapes(object):
 =======
             data = Pages(response_text).getReData(pattern)
 >>>>>>> 9677925... implemented method for more mixtapes, Added backend/mixsetup.py:pydatpiff/mixtapes.py
+=======
+            data = Pages(self._responses).parsePages(pattern)
+>>>>>>> 0d81f33... Added threading to mixsetup, Optimize speed of Mixtapes class:pydatpiff/mixtapes.py
             if hasattr(self,'_artists'):
                 # we map all attributes length to _artists length 
                 data = data[:len(self._artists)]

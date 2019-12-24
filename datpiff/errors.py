@@ -116,9 +116,17 @@ class Error(Exception):
 class MixtapesError(Error):
     """ handle all the Media errors"""
     __error__ = {
+<<<<<<< HEAD:datpiff/errors.py
                 1: 'No Mixtapes Found',
                 2: 'Invalid category selected',
              }
+=======
+                 1: 'No Mixtapes Found',
+                 2: 'Invalid category selected',
+                 3: 'Unable to process Data',
+                }
+
+>>>>>>> 0d81f33... Added threading to mixsetup, Optimize speed of Mixtapes class:pydatpiff/errors.py
 
 class MediaError(Error):
     """ handle all the Media errors"""
