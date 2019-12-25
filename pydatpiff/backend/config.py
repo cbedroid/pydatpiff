@@ -10,7 +10,6 @@ from ..utils.request import Session
 
 
 class Queued():
-        
     THREAD_COUNT = 75
     def __init__(self,main_job,input_work,search=None):
         self.input = input_work # work to put in queue
@@ -19,6 +18,7 @@ class Queued():
         self.search = search
         self.results = []
         self.q = Queue()
+        self.thread_pool = []
 
 
     @classmethod
@@ -32,6 +32,15 @@ class Queued():
     def _teardown(cls):
         '''Sets the requests Session back to its original timeout'''
         Session.TIMEOUT = cls._session_timeout
+
+
+    def capture_threads(self,threads):
+        self.thread_pool.append(threads)
+
+
+    def kill_all_threads(self):
+        while all(t.is_Alive() for t in self.thread_pool):
+            _=1 # 
 
     def set_queue(self):
         if Datatype.isList(self.input):
@@ -48,12 +57,18 @@ class Queued():
             self.results.append(self.main_job(worker))
         self.q.task_done()
 
-
+    
     def start_thread(self):
-        for _ in range(self.THREAD_COUNT):
-             t = threading.Thread(target = self.put_worker_to_work)
-             t.daemon = True
-             t.start()
+        try:
+            for _ in range(self.THREAD_COUNT):
+                t = threading.Thread(target = self.put_worker_to_work)
+                self.capture_threads(t)
+                t.daemon = True
+                t.start()
+        except:
+            self.kill_all_threads()
+            self.start_thread()
+
 
     def run(self):
         self._setup()
@@ -154,7 +169,6 @@ class User():
             choice - user choice. datatype: str
             data - list or dict object
         """
-
         try:
             choice = int(choice)
             results =  Datatype.enumerate_it(data)

@@ -14,6 +14,9 @@ class Session(object):
 
     def __init__(self):
         self.session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(pool_connections=600,
+                                               pool_maxsize=600)
+        self.session.mount('https://', adapter)
 
 
     def put_in_cache(self,url,response):

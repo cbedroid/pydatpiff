@@ -7,6 +7,7 @@ from ..errors import MixtapesError
 
 class Pages():
     RETRY = 3 # TODO: fix retry:: some reason parsePages fails on first try
+    MAX_MIXTAPES = 520 # maximum amount of available mixtapes possible
 
     def __init__(self,base_response):
         self.base_response = base_response # Session.response
@@ -41,7 +42,7 @@ class Pages():
         return self._session.method('GET',url).text
 
 
-    def parsePages(self,re_string):
+    def parsePages(self,re_string,bypass=False):
         '''
         Return the combine data from eachMixtapes convert_href page
 
@@ -73,5 +74,17 @@ class Pages():
                 return self.parsePages(re_string)
             else:
                 raise MixtapesError(3)
+        elif len(data) < self.MAX_MIXTAPES and not bypass:
+            # Try to get the maximun amount of mixtapes
+            # Since the first time this function is called, the data weirdly return None
+            # We keep trying until we get the max amount of mixtapes
+
+            if self.trys < self.RETRY:
+                self.trys+=1
+                return self.parsePages(re_string)
+            else:
+                #print('Fuck it')
+                return self.parsePages(re_string,True)
+
         return data
 

@@ -126,7 +126,7 @@ media = datpiff.Media(mix)
     ['Creative Control', 'Carter Collection (15th Anniversary)', 'Viva La Hova', 'The Best Of Jay-z: 25th Anniversary', 'Jay-z - If I Should Die Vol. 1 (the Best Of Jay-z)', 'Jay-Z: The Unheard Classics', 'Jay-z Underground Mixes And Mashes Disk 2', 'Iceburgz Ent Dj Smokeshop Presents -big Tingz-pt.1 Classic Beefs Nas,jay-z And More', 'The Best Of Jay-z Old Vs New', 'The Best Of Jay-z & Biggie Smalls', 'Jay-z Live From Glastonbury ', 'Jay-z Underground Mixes And Mashes disk 1', 'Jay-z - Remixes',..etc ]
 =======
  _THINGS YOU CAN DO:_
- - `findSong` - find any song by an artist
+ - `findSong` - find any song made by an artist
  - `play`  - plays songs from album
  - `download` - download song
  - `downloadAlbum` - download all songs from album
