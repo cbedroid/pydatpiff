@@ -1,12 +1,14 @@
-from setuptools import setup,find_packages,Extension
+from __init__ import __version__
+from setuptools import setup,find_packages
 
 with open('README.md',encoding='utf-8') as f:
     readme = f.read()
 
-setup( name='Datpiff',
-       version='0.1.4',
-       description='Datpiff Mixtape player',
-       url='https://github.com/cbedroid/Datpiff',
+#package_dir={'datpiff':'pydatpiff'},
+setup( name='pydatpiff',
+       version=__version__,
+       description='PyDatpiff Mixtape player',
+       url='https://github.com/cbedroid/pydatpiff',
        long_description=readme,
        long_description_content_type='text/markdown',
        author='Cornelius Brooks',
@@ -23,12 +25,9 @@ setup( name='Datpiff',
                     'Programming Language :: Python :: 3.6',
                     'Programming Language :: Python :: 3.7',
                     'Programming Language :: Python :: 3.8',
-<<<<<<< HEAD
-=======
                     'Operating System :: OS Independent',
                     'Topic :: Multimedia :: Sound/Audio :: Players',
 
->>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function
                     ],
        zip_safe=False,
        packages=find_packages(exclude=['tests'])

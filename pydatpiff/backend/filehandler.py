@@ -1,13 +1,7 @@
 import os
-import sys 
 import re
-import threading
 import tempfile
-import platform 
-import collections
 import math
-import subprocess
-from functools import wraps
 
 class Dict():
     def __init__(self):
@@ -68,17 +62,6 @@ class Tmp(object):
                         os.remove(lf)
                     except Exception as e:
                         pass
-
-
-    def threader(f):
-        @wraps(f)
-        def inner(self,*a,**kw):
-            t = threading.Thread(target=f,args=(self,a))
-            t.start()
-            return t
-        return inner
-
-
 
 class Path():
     @staticmethod

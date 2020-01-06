@@ -6,7 +6,7 @@ from .config import User,Datatype,Queued
 from ..errors import MixtapesError
 
 class Pages():
-    RETRY = 3 # TODO: fix retry:: some reason parsePages fails on first try
+    RETRY = 5 # TODO: fix retry:: some reason parsePages fails on first try
     MAX_MIXTAPES = 520 # maximum amount of available mixtapes possible
 
     def __init__(self,base_response):

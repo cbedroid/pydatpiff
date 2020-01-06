@@ -1,32 +1,30 @@
 import os
 import io
 import re
+from time import sleep
 from .frontend.display import Print,Verbose
 from .urls import Urls
 from .player import Player
 from .errors import MediaError
 from .utils.request import Session
-<<<<<<< HEAD:datpiff/media.py
-from .backend.handler import converter,Tmp,Path
-from .backend.mediasetup import Album,Mp3
-=======
 from .backend.filehandler import file_size,Tmp,Path
 from .backend.mediasetup import Album,Mp3
-from .backend.config import User,Datatype,Queued
-<<<<<<< HEAD:datpiff/media.py
-import traceback
->>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
-=======
->>>>>>> 9677925... implemented method for more mixtapes, Added backend/mixsetup.py:pydatpiff/media.py
+from .backend.config import User,Datatype,Queued,Threader
 
 
 class Media():
     """ Media player that control the songs selected from Mixtapes """
-
+    
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_tmpfile'):
             Tmp.removeTmpOnstart()
             cls._tmpfile = Tmp.create()
+
+        if not hasattr(cls,'player'):
+            try:
+                cls.player = Player()
+            except:
+                cls.player = None
         return super(Media, cls).__new__(cls)
 
 
@@ -37,12 +35,12 @@ class Media():
     def __repr__(self):
         return 'Media(%s)' % (self.mixtape)
 
+
     def __len__(self):
         if hasattr(self,'songs'):
             return len(self.songs)
         else:
             return 0
-
 
     def __init__(self, mixtape=None):
         """ Initialize Media 
@@ -75,6 +73,7 @@ class Media():
             Print('No song was found with this title ')
         results = Datatype.removeNone(results)
         return results
+
         
     def _search(self,links,song):
         index,link = links
@@ -96,33 +95,20 @@ class Media():
             str - will search for an artist from Mixtapes.artists (default)
                   or album from Mixtapes.ablum. 
         """
-<<<<<<< HEAD:datpiff/media.py
-        results = self.mixtape._select(selection)
-        if not results:
-=======
         result = self.mixtape._select(selection)
         if result is None:
             Verbose('SELECTION:',selection)
->>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
             e_msg = '\n--> Mixtape "%s" was not found'%selection
-            raise MediaError(1,e_msg)
-        link,choice = results
+            raise MediaError(1)
 
-<<<<<<< HEAD:datpiff/media.py
-        self._artist_name = self.mixtape.artists[choice]
-        self.album_name = self.mixtape.mixtapes[choice]
-        self._setup(link)
-        print('Setting Media to %s - %s' % (self.artist, self.album))
-=======
         self._artist_name = self.mixtape.artists[result]
         self.album_name = self.mixtape.mixtapes[result]
         link = self.mixtape._links
         self._setup(link[result])
         
         Verbose('Setting Media to %s - %s' % (self.artist, self.album))
->>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
         # only returning to check if choice was set
-        return choice
+        #return choice
 
 
     def _setup(self,link):
@@ -138,32 +124,11 @@ class Media():
 
         @@params: select  - Media.songs name or index of Media.songs 
         """
-<<<<<<< HEAD:datpiff/media.py
-        select = 1 if select == 0 else select
-        songs = dict(enumerate(self.songs, start=1))
-
-        # checking from index 
-        if isinstance(select,int):
-            length = len(self.songs) + 1
-            if select >= 0 and select < length:
-                select = 1 if select == 0 else select
-                return select-1
-
-        select = str(select).lower().strip()
-        selection = list(filter(lambda x: select in x[1].lower(),(songs.items()
-                            )))
-
-        if selection:
-            return (min(selection)[0]) - 1
-        else:
-            print('\n\t -- No song was found --')
-=======
         try:
             return User.selection(select,self.songs,[x.lower() for x in self.songs])
         except MediaError as e:
             raise MediaError(5)
 
->>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
 
 
     @property
@@ -277,7 +242,7 @@ class Media():
         self._song_index = selection
         link = self.mp3urls[selection]
         songname = self.songs[selection]
-        self.song= selection + 1
+        self.song = selection + 1
 
         # Write songname to file
         # check if song has been already downloaded 
@@ -289,7 +254,47 @@ class Media():
 
         return io.BytesIO(response.content)
 
+    @property
+    def autoplay(self):
+        ''' Continuous play song from current album'''
+        if hasattr(self,'_auto_play'):
+            return self._auto_play
 
+    @autoplay.setter
+    def autoplay(self,auto=False):
+        self._auto_play = auto
+        self._continousPlay()
+        if auto:
+            Verbose('SETTING AUTO PLAY ON')
+        else:
+            Verbose('SETTING AUTO PLAY OFF')
+
+
+    @Threader
+    def _continousPlay(self):
+         if self.autoplay:
+            total_song = len(self)
+            current_song =  self.song
+            if not current_song:
+                print('Must play a song before setting autoplay')
+                return 
+
+            current_track = self._parseSelection(current_song)+1
+
+            while current_track < len(self) and self.autoplay:
+                state = Datatype.strip_lowered(self.player._state)
+                next_track = current_track + 1
+                if state == 'ended':
+                    print('Loading next track')
+                    if next_track > len(self):
+                        Verbose('AUTO PLAY OFF')
+                        self.autoplay = False
+                        break
+                    Verbose('AUTO PLAY ON')
+                    self.play(next_track)
+                    current_track = next_track
+                    sleep(5) # wait for the track to load up
+            
     def play(self, track=None, demo=False):
         """ 
         Play song (uses vlc media player) 
@@ -299,6 +304,11 @@ class Media():
                               False: play full song 
                               *default: False
         """
+        if not self.player:
+            extented_msg = 'VLC is not installed or is incompatible with device'
+            raise MediaError(6,extented_msg)
+            return 
+
         if track is None:
             Print('\n\t -- No song was entered --')
             return 
@@ -307,15 +317,10 @@ class Media():
             if track > len(self):
                 raise MediaError(4) 
 
-        try
+        try:
             content = self.mp3Content(track).read()
-<<<<<<< HEAD:datpiff/media.py
-        except:
-            print('\n\t-- No song was found --')
-=======
         except Exception:
             Print('\n\t-- No song was found --')
->>>>>>> eca77c0... Refactor code, Change files name and method names in backup folder, Optimized speed of media.findSong function:pydatpiff/media.py
             return 
 
         songname = self.songs[self._song_index]
@@ -336,12 +341,10 @@ class Media():
         Verbose('Song: %s - %s' % (self.artist, songname))
         Verbose("Size:", file_size(samp))
         song = " - ".join((self.artist, songname))
-        if not hasattr(self, 'player'):
-            self.player = Player()
-        
         self.player.setTrack(song,self._tmpfile.name)
         self.player.play
-
+        
+        
 
     def download(self, track=False, output="", name=None):
         """

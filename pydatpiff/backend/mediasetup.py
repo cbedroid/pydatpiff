@@ -7,10 +7,13 @@ from ..errors import AlbumError
 #TODO::Change album to just get start url response embed url response
 
 class Album():
+    def __new__(cls,*args,**kwargs):
+        if not hasattr(cls,'_session'):
+            cls._session = Session()
+        return super(Album,cls).__new__(cls)
+
     def __init__(self,link):
         self.link = ''.join((Urls.url['album'] ,link))
-        self._session = Session()
-
 
     @property
     def name(self):

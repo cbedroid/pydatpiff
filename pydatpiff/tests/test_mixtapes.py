@@ -2,7 +2,7 @@ import os
 import sys 
 import unittest
 from unittest.mock import Mock,patch
-from datpiff import mixtapes as mt
+from ...pydatpiff import mixtapes as mt
 
 
 class TestMixtapes(unittest.TestCase):
@@ -28,13 +28,3 @@ class TestMixtapes(unittest.TestCase):
         
      
         
-
-    # testSearch
-    @patch.object(mt, "Mixtapes")
-    def test_if_search_has_a_response(self,instance):
-        instance.return_value = 'Lil Wayne'
-        mix = mt.Mixtapes()
-        print(instance.mock_calls)
-
-        
-

@@ -2,70 +2,47 @@ import re
 import vlc 
 from .frontend.display import Print
 from time import sleep
-
-
-class PlayerError(Exception):
-
-    @staticmethod
-    def error_msg(key,exceptions=None):
-        errors= {'Instance':'VLC can not initailize. Please check if your device supports vlc\n'  }
-        msg = '\n'+ str(errors.get(key) or '') 
-        if exceptions: 
-            msg+= str(exceptions)
-        return msg
+from .errors import PlayerError
 
 
 class Player(object):
+    """Media player controller""" 
 
     def __init__(self):
         try:
             self._vlc = vlc.Instance('-q')
             self._player = self._vlc.media_player_new()
-            self._track_set = False
-            self.song = None
         except Exception as e:
-            msg = PlayerError.error_msg('Instance') + str(e)
-        
+            extended_msg = 'Please check if your device supports VLC'
+            raise PlayerError(1,extended_msg)
+
+        self._track_set = False
+        self.song = None
+   
+
+    def _seeker(self,pos=10,rew=True):
+        if self._state == 'No Media':
+            return 
+        if rew: 
+            to_postion = self.player.get_time() - (pos * 1000)
+        else:
+            to_postion = self.player.get_time() + (pos * 1000)
+        self.player.set_time(to_postion)
+
 
     @property
     def player(self):
         return self._player
-
-    @property
-    def pause(self):
-        self.player.pause()
     
-    @property
-    def stop(self):
-        self.player.stop()
-
-    def close(self):
-        self.stop
-
-    property
-    def _format_time(self,pos):
-        """Format current song time to clock format"""
-        mins = int(pos/60000)
-        secs = int((pos%60000)/1000)
-        return mins,secs
-
 
     @property
-    def play(self):
-        """ Play media song"""
-        playing = True if self.player.is_playing() >=1 else False
+    def _state(self):
+        """Current state of the song being played"""
+        state = re.match(r'[\w.]*\.(\w*)',str(self.player.get_state())).group(1)
+        state = 'No Media' if state =='NothingSpecial' else state
+        return state
 
-        if playing:
-            # call play while playing ,them pause 
-            self.player.pause()
-        elif self._state == 'Paused':
-            self.player.pause()
-
-        elif self._track_set:
-            self.player.play()
-            self._track_set = False
-        return
-
+       
 
     def setTrack(self,song,media=None):
         if  media:
@@ -75,6 +52,15 @@ class Player(object):
         else:
             Print('No media to play')
         
+
+    property
+    def _format_time(self,pos):
+        """Format current song time to clock format"""
+        mins = int(pos/60000)
+        secs = int((pos%60000)/1000)
+        return mins,secs
+
+    
 
     @property
     def info(self):
@@ -92,31 +78,6 @@ class Player(object):
         pos = 'POSITION: {0}:{1} - {2}:{3}'.format(c_min,c_sec,l_min,l_sec)
         Print(pos)
              
-        
-    @property
-    def _state(self):
-        """Current state of the song being played"""
-        state = re.match(r'[\w.]*\.(\w*)',str(self.player.get_state())).group(1)
-        state = 'No Media' if state =='NothingSpecial' else state
-        return state
-
-
-    def volumeUp(self,vol=5):
-        """Turn the media volume up"""
-        self._set_volume(vol,way='up')
-     
-
-    def volumeDown(self,vol=5):
-        """Turn the media volume down"""
-        self._set_volume(vol,way='down')
-
-
-    def volume(self,vol=None):
-        """Set the volume to exact number"""
-        if vol is None:
-            return
-        self._set_volume(vol,way='exact')
-        
 
     @property
     def _current_volume(self):
@@ -154,6 +115,41 @@ class Player(object):
         self.player.audio_set_volume(vol)
 
 
+    def volumeUp(self,vol=5):
+        """Turn the media volume up"""
+        self._set_volume(vol,way='up')
+     
+
+    def volumeDown(self,vol=5):
+        """Turn the media volume down"""
+        self._set_volume(vol,way='down')
+
+
+    def volume(self,vol=None):
+        """Set the volume to exact number"""
+        if vol is None:
+            return
+        self._set_volume(vol,way='exact')
+ 
+   
+    @property
+    def play(self):
+        """ Play media song"""
+        playing = True if self.player.is_playing() >=1 else False
+
+        if playing:
+            # call play while playing ,them pause 
+            self.player.pause()
+        elif self._state == 'Paused':
+            self.player.pause()
+
+        elif self._track_set:
+            self.player.play()
+            self._track_set = False
+        return
+
+
+   
     @property
     def pause(self):
         """Pause the media song"""
@@ -177,12 +173,14 @@ class Player(object):
         self._seeker(pos,False)
 
 
-    def _seeker(self,pos=10,rew=True):
-        if self._state == 'No Media':
-            return 
-        if rew: 
-            to_postion = self.player.get_time() - (pos * 1000)
-        else:
-            to_postion = self.player.get_time() + (pos * 1000)
-        self.player.set_time(to_postion)
+       
+    @property
+    def stop(self):
+        self.player.stop()
 
+
+    def close(self):
+        self.stop
+
+      
+     

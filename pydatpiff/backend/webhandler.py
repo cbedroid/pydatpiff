@@ -34,7 +34,7 @@ ampersands = [
 class Html:
     @staticmethod
     def checkRe(f):
-        @wrap(f)
+        @wraps(f)
         def inner(obj):
             try:
                 f(obj)

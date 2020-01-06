@@ -6,6 +6,7 @@ import platform
 import tempfile 
 import logging 
 
+
 def fixdate():
     date = None
     _f = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -24,13 +25,14 @@ def fixdate():
 
 class Logger(object):
     logit = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.INFO,format = '%(message)s')
+    logging.basicConfig(level=logging.WARNING,format = '%(message)s')
     logfile = os.path.join(tempfile.gettempdir(),'pydatpiff.log')
     handler = logging.FileHandler(logfile)
     handler.setLevel(logging.WARNING)
     _format = logging.Formatter(fixdate(),datefmt="%m/%d/%Y %I:%M:%S %p %Z")
     handler.setFormatter(_format)
     logit.addHandler(handler)
+
 
     @classmethod
     def _parseLog(cls,*msg,level='info'):
@@ -48,10 +50,12 @@ class Logger(object):
     def display(cls,*msg):
         cls._parseLog(*msg,level='info')
 
+
     @classmethod
     def warn(cls,*msg):
         cls._parseLog(*msg,level='warning')
     
+
     @classmethod
     def failed(cls,*msg):
         cls._parseLog(*msg,level='critical')
@@ -61,7 +65,8 @@ class Logger(object):
 class Error(Exception):
     __error__ = {
                  1:'invalid mixtapes object',
-                 2:'no mixtapes found'}
+                 2:'no mixtapes found'
+                }
 
     code = None
     message='Unknown'
@@ -86,6 +91,7 @@ class Error(Exception):
         return self.__error__.get(code)
 
 
+
     @staticmethod
     def makeError(code):
         #code = code or self.message
@@ -103,56 +109,68 @@ class Error(Exception):
             cls.__error__[max_e+1] = Error.makeError(export_to)
             return Error.create(max_e+1)
         elif export_to in cls.__error__:
-            for c,a in cls.__error__.items():
-                name = Error.makeError(a)
+            for code,error in cls.__error__.items():
+                if not isinstance(error,str):
+                    return error
+                name = Error.makeError(error)
                 e = type(name,(cls,),{
-                    'code': c,
-                    'message':a,
+                    'code': code,
+                    'message':error,
                     })
-                cls.__error__[c] = e  
+                cls.__error__[code] = e  
             return "".join((str(cls.__error__[export_to]),'\n'+long_msg))
    
+
 
 class MixtapesError(Error):
     """ handle all the Media errors"""
     __error__ = {
-<<<<<<< HEAD:datpiff/errors.py
-                1: 'No Mixtapes Found',
-                2: 'Invalid category selected',
-             }
-=======
                  1: 'No Mixtapes Found',
                  2: 'Invalid category selected',
                  3: 'Unable to process Data',
                 }
 
->>>>>>> 0d81f33... Added threading to mixsetup, Optimize speed of Mixtapes class:pydatpiff/errors.py
 
 class MediaError(Error):
     """ handle all the Media errors"""
     __error__ = {
-                 1:'no mixtapes found',
-                 2:'invalid mixtapes object',
-                 3:"Media album not set",
-                 4: "invaild track index"}
+                 1: 'no mixtapes found',
+                 2: 'invalid mixtapes object',
+                 3: 'media album not set',
+                 4: 'invaild track index',
+                 5: 'song selection error',
+                 6: 'unsupported media player'
+                }
 
 
 class AlbumError(Error):
     __error__ = {
-                1: 'Mixtapes Not Found',
-                2: 'Invalid category selected',
-             }
+                  1: 'Mixtapes Not Found',
+                  2: 'Invalid category selected',
+                }
+
 
 class Mp3Error(Error):
     pass
 
 
+class PlayerError(Error):
+    __error__  = {
+                   1: 'vlc not installed',
+                 }    
+
+
 class RequestError(Error):
     # _type = self.__class__._qualname__
     __error__ = {
-               1: 'Invalid url scheme',
-               2: 'Request failed',
-               3: 'Request Non-200 status code',
-              }
-    
+                 1: 'Invalid url scheme',
+                 2: 'Request failed',
+                 3: 'Request Non-200 status code',
+                }
+
+
+class BuildError(Error):
+    __error__ = {
+                 1, 'user selection',
+                }
 

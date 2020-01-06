@@ -3,10 +3,22 @@
     These methods will be used throughout the whole program. 
     
 """
+import sys
+import concurrent.futures as cf 
 import threading
-from queue import Queue
 from functools import wraps
 from ..utils.request import Session
+
+
+
+def Threader(f):
+    @wraps(f)
+    def inner(*a,**kw):
+        t = threading.Thread(target=f,args=(a),kwargs=dict(kw))
+        t.daemon = True
+        t.start()
+        return t
+    return inner
 
 
 class Queued():
@@ -17,8 +29,18 @@ class Queued():
         # song to search for TODO: move this to main function
         self.search = search
         self.results = []
-        self.q = Queue()
         self.thread_pool = []
+
+
+    def run(self):
+        with cf.ThreadPoolExecutor() as ex:
+            if self.search:
+                search = [self.search] * len(self.input)
+                data =  ex.map(self.main_job,self.input,search) 
+            else:
+                data = ex.map(self.main_job,self.input)
+        return [x for x in data]
+
 
 
     @classmethod
@@ -39,8 +61,10 @@ class Queued():
 
 
     def kill_all_threads(self):
-        while all(t.is_Alive() for t in self.thread_pool):
-            _=1 # 
+        for t in self.thread_pool:
+            if t.is_Alive():
+                t.terminate()
+
 
     def set_queue(self):
         if Datatype.isList(self.input):
@@ -61,7 +85,7 @@ class Queued():
     def start_thread(self):
         try:
             for _ in range(self.THREAD_COUNT):
-                t = threading.Thread(target = self.put_worker_to_work)
+                t = self.mp.map(self.put_worker_to_work)
                 self.capture_threads(t)
                 t.daemon = True
                 t.start()
@@ -70,7 +94,8 @@ class Queued():
             self.start_thread()
 
 
-    def run(self):
+    def run2(self):
+        '''Old threading method'''
         self._setup()
         self.set_queue()
         while True:
