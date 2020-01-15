@@ -4,12 +4,16 @@ import re
 from time import sleep
 from .frontend.display import Print,Verbose
 from .urls import Urls
-from .player import Player
 from .errors import MediaError
 from .utils.request import Session
 from .backend.filehandler import file_size,Tmp,Path
 from .backend.mediasetup import Album,Mp3
 from .backend.config import User,Datatype,Queued,Threader
+from .backend.audio.player import BasePlayer as player 
+#TODO NOT finish writig baseplayer method and subclasses
+#   from .backend.audio.player import BasePlayer as player 
+#   will cahnge import to another name
+#    change name of player 
 
 
 class Media():

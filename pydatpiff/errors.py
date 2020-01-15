@@ -157,6 +157,7 @@ class Mp3Error(Error):
 class PlayerError(Error):
     __error__  = {
                    1: 'vlc not installed',
+                   2: 'no song found',
                  }    
 
 
