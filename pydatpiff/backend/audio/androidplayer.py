@@ -1,29 +1,32 @@
 import os
 import sys
 import atexit
-import eyed3
 import re
 import threading 
 from subprocess import PIPE,Popen,check_output
 from time import time,sleep
 from glob import glob
 from functools import wraps
+from .base import BasePlayer 
+
+try:
+    import eyed3
+except:
+    #dummy class
+    class eyed3():
+        pass
+
 
 class AndroidError(Exception):
     pass
 
 
+TMP_FILE = '/sdcard/.pydatpiff_tmp'
 class Android(BasePlayer):
     def __init__(self,name,song):
-        #songs=None):
-        if not self._song_title or self._song:
-            raise AndroidError('No song was enter')
-
-        self.songs = self._song
-        self._tmp = '/sdcard/piper.mp3'
+        self.song = self.TMP_FILE
         self.state['pause'] = False
         self.play()
-
 
     def _am_start(path):
         """ Sets  android java  am-start command  from android sdk"""
@@ -32,31 +35,14 @@ class Android(BasePlayer):
         return  start +"-d file:///%s -t audio/mp3"%path
 
 
-    def setTrack(songname,song):
-        if songname and song:
+    def setTrack(name,song):
+        if name and song:
             self.is_track_set = True
         else:
             print('No media to play')
             
     def __len__(self):
         return len(self.content)
-
-
-    def setSongs(self,songs,ext='mp3'):
-        #GET RID OF IT 
-        strip_dir = os.path.dirname(re.sub(r"[^w/]*","",songs))
-        dirname = os.path.splitext(strip_dir)[0]
-        self._songs = []
-        if not os.path.isdir(dirname):
-            print("\nInvalid song directory: %s"%dirname)
-            return
-        songs = re.search(r".*\w*(/|\\)*[^\w.]",songs).group(0)
-        if "*"  not in songs:
-            ext = "**."+ext
-        songs =  glob('%s%s'%(songs,ext),recursive=True)
-        if songs:
-            self._songs = songs
-        
 
     def _threader(f):
         @wraps(f)
@@ -66,6 +52,14 @@ class Android(BasePlayer):
             t.start()
             return t
         return inner
+
+
+    def _is_playing(boolean=False):
+        """ Return whether a song is being played or paused.
+            
+            variable state - belongs to BasePlayer
+        """
+        self.state = dict(playing=bool(boolean),pause=not bool(boolean))
 
 
 
@@ -113,6 +107,7 @@ class Android(BasePlayer):
     @staticmethod
     def _splitSong(song,keep=1):
         """Parse song and split by '-' """
+        #TODO: remove or refactor this for baseclass
         if "-" in song:
             return song.split("-")[keep]
         return song
@@ -120,6 +115,7 @@ class Android(BasePlayer):
 
     def _setTrackInfo(self):
         """Set the artist name  and title of the song"""
+        #::TODO refactor this for baseclass
         try:
             song = self.songs[self._index]
             title = re.sub(".mp3","",os.path.basename(song))
@@ -136,8 +132,8 @@ class Android(BasePlayer):
         Check if file path exists 
         @params:: path - path of song 
         """
-        if os.path.isfile(self._tmp):
-            os.remove(self._tmp)
+        if os.path.isfile(self.song):
+            os.remove(self.song)
         if not os.path.isfile(path):
             msg = "Song --> '%s' was  not founded"%path
             raise PlayerError(msg)
@@ -149,7 +145,7 @@ class Android(BasePlayer):
         @params:: file - path of the song
         """
         self.state['pause'] = False
-        self.eyed3 = eyed3._load(file)
+        self.eyed3 = eyed3.load(file)
         self.tag = self.eyed3.tag
         f = open(file,'rb')
         self.content = f.read()
@@ -183,9 +179,9 @@ class Android(BasePlayer):
         """Write media content to file"""
         br = self.__bytes_per_sec
         length = int(br* int(self.__position + length))
-        if os.path.isfile(self._tmp):
-            os.remove(self._tmp)
-        with open(self._tmp,'wb') as _tmp:
+        if os.path.isfile(self.song):
+            os.remove(self.song)
+        with open(self.song,'wb') as _tmp:
             _tmp.write(self.content[length:])
         return length
 
@@ -206,13 +202,14 @@ class Android(BasePlayer):
         if self.state['pause']: # detect if player is paused
             # Set the pause position to the current position
             pos = self._paused_pos
-            self.state['pause'] = False
-
+        
         self.__setContent(pos)
         self._player = Popen(self._command,shell=True,stdin=PIPE,
                     stdout=PIPE,stderr=PIPE)
 
+        self._is_playing(True)
   
+
     def volume(self,vol=None):
         """
         Android volume controls
@@ -220,7 +217,7 @@ class Android(BasePlayer):
         """
         os.system('termux-volume music %s'% vol)
 
-    
+   
     @property
     def pause(self):
         """Pause song"""
@@ -229,12 +226,13 @@ class Android(BasePlayer):
             self.stop
             print("Pause")
             self._paused_pos = self.__position
-            self.state['pause'] = True
+            self._is_playing(False)
+
         else: # unpause
-            self.state['pause'] =False
             self.__position = self._paused_pos
             print("Unpause")
             self.play()
+            # Not here play() will handle self._is_playing(True) 
 
 
     def _seeker(self,pos=5, rew=True):
@@ -262,7 +260,6 @@ class Android(BasePlayer):
         results = Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE)
 
 
-"""
 @atexit.register
 def remove_file():
     removed = not os.system('rm /sdcard/piper.mp3')

@@ -1,17 +1,18 @@
-from ._player import Base_player
-from .errors import PlayerError
+from ...errors import PlayerError
+from .base import BasePlayer
 
-def VLCPlayer(Base_player):
-     def __init__(self,*args,**kwargs):
+def VLCPlayer(BasePlayer):
+    def __init__(self,*args,**kwargs):
         try:
             self._vlc = vlc.Instance('-q')
             self._player = self._vlc.media_player_new()
         except Exception as e:
-            extended_msg = 'Please check if your device supports VLC'
-            raise PlayerError(1,extended_msg)
+            print('VLC: ',e)
+            #extended_msg = 'Please check if your device supports VLC'
+            #raise PlayerError(1,extended_msg)
         self._is_track_set = False
         self.song = None
-
+    
     @property
     def _state(self):
         """Current state of the song being played"""
@@ -19,9 +20,9 @@ def VLCPlayer(Base_player):
         state = 'No Media' if state =='NothingSpecial' else state
         return state
 
-    def setTrack(self,song,media=None):
-        if  media:
-            self._player.set_mrl(media)
+    def setTrack(self,name,song=None):
+        if  song:
+            self._player.set_mrl(song)
             self._is_track_set = True
         else:
             Print('No media to play')
@@ -58,8 +59,8 @@ def VLCPlayer(Base_player):
 
 
 
-     @property
-     def _volumeLevel(self):
+    @property
+    def _volumeLevel(self):
         """ Current media _player volume"""
         return self._player.audio_get_volume()
 
@@ -83,7 +84,7 @@ def VLCPlayer(Base_player):
 
     @property
     def track_time(self):
-        return self._player.get_time())
+        return self._player.get_time()
 
     @propery
     def track_size(self):
@@ -107,7 +108,6 @@ def VLCPlayer(Base_player):
             self._is_track_set = True
             self._player.play()
         return
-
 
 
     @property
@@ -145,7 +145,4 @@ def VLCPlayer(Base_player):
     @property
     def stop(self):
         self._player.stop()
-
-
-   
 
