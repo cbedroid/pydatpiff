@@ -5,7 +5,6 @@ from ...errors import PlayerError
 class BasePlayer:
     """Media player controller""" 
     def __init__(self,*args,**kwargs):
-        print('\nBase Initialized')
         self._state={'playing':False,'pause':False,
                  'stop':False,'load':False}
         self._is_track_set = False

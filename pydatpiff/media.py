@@ -30,8 +30,6 @@ class Media():
             try:
                 cls.player = Player.getPlayer()
             except Exception as e:
-                print('\n\nMEDIA ERROR: ')
-                print('Exception:%s\n\n%s\n'%(e,traceback.print_exc()))
                 cls.player = None
         return super(Media, cls).__new__(cls)
 
@@ -284,7 +282,7 @@ class Media():
             total_song = len(self)
             current_song =  self.song
             if not current_song:
-                print('Must play a song before setting autoplay')
+                Verbose('Must play a song before setting autoplay')
                 return 
 
             current_track = self._parseSelection(current_song)+1
@@ -293,7 +291,7 @@ class Media():
                 state = Datatype.strip_lowered(self.player._state)
                 next_track = current_track + 1
                 if state == 'ended':
-                    print('Loading next track')
+                    Verbose('Loading next track')
                     if next_track > len(self):
                         Verbose('AUTO PLAY OFF')
                         self.autoplay = False
