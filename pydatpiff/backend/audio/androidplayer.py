@@ -5,6 +5,11 @@ import atexit
 import shutil
 from subprocess import PIPE,Popen,check_output
 from time import time,sleep
+<<<<<<< HEAD
+=======
+from glob import glob
+from functools import wraps
+>>>>>>> e75e8dfe19155bdbd5f678c31715c178e6cdf6d5
 from .baseplayer import BasePlayer 
 
 try:
@@ -19,6 +24,7 @@ class AndroidError(Exception):
 
 TMP = '/sdcard/.pydatpiff_tmp'
 class Android(BasePlayer):
+<<<<<<< HEAD
 
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
@@ -44,6 +50,12 @@ class Android(BasePlayer):
 
         return shutil.copy(self._filename,self.TMP)
 
+=======
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.song = self.TMP_FILE
+        self.state['pause'] = False
+>>>>>>> e75e8dfe19155bdbd5f678c31715c178e6cdf6d5
 
     def _am_start(path):
         """ Sets  android java  am-start command  from android sdk"""
