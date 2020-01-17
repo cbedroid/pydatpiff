@@ -1,8 +1,12 @@
+import vlc
+import re
 from ...errors import PlayerError
-from .base import BasePlayer
+from .baseplayer import BasePlayer
 
-def VLCPlayer(BasePlayer):
+class VLCPlayer(BasePlayer):
+    
     def __init__(self,*args,**kwargs):
+        super(VLCPlayer,self).__init__(*args,**kwargs)
         try:
             self._vlc = vlc.Instance('-q')
             self._player = self._vlc.media_player_new()
@@ -11,14 +15,24 @@ def VLCPlayer(BasePlayer):
             #extended_msg = 'Please check if your device supports VLC'
             #raise PlayerError(1,extended_msg)
         self._is_track_set = False
-        self.song = None
-    
+
+
     @property
-    def _state(self):
+    def _stateof(self):
         """Current state of the song being played"""
         state = re.match(r'[\w.]*\.(\w*)',str(self._player.get_state())).group(1)
-        state = 'No Media' if state =='NothingSpecial' else state
-        return state
+        if state =='NothingSpecial':
+            #set all player value to False
+            for k,v in self._state.items():
+                self._state[k] = False
+
+        elif 'pause' in state.lower():
+            self._state['pause'] = True
+            self._state['playing'] = False
+        else:
+            self._state['playing'] = True
+            self._state['pause'] = False
+        return self.state
 
     def setTrack(self,name,song=None):
         if  song:
@@ -86,7 +100,7 @@ def VLCPlayer(BasePlayer):
     def track_time(self):
         return self._player.get_time()
 
-    @propery
+    @property
     def track_size(self):
         return self._player.get_length()
 
@@ -116,7 +130,7 @@ def VLCPlayer(BasePlayer):
         self._player.pause()
      
     def _seeker(self,pos=10,rew=True):
-        if self._state == 'No Media':
+        if not self._state['playing']:
             return 
         if rew: 
             to_postion = self._player.get_time() - (pos * 1000)

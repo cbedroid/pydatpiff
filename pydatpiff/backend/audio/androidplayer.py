@@ -7,7 +7,7 @@ from subprocess import PIPE,Popen,check_output
 from time import time,sleep
 from glob import glob
 from functools import wraps
-from .base import BasePlayer 
+from .baseplayer import BasePlayer 
 
 try:
     import eyed3
@@ -23,10 +23,10 @@ class AndroidError(Exception):
 
 TMP_FILE = '/sdcard/.pydatpiff_tmp'
 class Android(BasePlayer):
-    def __init__(self,name,song):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
         self.song = self.TMP_FILE
         self.state['pause'] = False
-        self.play()
 
     def _am_start(path):
         """ Sets  android java  am-start command  from android sdk"""
