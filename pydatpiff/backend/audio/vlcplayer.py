@@ -34,9 +34,11 @@ class VLCPlayer(BasePlayer):
             self._state['pause'] = False
         return self.state
 
-    def setTrack(self,name,song=None):
-        if  song:
-            self._player.set_mrl(song)
+    def setTrack(self,name,filename=None):
+        if filename:
+            self._filename = filename
+            self._song = name
+            self._player.set_mrl(filename)
             self._is_track_set = True
         else:
             Print('No media to play')
@@ -70,7 +72,6 @@ class VLCPlayer(BasePlayer):
             except:
                 pass
         self._player.audio_set_volume(vol)
-
 
 
     @property
@@ -115,22 +116,28 @@ class VLCPlayer(BasePlayer):
     @property
     def play(self,*args,**kwarg):
         """ Play media song"""
-        if self.state['playing']:
-            # pause if track is already playing
+        if self.state['pause']:
+            # unpause if track is already playing but paused
             self.pause
         else:
             self._is_track_set = True
             self._player.play()
+
+        self.set_all_state(False,playing=True,load=True)
         return
 
 
     @property
     def pause(self):
         """Pause the media song"""
+
+        pause = self.state['pause']
+        self.state['playing'] = pause 
         self._player.pause()
+        self.state['pause'] =  not pause
      
     def _seeker(self,pos=10,rew=True):
-        if not self._state['playing']:
+        if self._state['stop']:
             return 
         if rew: 
             to_postion = self._player.get_time() - (pos * 1000)
@@ -159,4 +166,5 @@ class VLCPlayer(BasePlayer):
     @property
     def stop(self):
         self._player.stop()
+        self.set_all_state(False,stop=True)
 

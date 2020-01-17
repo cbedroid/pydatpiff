@@ -12,17 +12,24 @@ class BasePlayer:
         self.player = None 
     
     @property
-    def song(self):
-        if not hasattr(self,'_song'):
+    def filename(self):
+        if not hasattr(self,'_filename'):
             raise PlayerError(2,'Cannot find song')
-        return self._song
+        return self._filename
 
     @property
     def name(self):
-        if not hasattr(self,'_name'):
+        if not hasattr(self,'_song'):
             raise PlayerError(2,'Cannot find name of song')
         return self._song
 
+    
+    def set_all_state(self,state=False,**kwargs):
+        """Change all states at once"""
+        if self.state:
+            for k,v in self.state.items():
+                self.state[k] = state
+        self.state.update(**kwargs)
 
     @property
     def state(self):
@@ -30,7 +37,7 @@ class BasePlayer:
         if hasattr(self,'_state'):
             return self._state
         else:
-            return 'Unsupported'
+            raise PlayerError(3,'def _state')
 
     @state.setter
     def state(self,**state):
@@ -49,7 +56,7 @@ class BasePlayer:
     @property
     def info(self):
         """Returns feedback for media song being played"""
-        if self.state == 'No Media':
+        if not self.state['load']:
             return 'No media' 
         c_min,c_sec = self._format_time(self.track_time)
         c_sec = c_sec if len(str(c_sec)) >1 else str(c_sec).zfill(2) 
@@ -57,10 +64,14 @@ class BasePlayer:
         l_min,l_sec = self._format_time(self.track_size)
         l_sec = l_sec if len(str(l_sec)) >1 else str(l_sec).zfill(2) 
         
-        mode = [x[0] for x in name.items() if x[1]==True]
-        mode = mode[0] if mode else 'Unkown'
+        if self.state['playing']:
+            mode = 'Playing' 
+        elif self.state['pause']:
+            mode = 'Paused'
+        else:
+            mode = 'Stopped'
         Print('TRACK:',self.name)
-        Print('MODE:',self.state[''])
+        Print('MODE:',mode)
         pos = 'POSITION: {0}:{1} - {2}:{3}'.format(c_min,c_sec,l_min,l_sec)
         Print(pos)
 

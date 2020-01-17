@@ -1,12 +1,10 @@
 import os
 import sys
-import atexit
 import re
-import threading 
+import atexit
+import shutil
 from subprocess import PIPE,Popen,check_output
 from time import time,sleep
-from glob import glob
-from functools import wraps
 from .baseplayer import BasePlayer 
 
 try:
@@ -16,17 +14,36 @@ except:
     class eyed3():
         pass
 
-
 class AndroidError(Exception):
     pass
 
-
-TMP_FILE = '/sdcard/.pydatpiff_tmp'
+TMP = '/sdcard/.pydatpiff_tmp'
 class Android(BasePlayer):
+
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
-        self.song = self.TMP_FILE
         self.state['pause'] = False
+
+    @staticmethod
+    def _isFile(path):
+        """ 
+        Check if file path exists 
+        :params: path - path of song 
+        """
+        return os.path.isFile(path)
+
+    def __copyTmp(self):
+        """Move media filename from tmp directory into\
+        an accessible directory -- see TMP 
+
+        On android platform with root media filename will\
+        not be accessible,so we move it to device storage  
+        """
+        if not self.isFile(self._filename):
+            raise PlayerError(msg)
+
+        return shutil.copy(self._filename,self.TMP)
+
 
     def _am_start(path):
         """ Sets  android java  am-start command  from android sdk"""
@@ -34,24 +51,9 @@ class Android(BasePlayer):
         start = "am start --user 0 -a android.intent.action.VIEW "
         return  start +"-d file:///%s -t audio/mp3"%path
 
-
-    def setTrack(name,song):
-        if name and song:
-            self.is_track_set = True
-        else:
-            print('No media to play')
-            
+                
     def __len__(self):
-        return len(self.content)
-
-    def _threader(f):
-        @wraps(f)
-        def inner(self,*a,**kw):
-            t = threading.Thread(target=f,args=(self,))
-            t.daemon = True
-            t.start()
-            return t
-        return inner
+        return len(self.__content)
 
 
     def _is_playing(boolean=False):
@@ -61,11 +63,9 @@ class Android(BasePlayer):
         """
         self.state = dict(playing=bool(boolean),pause=not bool(boolean))
 
-
-
     @property
     def track_size(self):
-        return self.eyed3.info.time_secs 
+        return self.__eyed3.info.time_secs 
 
 
     def _format_time(self,pos=None):
@@ -90,8 +90,8 @@ class Android(BasePlayer):
     @property
     def album(self):
         """ Album name"""
-        if self.tag:
-            return self.eyed3.tag.album
+        if self.__tag:
+            return self.__eyed3.tag.album
 
     @property
     def title(self):
@@ -117,45 +117,21 @@ class Android(BasePlayer):
         """Set the artist name  and title of the song"""
         #::TODO refactor this for baseclass
         try:
-            song = self.songs[self._index]
+            song = self._filenames[self._index]
             title = re.sub(".mp3","",os.path.basename(song))
             self.artist = self._splitSong(title,0)
             self.title = self._splitSong(title,-1)
         except:
-            tag = self.eyed3.tag.title 
-            self.artist = self.eyed3.tag.artist
-            self.title = self._splitSong(self.eyed3.tag.title,1)
-
-
-    def _fileCheck(self,path):
-        """ 
-        Check if file path exists 
-        @params:: path - path of song 
-        """
-        if os.path.isfile(self.song):
-            os.remove(self.song)
-        if not os.path.isfile(path):
-            msg = "Song --> '%s' was  not founded"%path
-            raise PlayerError(msg)
-
-
-    def _load(self,file):
-        """
-        Open file path  and return its content
-        @params:: file - path of the song
-        """
-        self.state['pause'] = False
-        self.eyed3 = eyed3.load(file)
-        self.tag = self.eyed3.tag
-        f = open(file,'rb')
-        self.content = f.read()
-        f.close()
-
+            tag = self.__eyed3.tag.title 
+            self.artist = self.__eyed3.tag.artist
+            self.title = self._splitSong(self.__eyed3.tag.title,1)
+        
 
     @property
     def __bytes_elaspe(self):
         """Current bytes of the current song"""
         return self.__bytes_per_sec * self.__position
+
 
     @property
     def __position(self):
@@ -172,32 +148,49 @@ class Android(BasePlayer):
     @property
     def __bytes_per_sec(self):
         """song bytes per seconds"""
-        return len(self) / self.eyed3.info.time_secs
+        return len(self) / self.__eyed3.info.time_secs
 
 
     def __setContent(self,length):
         """Write media content to file"""
         br = self.__bytes_per_sec
         length = int(br* int(self.__position + length))
-        if os.path.isfile(self.song):
-            os.remove(self.song)
-        with open(self.song,'wb') as _tmp:
-            _tmp.write(self.content[length:])
+        with open(self.TMP,'wb') as _tmp:
+            _tmp.write(self.__content[length:])
         return length
 
+
+    def loadMedia(self):
+        """
+        Open file path  and return its content
+        @params:: file - path of the song
+        """
+        self._state['pause'] = False
+        self.__eyed3 = eyed3.load(file)
+        self.__tag = self.__eyed3.tag
+        f = open(self.filename,'rb')
+        self.__content = f.read()
+        f.close()
+
+
+    def setTrack(name,filename):
+        if name and filename:
+            self._name = name
+            self._filename = filename
+            self.is_track_set = True
+        else:
+            print('No media to play')
 
     def play(self,song=None ,pos=1):
         """
         Play media songs
-
         @params:: song - song  play 
                     type:: int - index of songs  (see Android.songs)
                            str - path of the song to play 
                   pos   - play a song at the given postion (seconds)
         """
-        self._fileCheck(self.song)
         self._start_time = time()
-        self._load(self.song)
+        self.loadMedia()
 
         if self.state['pause']: # detect if player is paused
             # Set the pause position to the current position
@@ -259,9 +252,3 @@ class Android(BasePlayer):
         cmd = service + "org.videolan.vlc/org.videolan.vlc.PlaybackService"
         results = Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE)
 
-
-@atexit.register
-def remove_file():
-    removed = not os.system('rm /sdcard/piper.mp3')
-    msg = 'Removed' if removed else "False"
-    print(msg)

@@ -158,6 +158,7 @@ class PlayerError(Error):
     __error__  = {
                    1: 'vlc not installed',
                    2: 'no song found',
+                   3: 'Derive class missing function'
                  }    
 
 
