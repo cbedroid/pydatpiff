@@ -1,29 +1,15 @@
-import re
-import vlc 
-from time import sleep
 from ...frontend.display import Print
 from ...errors import PlayerError
 
 
 class BasePlayer(object):
+
     """Media player controller""" 
-    player = None 
-    _state={'playing':False,'pause':False,
-            'stop':False,'load':False}
-
-    '''
-    def __new__(cls,name=None,song=None):
-        # Get the song name
-        cls._name = name
-        # get the song media file path 
-        cls._song = song
-        return super(cls,BasePlayer).__new__(cls)
-    '''
-
     def __init__(self,*args,**kwargs):
         self._is_track_set = False
-        super(BasePlayer, self).__init__(*args,**kwargs)
-
+        self.player = None 
+        self._state={'playing':False,'pause':False,
+            'stop':False,'load':False}
 
     @property
     def song(self):

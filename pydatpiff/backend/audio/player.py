@@ -1,34 +1,27 @@
+import traceback
 from .androidplayer import Android, AndroidError
 from .vlcplayer import VLCPlayer
-from .base import BasePlayer
 from ...errors import PlayerError
 
-class Player():
-
+class Player:
     @classmethod
     def getPlayer(cls,*args,**kwargs):
         print('\nBEGINNING')
         try:
             #vlc player 
-            #self.player = VLCPlayer(*args,**kwargs)
-            return VLCPlayer(*args,**kwargs)
-        except PlayerEror:
-            print('VLC PLAYER PASS')
+            print('\nTRYING VLC')
+            return VLCPlayer()
+        except PlayerError:
+            print('\nVLC PLAYER PASS')
+            print(traceback.print_exc())
 
         try:
-            #vlc player 
-            print('TRYING ADROID')
-            return AndroidPlayer(*args,**kwargs)
+            #android player 
+            print('TRYING ANDROID')
+            return AndroidPlayer()
         except:
             print('Android PLAYER PASS')
-
-        raise TypeError('NO player has been found')
-
-
-
-
-
-
-
+            raise PlayerError(1,'NO player has been found')
         
+        raise TypeError('No Audio Player was specified') 
 

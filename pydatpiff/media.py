@@ -9,7 +9,8 @@ from .utils.request import Session
 from .backend.filehandler import file_size,Tmp,Path
 from .backend.mediasetup import Album,Mp3
 from .backend.config import User,Datatype,Queued,Threader
-from .backend.audio.player import Player 
+from .backend.audio.player import Player
+import traceback
 
 #TODO NOT finish writig baseplayer method and subclasses
 #   from .backend.audio.player import BasePlayer as player 
@@ -28,7 +29,9 @@ class Media():
         if not hasattr(cls,'player'):
             try:
                 cls.player = Player.getPlayer()
-            except:
+            except Exception as e:
+                print('\n\nMEDIA ERROR: ')
+                print('Exception:%s\n\n%s\n'%(e,traceback.print_exc()))
                 cls.player = None
         return super(Media, cls).__new__(cls)
 

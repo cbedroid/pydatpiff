@@ -1,7 +1,8 @@
+import vlc
 from ...errors import PlayerError
-from .base import BasePlayer
 
-def VLCPlayer(BasePlayer):
+
+class VLCPlayer():
     def __init__(self,*args,**kwargs):
         try:
             self._vlc = vlc.Instance('-q')
@@ -12,7 +13,8 @@ def VLCPlayer(BasePlayer):
             #raise PlayerError(1,extended_msg)
         self._is_track_set = False
         self.song = None
-    
+
+
     @property
     def _state(self):
         """Current state of the song being played"""
@@ -86,7 +88,7 @@ def VLCPlayer(BasePlayer):
     def track_time(self):
         return self._player.get_time()
 
-    @propery
+    @property
     def track_size(self):
         return self._player.get_length()
 
