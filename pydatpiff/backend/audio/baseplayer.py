@@ -2,12 +2,7 @@ from ...frontend.display import Print
 from ...errors import PlayerError
 
 
-<<<<<<< HEAD:pydatpiff/backend/audio/baseplayer.py
 class BasePlayer:
-=======
-class BasePlayer(object):
-
->>>>>>> e75e8dfe19155bdbd5f678c31715c178e6cdf6d5:pydatpiff/backend/audio/baseplayer.py
     """Media player controller""" 
     def __init__(self,*args,**kwargs):
         print('\nBase Initialized')
@@ -15,13 +10,7 @@ class BasePlayer(object):
                  'stop':False,'load':False}
         self._is_track_set = False
         self.player = None 
-<<<<<<< HEAD:pydatpiff/backend/audio/baseplayer.py
     
-=======
-        self._state={'playing':False,'pause':False,
-            'stop':False,'load':False}
-
->>>>>>> e75e8dfe19155bdbd5f678c31715c178e6cdf6d5:pydatpiff/backend/audio/baseplayer.py
     @property
     def filename(self):
         if not hasattr(self,'_filename'):

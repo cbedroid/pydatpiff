@@ -1,17 +1,10 @@
 import vlc
-<<<<<<< HEAD
 import re
 from ...errors import PlayerError
 from .baseplayer import BasePlayer
 
 class VLCPlayer(BasePlayer):
     
-=======
-from ...errors import PlayerError
-
-
-class VLCPlayer():
->>>>>>> e75e8dfe19155bdbd5f678c31715c178e6cdf6d5
     def __init__(self,*args,**kwargs):
         super(VLCPlayer,self).__init__(*args,**kwargs)
         try:
@@ -22,10 +15,6 @@ class VLCPlayer():
             #extended_msg = 'Please check if your device supports VLC'
             #raise PlayerError(1,extended_msg)
         self._is_track_set = False
-<<<<<<< HEAD
-=======
-        self.song = None
->>>>>>> e75e8dfe19155bdbd5f678c31715c178e6cdf6d5
 
 
     @property
