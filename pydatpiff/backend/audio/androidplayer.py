@@ -188,8 +188,9 @@ class Android(BasePlayer):
                     type:: int - index of songs  (see Android.songs)
                            str - path of the song to play 
                   pos   - play a song at the given postion (seconds)
-        """
-        self._start_time = time()
+        """ 
+        if not self.state['load']:
+            self._start_time = time()
         self.loadMedia()
 
         if self.state['pause']: # detect if player is paused

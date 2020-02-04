@@ -310,7 +310,6 @@ class Media():
                     Verbose('AUTO PLAY ON')
                     self.play(next_track)
                     current_track = next_track
-                    sleep(5) # wait for the track to load up
             
     def play(self, track=None, demo=False):
         """ 

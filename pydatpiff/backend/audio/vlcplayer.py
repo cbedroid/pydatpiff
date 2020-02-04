@@ -140,10 +140,13 @@ class VLCPlayer(BasePlayer):
         if self._state['stop']:
             return 
         if rew: 
-            to_postion = self._player.get_time() - (pos * 1000)
+            to_postiion = self._player.get_time() - (pos * 1000)
         else:
-            to_postion = self._player.get_time() + (pos * 1000)
-        self._player.set_time(to_postion)
+            to_position = self._player.get_time() + (pos * 1000)
+            if to_position > self.track_size:
+                print('overflowed')
+                to_position = self.track_size-1
+        self._player.set_time(to_position)
 
 
 
