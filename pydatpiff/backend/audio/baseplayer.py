@@ -1,15 +1,39 @@
+import threading
+from time import sleep
 from ...frontend.display import Print
 from ...errors import PlayerError
+from ..config import Threader
+
+class DerivedError(Exception):
+    pass
+
+class BaseMeta(type):
+    """
+    For Authors and Contributors only !
+    Metaclass that will force constrains on any derived class that inherit BasePlayer
+
+    Certain functions must be available in derived subclass.
+    All of the functions and method will be force here
+    """
+    def __new__(cls,name,bases,body):
+        methods =['setTrack', '_format_time']
+        for method in methods:
+            if method not in body:
+                error = 'Method: "%s.%s" must be implemented in derived class '\
+                        '"%s" to use BasePlayer'%(name,method,name)
+                raise DerivedError(error)
+        return super().__new__(cls,name,bases,body)
 
 
-class BasePlayer:
+class BasePlayer(metaclass=BaseMeta):
     """Media player controller""" 
     def __init__(self,*args,**kwargs):
         self._state={'playing':False,'pause':False,
                  'stop':False,'load':False}
         self._is_track_set = False
         self.player = None 
-    
+        self._monitor()
+
     @property
     def filename(self):
         if not hasattr(self,'_filename'):
@@ -43,6 +67,28 @@ class BasePlayer:
         self._state.update(**state)
 
 
+    @Threader
+    def _monitor(self):
+        """
+        Monitor media track and automatically set state
+        when media state changes.
+        """
+        print('Monitoring')
+        # If media.autoplay changes track before song finish 
+        # adjust sleep time 
+        SLEEP_TIME = 3
+        while True:
+            playing = self.state.get('playing')
+            if playing:
+                sleep(SLEEP_TIME) # wait for track to load
+                current_time = self._format_time(self.track_time)
+                endtime = self._format_time(self.track_size)
+                
+                if current_time == endtime:
+                    print('Monitoring changed state\n',self.state)
+                    self.set_all_state(False,stop=True)
+                    
+        
     def setTrack(self,*args,**kwargs):
         raise NotImplementedError
 
@@ -69,10 +115,10 @@ class BasePlayer:
             mode = 'Paused'
         else:
             mode = 'Stopped'
-        Print('TRACK:',self.name)
-        Print('MODE:',mode)
+        print('TRACK:',self.name)
+        print('MODE:',mode)
         pos = 'POSITION: {0}:{1} - {2}:{3}'.format(c_min,c_sec,l_min,l_sec)
-        Print(pos)
+        print(pos)
 
     @property
     def _volumeLevel(self):

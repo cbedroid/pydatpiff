@@ -69,19 +69,32 @@ class Media():
         self._downloaded_song = None
         super(Media, self).__init__()
 
-    
+     
     def findSong(self,songname):
+        """
+        Search through all mixtapes songs and return all songs 
+        with songname
+
+        :param: songname - name of the song to search for
+        """
+        
+        #TODO:look this video with James Powell
+        # https://www.youtube.com/watch?v=R2ipPgrWypI&t=1748s at 55:00.
+        # Implement a generate function , so user dont have to wait on all the results at once 
+        # Also thread this main function, to unblock user from still using program while 
+        # it wait for result to be finished.
         songname = Datatype.strip_lowered(songname)
         links = self.mixtape.links
         links = list(enumerate(links,start=1))
-        results = Queued(self._search,links,songname).run()
+        results = Queued(self._search_song,links,songname).run()
         if not results:
             Print('No song was found with this title ')
         results = Datatype.removeNone(results)
         return results
 
         
-    def _search(self,links,song):
+    def _search_song(self,links,song):
+        """ main function for findSong see: findSong"""
         index,link = links
         album = Album(link)
         name = album.name
@@ -134,7 +147,6 @@ class Media():
             return User.selection(select,self.songs,[x.lower() for x in self.songs])
         except MediaError as e:
             raise MediaError(5)
-
 
 
     @property
@@ -286,11 +298,10 @@ class Media():
                 return 
 
             current_track = self._parseSelection(current_song)+1
-
             while current_track < len(self) and self.autoplay:
-                state = Datatype.strip_lowered(self.player._state)
+                state = self.player._state.get('playing')
                 next_track = current_track + 1
-                if state == 'ended':
+                if not state:
                     Verbose('Loading next track')
                     if next_track > len(self):
                         Verbose('AUTO PLAY OFF')
@@ -352,27 +363,32 @@ class Media():
         
         
 
-    def download(self, track=False, output="", name=None):
+    def download(self, track=False, output="", rename=None):
         """
         Download song from Datpiff
 
         @@params: track - name or index of song type(str or int)
         @@output: location to save the song (optional)
-        @@name:   rename the song (optional)
+        @@rename:   rename the song (optional)
             default will be song's name 
         """
         selection = self._parseSelection(track)
         if selection is None:
             return
-
+        
+        #Handles paths
         output = output or os.getcwd()
         if not Path.is_dir(output):
             Print('Invalid directory: %s'%output)
             return 
-
         link = self.mp3urls[selection]
         song = self.songs[selection]
-        title  = ' - '.join(( self.artist,song.strip()+".mp3" ))
+        
+        #Handles song's naming 
+        if rename:
+            title  = rename.strip() + ".mp3" 
+        else:
+            title  = ' - '.join(( self.artist,song.strip()+".mp3" ))
         title = Path.toStandard(title)
         songname = Path.join(output,title)
 
