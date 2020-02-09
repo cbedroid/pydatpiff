@@ -1,12 +1,12 @@
-from __init__ import __version__
 from setuptools import setup,find_packages
+from vercontrol import getVersion
 
 with open('README.md',encoding='utf-8') as f:
     readme = f.read()
 
 #package_dir={'datpiff':'pydatpiff'},
 setup( name='pydatpiff',
-       version=__version__,
+       version= getVersion(),
        description='PyDatpiff Mixtape player',
        url='https://github.com/cbedroid/pydatpiff',
        long_description=readme,
