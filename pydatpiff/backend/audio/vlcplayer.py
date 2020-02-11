@@ -12,8 +12,8 @@ class VLCPlayer(BasePlayer):
             self._player = self._vlc.media_player_new()
         except Exception as e:
             print('VLC: ',e)
-            #extended_msg = 'Please check if your device supports VLC'
-            #raise PlayerError(1,extended_msg)
+            extended_msg = 'Please check if your device supports VLC'
+            raise PlayerError(1,extended_msg)
         self._is_track_set = False
 
 

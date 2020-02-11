@@ -139,7 +139,8 @@ class MediaError(Error):
                  3: 'media album not set',
                  4: 'invaild track index',
                  5: 'song selection error',
-                 6: 'unsupported media player'
+                 6: 'unsupported media player',
+                 7: 'media player not found',
                 }
 
 
@@ -156,7 +157,7 @@ class Mp3Error(Error):
 
 class PlayerError(Error):
     __error__  = {
-                   1: 'vlc not installed',
+                   1: 'Unsupport media object',
                    2: 'no song found',
                    3: 'Derive class missing function',
                    4: 'call back method missing'

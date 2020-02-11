@@ -17,12 +17,17 @@ except:
 class AndroidError(Exception):
     pass
 
-TMP = '/sdcard/.pydatpiff_tmp'
 class Android(BasePlayer):
+    TMP = '/sdcard/.pydatpiff_tmp.mp3'
 
     def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.state['pause'] = False
+        try:
+            super(Android,self).__init__(*args,**kwargs)
+            self._state['pause'] = False
+            self._state = dict(playing=False,pause=False,
+                              load=False,stop=False)
+        except Exception as e:
+            print('ANDROID-ERROR:',e)
 
     @staticmethod
     def _isFile(path):
@@ -45,23 +50,26 @@ class Android(BasePlayer):
         return shutil.copy(self._filename,self.TMP)
 
 
-    def _am_start(path):
+    def _am_start(self,path):
         """ Sets  android java  am-start command  from android sdk"""
         path = path[1:] if path.startswith('/') else path
         start = "am start --user 0 -a android.intent.action.VIEW "
-        return  start +"-d file:///%s -t audio/mp3"%path
+        return  start +"-d file:///%s -t audio/*"%path
 
                 
     def __len__(self):
-        return len(self.__content)
+        try:
+            return len(self.__content)
+        except:
+            return 0
 
 
-    def _is_playing(boolean=False):
+    def _is_playing(self,boolean=False):
         """ Return whether a song is being played or paused.
             
             variable state - belongs to BasePlayer
         """
-        self.state = dict(playing=bool(boolean),pause=not bool(boolean))
+        self._state = dict(playing=bool(boolean),pause=not bool(boolean),)
 
     @property
     def track_size(self):
@@ -104,7 +112,6 @@ class Android(BasePlayer):
         self._title = name
 
 
-    @staticmethod
     def _splitSong(song,keep=1):
         """Parse song and split by '-' """
         #TODO: remove or refactor this for baseclass
@@ -126,7 +133,14 @@ class Android(BasePlayer):
             self.artist = self.__eyed3.tag.artist
             self.title = self._splitSong(self.__eyed3.tag.title,1)
         
-
+    
+    @property
+    def track_time(self):
+        #Feb2020 fix this 
+        try:
+            return len(self)
+        except: 
+            return 0
     @property
     def __bytes_elaspe(self):
         """Current bytes of the current song"""
@@ -159,21 +173,36 @@ class Android(BasePlayer):
             _tmp.write(self.__content[length:])
         return length
 
+    @property
+    def songpath(self):
+        if hasattr(self,'_songpath'):
+            return self._songpath
+        else:
+            # clean this up with custom Error
+            raise TypeError('Android song path not  found')
 
-    def loadMedia(self):
+    @songpath.setter
+    def songpath(self,path):
+        self._songpath = path
+
+
+    def loadMedia(self,path=None):
         """
         Open file path  and return its content
-        @params:: file - path of the song
+        @params:: path - path of the song
         """
         self._state['pause'] = False
-        self.__eyed3 = eyed3.load(file)
+        self.__eyed3 = eyed3.load(self.songpath)
         self.__tag = self.__eyed3.tag
-        f = open(self.filename,'rb')
+        f = open(self.songpath,'rb')
         self.__content = f.read()
         f.close()
+        self.state['load'] = True
 
+    def setTrack(self,name,filename):
+        print('Setting Track',name,filename)
 
-    def setTrack(name,filename):
+        self.songpath = filename
         if name and filename:
             self._name = name
             self._filename = filename
@@ -181,24 +210,30 @@ class Android(BasePlayer):
         else:
             print('No media to play')
 
-    def play(self,song=None ,pos=1):
+    @property
+    def play(self):
+        self._play()
+
+
+    def _play(self,song=None ,pos=1):
         """
         Play media songs
-        @params:: song - song  play 
-                    type:: int - index of songs  (see Android.songs)
-                           str - path of the song to play 
-                  pos   - play a song at the given postion (seconds)
+        :params: song - song  play 
+            type:: int - index of songs  (see Android.songs)
+                   str - path of the song to play 
+            pos   - play a song at the given postion (seconds)
         """ 
-        if not self.state['load']:
+        if not self._state.get('load'):
             self._start_time = time()
+            self._state['load'] = True;
         self.loadMedia()
 
-        if self.state['pause']: # detect if player is paused
+        if self._state['pause']: # detect if player is paused
             # Set the pause position to the current position
             pos = self._paused_pos
         
         self.__setContent(pos)
-        self._player = Popen(self._command,shell=True,stdin=PIPE,
+        self._player = Popen(self._am_start(self.TMP),shell=True,stdin=PIPE,
                     stdout=PIPE,stderr=PIPE)
 
         self._is_playing(True)
@@ -216,7 +251,7 @@ class Android(BasePlayer):
     def pause(self):
         """Pause song"""
         # capture the position the media player was pause
-        if not self.state['pause']:
+        if not self._state['pause']:
             self.stop
             print("Pause")
             self._paused_pos = self.__position
@@ -225,19 +260,19 @@ class Android(BasePlayer):
         else: # unpause
             self.__position = self._paused_pos
             print("Unpause")
-            self.play()
+            self._play()
             # Not here play() will handle self._is_playing(True) 
 
 
     def _seeker(self,pos=5, rew=True):
         """Control fast forward and rewind function"""
         spot = pos
-        if self.state['pause']:
+        if self._state['pause']:
             self.__position = self._paused_pos
-            self.state['pause'] = False
+            self._state['pause'] = False
 
         self._start_time+=spot
-        self.play(pos=pos)
+        self._play(pos=pos)
 
 
     def rewind(self,pos=5):

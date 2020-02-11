@@ -30,7 +30,12 @@ class Media():
             try:
                 cls.player = Player.getPlayer()
             except Exception as e:
+                print('ERROR:',e)
                 cls.player = None
+
+            if cls.player is None: # Incase user reinitalize Media class
+                raise MediaError(7)
+
         return super(Media, cls).__new__(cls)
 
 
@@ -320,8 +325,8 @@ class Media():
                               False: play full song 
                               *default: False
         """
-        if not self.player:
-            extented_msg = 'VLC is not installed or is incompatible with device'
+        if self.player is None:
+            extented_msg = 'Audio player is incompatible with device'
             raise MediaError(6,extented_msg)
             return 
 
