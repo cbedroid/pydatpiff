@@ -43,7 +43,7 @@ class BasePlayer(metaclass=BaseMeta):
     @property
     def name(self):
         if not hasattr(self,'_song'):
-            raise PlayerError(2,'Cannot find name of song')
+            raise PlayerError(2,'Cannot find a name for the song playing')
         return self._song
 
     

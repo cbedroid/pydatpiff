@@ -23,9 +23,6 @@ class Android(BasePlayer):
     def __init__(self,*args,**kwargs):
         try:
             super(Android,self).__init__(*args,**kwargs)
-            self._state['pause'] = False
-            self._state = dict(playing=False,pause=False,
-                              load=False,stop=False)
         except Exception as e:
             print('ANDROID-ERROR:',e)
 
@@ -69,7 +66,7 @@ class Android(BasePlayer):
             
             variable state - belongs to BasePlayer
         """
-        self._state = dict(playing=bool(boolean),pause=not bool(boolean),)
+        self._state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
 
     @property
     def track_size(self):
@@ -77,7 +74,7 @@ class Android(BasePlayer):
 
 
     def _format_time(self,pos=None):
-        """Fomrat current song time to clock format """
+        """Format current song time to clock format """
         pos = self.track_size  if not pos else pos
         mins = int(pos/60)
         secs = int(pos%60)
@@ -136,11 +133,7 @@ class Android(BasePlayer):
     
     @property
     def track_time(self):
-        #Feb2020 fix this 
-        try:
-            return len(self)
-        except: 
-            return 0
+        return self.__position
     @property
     def __bytes_elaspe(self):
         """Current bytes of the current song"""
@@ -169,6 +162,11 @@ class Android(BasePlayer):
         """Write media content to file"""
         br = self.__bytes_per_sec
         length = int(br* int(self.__position + length))
+        if length < 0:
+            # need to get the ffwd out of range too 
+            print('out of track range',)
+            return 
+        print('\nsetting Content:',length)
         with open(self.TMP,'wb') as _tmp:
             _tmp.write(self.__content[length:])
         return length
@@ -197,12 +195,14 @@ class Android(BasePlayer):
         f = open(self.songpath,'rb')
         self.__content = f.read()
         f.close()
-        self.state['load'] = True
+        self._state['load'] = True
+        print('loadingMedia:',self._state)
 
     def setTrack(self,name,filename):
         print('Setting Track',name,filename)
 
         self.songpath = filename
+        self._song = name
         if name and filename:
             self._name = name
             self._filename = filename
@@ -212,6 +212,8 @@ class Android(BasePlayer):
 
     @property
     def play(self):
+        self._state = dict(playing=False,pause=False,
+                              load=False,stop=False)
         self._play()
 
 
