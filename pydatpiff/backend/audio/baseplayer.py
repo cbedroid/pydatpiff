@@ -7,6 +7,11 @@ from ..config import Threader
 class DerivedError(Exception):
     pass
 
+
+'''
+#TODO:name_change
+    duration (inherited)  ->> duration
+'''
 class BaseMeta(type):
     """
     For Authors and Contributors only !
@@ -16,7 +21,7 @@ class BaseMeta(type):
     All of the functions and method will be force here
     """
     def __new__(cls,name,bases,body):
-        methods =['setTrack', '_format_time']
+        methods =['setTrack', '_format_time','duration']
         for method in methods:
             if method not in body:
                 error = 'Method: "%s.%s" must be implemented in derived class '\
@@ -33,13 +38,13 @@ class BasePlayer(metaclass=BaseMeta):
         self._is_track_set = False
         self.player = None 
         self._monitor()
-
+    """
     @property
     def filename(self):
         if not hasattr(self,'_filename'):
             raise PlayerError(2,'Cannot find song')
         return self._filename
-
+    """
     @property
     def name(self):
         if not hasattr(self,'_song'):
@@ -81,8 +86,8 @@ class BasePlayer(metaclass=BaseMeta):
             playing = self.state.get('playing')
             if playing:
                 sleep(SLEEP_TIME) # wait for track to load
-                current_time = self._format_time(self.track_time)
-                endtime = self._format_time(self.track_size)
+                current_time = self._format_time(self.current_time)
+                endtime = self._format_time(self.duration)
                 
                 if current_time == endtime:
                     print('Monitoring changed state\n',self.state)
@@ -92,6 +97,9 @@ class BasePlayer(metaclass=BaseMeta):
     def setTrack(self,*args,**kwargs):
         raise NotImplementedError
 
+    @property
+    def duration(self,*args,**kwargs):
+        raise NotImplementedError
 
     def _format_time(self,*args,**kwargs):
         """Format current song time to clock format"""
@@ -103,10 +111,10 @@ class BasePlayer(metaclass=BaseMeta):
         """Returns feedback for media song being played"""
         if not self.state['load']:
             return 'No media' 
-        c_min,c_sec = self._format_time(self.track_time)
+        c_min,c_sec = self._format_time(self.current_time)
         c_sec = c_sec if len(str(c_sec)) >1 else str(c_sec).zfill(2) 
 
-        l_min,l_sec = self._format_time(self.track_size)
+        l_min,l_sec = self._format_time(self.duration)
         l_sec = l_sec if len(str(l_sec)) >1 else str(l_sec).zfill(2) 
         
         if self.state['playing']:

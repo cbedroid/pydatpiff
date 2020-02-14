@@ -69,6 +69,15 @@ class Path():
         path = path or ''
         return os.path.isdir(path)
 
+    @staticmethod
+    def isFile(path):
+        """ 
+        Check if file path exists 
+        :params: path - path of song 
+        """
+        return os.path.isfile(path)
+
+
     @classmethod
     def join(cls,path='',to=''):
         if not cls.is_dir(path):

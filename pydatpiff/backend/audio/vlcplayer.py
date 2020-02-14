@@ -1,6 +1,7 @@
 import vlc
 import re
 from ...errors import PlayerError
+
 from .baseplayer import BasePlayer
 
 class VLCPlayer(BasePlayer):
@@ -34,11 +35,10 @@ class VLCPlayer(BasePlayer):
             self._state['pause'] = False
         return self.state
 
-    def setTrack(self,name,filename=None):
-        if filename:
-            self._filename = filename
-            self._song = name
-            self._player.set_mrl(filename)
+    def setTrack(self,name,path=None):
+        if path:
+            self._name = name
+            self._player.set_mrl(path)
             self._is_track_set = True
         else:
             Print('No media to play')
@@ -98,11 +98,11 @@ class VLCPlayer(BasePlayer):
  
 
     @property
-    def track_time(self):
+    def current_time(self):
         return self._player.get_time()
 
     @property
-    def track_size(self):
+    def duration(self):
         return self._player.get_length()
 
 
@@ -114,7 +114,7 @@ class VLCPlayer(BasePlayer):
 
    
     @property
-    def play(self,*args,**kwarg):
+    def play(self):
         """ Play media song"""
         if self.state['pause']:
             # unpause if track is already playing but paused
@@ -143,9 +143,9 @@ class VLCPlayer(BasePlayer):
             to_postiion = self._player.get_time() - (pos * 1000)
         else:
             to_position = self._player.get_time() + (pos * 1000)
-            if to_position > self.track_size:
+            if to_position > self.duration:
                 print('overflowed')
-                to_position = self.track_size-1
+                to_position = self.duration-1
         self._player.set_time(to_position)
 
 
