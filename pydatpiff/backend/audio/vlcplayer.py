@@ -98,7 +98,7 @@ class VLCPlayer(BasePlayer):
  
 
     @property
-    def current_time(self):
+    def current_position(self):
         return self._player.get_time()
 
     @property

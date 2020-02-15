@@ -7,6 +7,7 @@ from subprocess import PIPE,Popen,check_output
 from time import time,sleep
 from .baseplayer import BasePlayer 
 
+
 try:
     import eyed3
 except:
@@ -135,18 +136,18 @@ class Android(BasePlayer):
     @property
     def __bytes_elaspe(self):
         """Current bytes of the current song"""
-        return self.bytes_per_sec * self.current_time
+        return self.bytes_per_sec * self.current_position
 
 
     @property
-    def current_time(self):
+    def current_position(self):
         """Current position of track in seconds"""
         if hasattr(self,'_load_time'):
             return int(time() - self._load_time) 
         return 1
 
-    @current_time.setter
-    def current_time(self,spot):
+    @current_position.setter
+    def current_position(self,spot):
         self._load_time = time() + spot
 
 
@@ -159,9 +160,9 @@ class Android(BasePlayer):
     def __setContent(self,position):
         """Write media content to file"""
         br = self.bytes_per_sec
-        length = int(br* int(self.current_time + position))
-        self.current_time = position 
-        print('\nSetting %s of %s'%(self.current_time,self.duration))
+        length = int(br* int(self.current_position + position))
+        self.current_position = position 
+        print('\nSetting %s of %s'%(self.current_position,self.duration))
         if length < 0:
             # need to get the ffwd out of range too 
             print('out of track range',)
@@ -260,11 +261,11 @@ class Android(BasePlayer):
         if not self._state['pause']:
             self.stop
             print("Pause")
-            self._paused_pos = self.current_time
+            self._paused_pos = self.current_position
             self._is_playing(False)
 
         else: # unpause
-            self.current_time = self._paused_pos
+            self.current_position = self._paused_pos
             print("Unpause")
             self._play()
             # Not here play() will handle self._is_playing(True) 
@@ -274,10 +275,10 @@ class Android(BasePlayer):
         """Control fast forward and rewind function"""
         spot = pos
         if self._state['pause']:
-            self.current_time = self._paused_pos
+            self.current_position = self._paused_pos
             self._state['pause'] = False
 
-        #self.current_time = spot
+        #self.current_position = spot
         self._play(postion=pos)
 
 

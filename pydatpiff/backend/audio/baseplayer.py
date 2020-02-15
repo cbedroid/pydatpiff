@@ -22,6 +22,8 @@ class BaseMeta(type):
     """
     def __new__(cls,name,bases,body):
         methods =['setTrack', '_format_time','duration']
+        #current_position
+
         for method in methods:
             if method not in body:
                 error = 'Method: "%s.%s" must be implemented in derived class '\
@@ -86,12 +88,13 @@ class BasePlayer(metaclass=BaseMeta):
             playing = self.state.get('playing')
             if playing:
                 sleep(SLEEP_TIME) # wait for track to load
-                current_time = self._format_time(self.current_time)
+                current_position = self._format_time(self.current_position)
                 endtime = self._format_time(self.duration)
                 
-                if current_time == endtime:
+                if current_position == endtime:
                     print('Monitoring changed state\n',self.state)
-                    self.set_all_state(False,stop=True)
+                    if not self.state['pause']:
+                        self.set_all_state(False,stop=True)
                     
         
     def setTrack(self,*args,**kwargs):
@@ -111,7 +114,7 @@ class BasePlayer(metaclass=BaseMeta):
         """Returns feedback for media song being played"""
         if not self.state['load']:
             return 'No media' 
-        c_min,c_sec = self._format_time(self.current_time)
+        c_min,c_sec = self._format_time(self.current_position)
         c_sec = c_sec if len(str(c_sec)) >1 else str(c_sec).zfill(2) 
 
         l_min,l_sec = self._format_time(self.duration)
