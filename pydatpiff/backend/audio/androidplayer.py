@@ -7,6 +7,7 @@ from ..filehandler import Path
 from ..config import Threader
 from .baseplayer import BasePlayer
 
+Fix pause time 
 try:
     # try to import eyed3 for easy metadata
     import eyed3
@@ -49,6 +50,11 @@ class Android(BasePlayer):
 
     @property
     def elapse(self):
+        """ 
+        Elapse is the last time since a track has been loaded (self.__load).
+        Elaspe capture when either rewinding,fast-forward, pause is called
+        It records the time from the latest state in seconds
+        """
         return self._elapse
 
     @elapse.setter
@@ -59,14 +65,12 @@ class Android(BasePlayer):
 
     @property
     def current_position(self):
-        pos = self._position + self.elapse
+        pos = time() - self._start_time
         return pos if pos > 0 else 0 
 
     @current_position.setter
     def current_position(self,pos):
-        self._position = pos
-
-
+        self._start_time = self._start_time - pos
 
     @Threader
     def startClock(self):
@@ -75,7 +79,7 @@ class Android(BasePlayer):
         while True:
             if self._state['playing'] and not self._state['pause']:
                 #state_time was here
-                self.elapse = time() - self._load_time
+                self._elapse = time() - self._load_time
             #else: #catch the current postion  paused,rewinf, and fast-forward 
             #    # its self.elaspe because sef.elaspe has the pause position
             #    self.current_position = 0
@@ -138,6 +142,7 @@ class Android(BasePlayer):
         self._state['pause'] = False
         self.__Id3 = eyed3.load(self.__meta_data_path)
         self.__tag = self.__Id3.tag
+        
         with open(self.songpath,'rb') as f:
             self.__content = f.read()
 
@@ -150,6 +155,7 @@ class Android(BasePlayer):
         """song bytes per seconds"""
         return len(self)/self.duration
 
+    '''
     @property
     def current_position(self):
         """Current position of track in seconds"""
@@ -160,7 +166,7 @@ class Android(BasePlayer):
     @current_position.setter
     def current_position(self,spot):
         self._load_time = time() + spot
-
+    '''
 
     def __load(self,position):
         """
@@ -173,11 +179,16 @@ class Android(BasePlayer):
             spot = int(self.current_position+position) 
             topos = spot*self.bytes_per_sec if spot > 0 else 1*self.bytes_per_sec
             topos = int(topos)
-            print("\nSpot:",int(self.current_position))
-            self._position = self.current_position + position
-            #state_time was here
+            print('POS',position)
+            print("OLD POSITION:",int(self.current_position))
+            self.current_position = position
+            oldpos = self.current_position #testing
+            print('NEW POSITION:',self.current_position)
+            newpos = self.current_position # testing
+            print('DIFFERENCE IN POSITION:',oldpos-newpos)
             self._load_time = time()
             print('\nloaded to:',topos)
+            self.topos = topos # can delect this : testing only
             mp3.write(self.__content[topos:])
 
             """
@@ -202,8 +213,7 @@ class Android(BasePlayer):
         """
         #TMP = '/sdcard/2chainz.mp3'
         #mp3file = '/sdcard/testmp3.mp3'
-        self._position = 0
-        self._elapse = 0
+        self.current_time = 0
         self.__resetState()
 
         if Path.isFile(path):
@@ -213,12 +223,15 @@ class Android(BasePlayer):
         else:
             raise AndroidError('Internal Error: Media song invalid path')
 
+        self._load_time = time()
+        self.elapse = 0
 
     @property
     def play(self):
         #state_time was here
-        self._load_time = time()
+        #self._load_time = time()
         self.startClock()
+        self._start_time = time()
         self._play()
 
     def _play(self,position=0):
@@ -226,6 +239,7 @@ class Android(BasePlayer):
         Play media songs
         :param:pos   - play a song at the given postion (seconds)
         """ 
+        
         self.preloadTrack()
 
         if not self._state['load']:
@@ -234,7 +248,8 @@ class Android(BasePlayer):
             self.__startClock()
             self._state['load'] = True
 
-
+        if self._state[pause] = True:
+            position = self.elaspe
         self.__load(position)
         self._player = Popen(self.__am_start_Intent ,shell=True,
                     stdin=PIPE,stdout=PIPE,stderr=PIPE)
@@ -278,7 +293,7 @@ class Android(BasePlayer):
 
 
     def rewind(self,pos=5):
-        self._seeker(-(pos,True)
+        self._seeker(-(pos),True)
         
 
     def ffwd(self,pos=5):
