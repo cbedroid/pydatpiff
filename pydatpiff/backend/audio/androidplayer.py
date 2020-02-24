@@ -7,7 +7,6 @@ from ..filehandler import Path
 from ..config import Threader
 from .baseplayer import BasePlayer
 
-Fix pause time 
 try:
     # try to import eyed3 for easy metadata
     import eyed3
@@ -43,8 +42,10 @@ class Android(BasePlayer):
         """ Return whether a song is being played or paused.
             
             variable state - belongs to BasePlayer
+            sets the playing state = boolean
+            sets the pause state = not boolean
         """
-        self._state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
+        self.state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
 
 
 
@@ -52,7 +53,7 @@ class Android(BasePlayer):
     def elapse(self):
         """ 
         Elapse is the last time since a track has been loaded (self.__load).
-        Elaspe capture when either rewinding,fast-forward, pause is called
+        Elaspe capture when player is playing track
         It records the time from the latest state in seconds
         """
         return self._elapse
@@ -63,15 +64,6 @@ class Android(BasePlayer):
         self._elapse = (time() - self._load_time )
 
 
-    @property
-    def current_position(self):
-        pos = time() - self._start_time
-        return pos if pos > 0 else 0 
-
-    @current_position.setter
-    def current_position(self,pos):
-        self._start_time = self._start_time - pos
-
     @Threader
     def startClock(self):
         print('\nClock started')
@@ -81,7 +73,7 @@ class Android(BasePlayer):
                 #state_time was here
                 self._elapse = time() - self._load_time
             #else: #catch the current postion  paused,rewinf, and fast-forward 
-            #    # its self.elaspe because sef.elaspe has the pause position
+            #    # its self.elapse because sef.elapse has the pause position
             #    self.current_position = 0
             if time() - start > 3:
                 #print('TIME:',self.current_position)
@@ -139,7 +131,6 @@ class Android(BasePlayer):
 
         #if not self._state.get('load'):
         #    self._load_time = time()
-        self._state['pause'] = False
         self.__Id3 = eyed3.load(self.__meta_data_path)
         self.__tag = self.__Id3.tag
         
@@ -155,19 +146,32 @@ class Android(BasePlayer):
         """song bytes per seconds"""
         return len(self)/self.duration
 
-    '''
+    @property
+    def pause_position(self):
+        """ Return the position when the pause is pause"""
+        if not hasattr(self,'_pause_pos'):
+            self._pause_pos = self._current_position
+            return 0
+        return self._pause_pos
+
+    @pause_position.setter
+    def pause_position(self,pos):
+        self._pause_pos = pos
+
+
     @property
     def current_position(self):
-        """Current position of track in seconds"""
-        if hasattr(self,'_load_time'):
-            return int(time() - self._load_time) 
-        return 1
+        pos = time() - self._start_time
+        return pos if pos > 0 else 0 
 
     @current_position.setter
-    def current_position(self,spot):
-        self._load_time = time() + spot
+    def current_position(self,pos):
+        self._start_time -= pos
+    ''' 
+    if self._state['pause']:
+            position = self.pause_position + position
+            print('RELEASING PAUSE AT POSITION:', position)
     '''
-
     def __load(self,position):
         """
         Write media content to file
@@ -176,18 +180,31 @@ class Android(BasePlayer):
         """
         #spot in seconds
         with open(self.DROID_TMP,'wb') as mp3:
+
+            print('\nPOS',position)
+            if self.state['pause']:
+                print("OLD POSITION P<>:",int(self.pause_position))
+                difference = self.current_position - (
+                                self.pause_position + position)
+                print('THE DIFFERENCE: ',difference)
+                self.current_position = -difference
+            else:
+                print("OLD POSITION:",int(self.current_position))
+                self.current_position = position
+
             spot = int(self.current_position+position) 
             topos = spot*self.bytes_per_sec if spot > 0 else 1*self.bytes_per_sec
             topos = int(topos)
-            print('POS',position)
-            print("OLD POSITION:",int(self.current_position))
-            self.current_position = position
+
             oldpos = self.current_position #testing
             print('NEW POSITION:',self.current_position)
+            #testing
+            if self.state['pause']: # testing
+                print('UNPAUSE POSITION:',self.pause_position)
             newpos = self.current_position # testing
             print('DIFFERENCE IN POSITION:',oldpos-newpos)
             self._load_time = time()
-            print('\nloaded to:',topos)
+            print('loaded to:',topos)
             self.topos = topos # can delect this : testing only
             mp3.write(self.__content[topos:])
 
@@ -239,7 +256,7 @@ class Android(BasePlayer):
         Play media songs
         :param:pos   - play a song at the given postion (seconds)
         """ 
-        
+        print('\n')
         self.preloadTrack()
 
         if not self._state['load']:
@@ -247,16 +264,13 @@ class Android(BasePlayer):
             #self._load_time = time()
             self.__startClock()
             self._state['load'] = True
-
-        if self._state[pause] = True:
-            position = self.elaspe
+        print('MID STATE:',self.state)
         self.__load(position)
         self._player = Popen(self.__am_start_Intent ,shell=True,
                     stdin=PIPE,stdout=PIPE,stderr=PIPE)
-
-        self._state['playing'] = True
         self._state['pause'] = False
-  
+        self._is_playing(True)
+        print('NEW STATE:',self.state)
 
     def volume(self,vol=None):
         """
@@ -269,18 +283,23 @@ class Android(BasePlayer):
     @property
     def pause(self):
         """Pause song"""
+        print('PAUSE STATE:',self.state['pause'])
         # capture the position the media player was pause
         if not self._state['pause']:
             self.stop
-            print("Pause")
+            print("Paused")
             self._is_playing(False)
+            #Capture time when state is pause 
+            self.pause_position = self.current_position
+            print('Paused_Position:',self.pause_position)
 
         else: # unpause
             print("Unpause")
             self._play()
-            self._is_playing(True)
+            #self._is_playing(True)
             # Not here play() will handle self._is_playing(True) 
 
+        print('NEW PAUSE STATE: %s\n '%self.state)
 
     def _seeker(self,pos=5, rew=True):
         """Control fast forward and rewind function"""
