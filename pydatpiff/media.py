@@ -79,7 +79,7 @@ class Media():
         index,link = links
         album = Album(link)
         name = album.name
-        tracks = Mp3(album.embed_response).songs
+        tracks = Mp3(album.embed_player_response).songs
         if any(song in Datatype.strip_lowered(track) for track in tracks):
             return index,name 
 
@@ -113,7 +113,7 @@ class Media():
 
     def _setup(self,link):
         self._album = Album(link)
-        response = self._album.embed_response
+        response = self._album.embed_player_response
         self._Mp3 = Mp3(response)
         self._song_cache = {}
 
@@ -157,7 +157,7 @@ class Media():
 
     @property
     def songs(self):
-        """ Return all album songs."""
+        """ Return all songs from current album."""
         if not hasattr(self,'_Mp3'):
             e_msg = 'Set media by calling -->  Media.setMedia("Album name")'
             raise MediaError(3,e_msg)

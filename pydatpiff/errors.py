@@ -151,7 +151,10 @@ class AlbumError(Error):
 
 
 class Mp3Error(Error):
-    pass
+    __error__ = {
+                  1: 'Album response invalid type',
+                }
+
 
 
 class PlayerError(Error):

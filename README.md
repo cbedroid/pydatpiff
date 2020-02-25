@@ -1,5 +1,5 @@
 
-<img src="https://raw.github.com/cbedroid/pydatpiff/dev2/github/Logo.png" width="800" height="200">
+<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/Logo.png" width="800" height="200">
 
 [![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
 # Introduction
@@ -108,7 +108,7 @@ import pydatpiff
 
 --- --
 # Find A Song 
-<img src="https://raw.github.com/cbedroid/pydatpiff/dev2/github/EmojiThinking.png" width="100" height="100"> **. . . CANT FIND A SONG??**
+<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/EmojiThinking.png" width="100" height="100"> **. . . CANT FIND A SONG??**
 ```python
    #Search for a song
    >>> media.findSong('green lan') # returns mixtape's index and name
