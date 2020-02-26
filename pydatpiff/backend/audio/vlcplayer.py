@@ -15,7 +15,6 @@ class VLCPlayer(BasePlayer):
             print('VLC: ',e)
             extended_msg = 'Please check if your device supports VLC'
             raise PlayerError(1,extended_msg)
-        self._is_track_set = False
 
 
     @property
@@ -39,7 +38,6 @@ class VLCPlayer(BasePlayer):
         if path:
             self._name = name
             self._player.set_mrl(path)
-            self._is_track_set = True
         else:
             Print('No media to play')
 
@@ -120,10 +118,9 @@ class VLCPlayer(BasePlayer):
             # unpause if track is already playing but paused
             self.pause
         else:
-            self._is_track_set = True
             self._player.play()
 
-        self.set_all_state(False,playing=True,load=True)
+        self._set_all_state(False,playing=True,load=True)
         return
 
 
@@ -169,5 +166,5 @@ class VLCPlayer(BasePlayer):
     @property
     def stop(self):
         self._player.stop()
-        self.set_all_state(False,stop=True)
+        self._set_all_state(False,stop=True)
 

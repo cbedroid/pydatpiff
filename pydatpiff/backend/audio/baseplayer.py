@@ -1,5 +1,5 @@
 import threading
-from time import sleep
+from time import sleep,time
 from ...frontend.display import Print
 from ...errors import PlayerError
 from ..config import Threader
@@ -37,16 +37,9 @@ class BasePlayer(metaclass=BaseMeta):
     def __init__(self,*args,**kwargs):
         self._state={'playing':False,'pause':False,
                  'stop':False,'load':False}
-        self._is_track_set = False
-        self.player = None 
+        self.__is_monitoring = False
         self._monitor()
-    """
-    @property
-    def filename(self):
-        if not hasattr(self,'_filename'):
-            raise PlayerError(2,'Cannot find song')
-        return self._filename
-    """
+
     @property
     def name(self):
         if not hasattr(self,'_song'):
@@ -54,7 +47,7 @@ class BasePlayer(metaclass=BaseMeta):
         return self._song
 
     
-    def set_all_state(self,state=False,**kwargs):
+    def _set_all_state(self,state=False,**kwargs):
         """Change all states at once"""
         if self.state:
             for k,v in self.state.items():
@@ -80,22 +73,37 @@ class BasePlayer(metaclass=BaseMeta):
         Monitor media track and automatically set state
         when media state changes.
         """
+        while not self.__is_monitoring:
+            if self.state['playing']:
+                self.__is_monitoring = True
         print('Monitoring')
         # If media.autoplay changes track before song finish 
         # adjust sleep time 
+
+        # wait for 3 sec, if the track is load then monitor when the track stops
         SLEEP_TIME = 3
-        while True:
-            playing = self.state.get('playing')
-            if playing:
-                sleep(SLEEP_TIME) # wait for track to load
-                current_position = self._format_time(self.current_position)
-                endtime = self._format_time(self.duration)
-                
-                if current_position == endtime:
-                    print('Monitoring changed state\n',self.state)
-                    if not self.state['pause']:
-                        self.set_all_state(False,stop=True)
+    
+        if True:
+            start = time()
+            while (time() - start) < 10:
+                pass
+
+            print('\n\n%s\nmonitoring\n%s'%(30*'-',30*'-'))
+
+            while self.state['load']:
+                playing = self.state.get('playing')
+                if playing:
+                    sleep(SLEEP_TIME) # wait for track to load
+                    current_position = self._format_time(self.current_position)
+                    endtime = self._format_time(self.duration)
                     
+                    if current_position == endtime:
+                        print('Monitoring changed state\n',self.state)
+                        if not self.state['pause']:
+                            self._set_all_state(False,stop=True)
+
+            #If track is stop then recall function for next track
+            self._monitor()            
         
     def setTrack(self,*args,**kwargs):
         raise NotImplementedError
