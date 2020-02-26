@@ -23,20 +23,21 @@ def Threader(f):
 
 class Queued():
     THREAD_COUNT = 75
-    def __init__(self,main_job,input_work,search=None):
+    def __init__(self,main_job,input_work):
         self.input = input_work # work to put in queue
         self.main_job = main_job # job to perform with work
         # song to search for TODO: move this to main function
-        self.search = search
         self.results = []
         self.thread_pool = []
 
 
-    def run(self):
+    def run(self,*args,**kwargs):
         with cf.ThreadPoolExecutor() as ex:
-            if self.search:
-                search = [self.search] * len(self.input)
-                data =  ex.map(self.main_job,self.input,search) 
+            if args or kwargs:
+                print('running with args and kwargs')
+                args = tuple(args) * len(self.input)
+                #kwargs = tuple(kwargs) * len(self.input)
+                data =  ex.map(self.main_job,self.input,args,kwargs) 
             else:
                 data = ex.map(self.main_job,self.input)
         return [x for x in data]

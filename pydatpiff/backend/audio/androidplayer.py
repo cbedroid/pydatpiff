@@ -3,16 +3,10 @@ import re
 import sys 
 from time import time
 from subprocess import PIPE,Popen
+from mutagen.mp3 import MP3
 from ..filehandler import Path
 from ..config import Threader
 from .baseplayer import BasePlayer
-
-try:
-    # try to import eyed3 for easy metadata
-    import eyed3
-except:
-    class eyed3():
-        pass
 
 class AndroidError(Exception):
     pass
@@ -24,7 +18,7 @@ class Android(BasePlayer):
     # we will move the tempfile (see backend.filehandler)
     # to the device storage system ('/sdcard' or '/storage/')
     DROID_TMP = '/sdcard/.pydatpiff_tmp.mp3'
-    __Id3 = eyed3
+    __Mutagen = MP3
 
     def __init__(self,*args,**kwargs):
         """ Initialize BasePlayer from Android class"""
@@ -95,7 +89,7 @@ class Android(BasePlayer):
         
     @property
     def duration(self):
-        return self.__Id3.info.time_secs 
+        return self.__Mutagen.info.length
    
         
     @property
@@ -131,8 +125,7 @@ class Android(BasePlayer):
 
         #if not self._state.get('load'):
         #    self._load_time = time()
-        self.__Id3 = eyed3.load(self.__meta_data_path)
-        self.__tag = self.__Id3.tag
+        self.__Mutagen = MP3(self.__meta_data_path)
         
         with open(self.songpath,'rb') as f:
             self.__content = f.read()
@@ -150,7 +143,7 @@ class Android(BasePlayer):
     def pause_position(self):
         """ Return the position when the pause is pause"""
         if not hasattr(self,'_pause_pos'):
-            self._pause_pos = self._current_position
+            self._pause_pos = self.current_position
             return 0
         return self._pause_pos
 

@@ -85,6 +85,6 @@ class Path():
         return os.path.join(path,to)
 
     @staticmethod
-    def toStandard(name):
+    def standardizeName(name):
         return re.sub('[^A-Za-z0-9_\-\.] ', '', name)
 

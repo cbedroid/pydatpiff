@@ -1,7 +1,5 @@
 import os
 import io
-import re
-from time import sleep
 from .frontend.display import Print,Verbose
 from .urls import Urls
 from .errors import MediaError
@@ -30,7 +28,6 @@ class Media():
             try:
                 cls.player = Player.getPlayer()
             except Exception as e:
-                print('ERROR:',e)
                 cls.player = None
 
             if cls.player is None: # Incase user reinitalize Media class
@@ -91,15 +88,19 @@ class Media():
         songname = Datatype.strip_lowered(songname)
         links = self.mixtape.links
         links = list(enumerate(links,start=1))
-        results = Queued(self._search_song,links,songname).run()
+        results = Queued(self._searchAlbumsFor,links).run(songname)
         if not results:
             Print('No song was found with this title ')
         results = Datatype.removeNone(results)
         return results
 
         
-    def _search_song(self,links,song):
-        """ main function for findSong see: findSong"""
+    def _searchAlbumsFor(self,links,song):
+        """
+        Search through all Albums and return all Albums
+        that contains similiar songs' title.
+        :param: song: title of the song to search for
+        """
         index,link = links
         album = Album(link)
         name = album.name
@@ -110,43 +111,45 @@ class Media():
 
     def setMedia(self, selection):
         """
-        Setup and queues Datpiff.Mixtapes ablum to media player by selection 
-        Datpiff.Mixtapes artists or album name.
+        Initialize and set the an Album to Media Player.
+        A pydatpiff.Mixtape's ablum will be load to the media player.
 
-        @@params: selection - Datpiff.Mixtapes album's name or artist's name.
-            #datatype 
+        :params: selection - pydatpiff.Mixtapes album's name or artist's name.
             int - will return the Datpiff.Mixtape artist at that index.
             str - will search for an artist from Mixtapes.artists (default)
                   or album from Mixtapes.ablum. 
+
+            note: see pydatpiff.Mixtapes for album or artist selection 
         """
+
         result = self.mixtape._select(selection)
         if result is None:
             Verbose('SELECTION:',selection)
             e_msg = '\n--> Mixtape "%s" was not found'%selection
             raise MediaError(1)
 
+        # set up all Album's Info
         self._artist_name = self.mixtape.artists[result]
         self.album_name = self.mixtape.mixtapes[result]
         link = self.mixtape._links
-        self._setup(link[result])
-        
+
+        self._loadAlbum(link[result])
         Verbose('Setting Media to %s - %s' % (self.artist, self.album))
-        # only returning to check if choice was set
-        #return choice
 
 
-    def _setup(self,link):
+    def _loadAlbum(self,link):
         self._album = Album(link)
         response = self._album.embed_response
         self._Mp3 = Mp3(response)
         self._song_cache = {}
 
        
-    def _parseSelection(self, select):
+    def _getIndexOf(self, select):
         """
-        Parse all user selection and return the correct songs
-
-        @@params: select  - Media.songs name or index of Media.songs 
+        Parse all user input and return the correct song index.
+        :param select: -  Media.songs name or index of Media.songs 
+               datatype: int: must be numerical
+                         str: artist,mixtape, or song name
         """
         try:
             return User.selection(select,self.songs,[x.lower() for x in self.songs])
@@ -193,7 +196,6 @@ class Media():
         return list(self._Mp3.mp3Urls)
 
 
-    @property
     def show_songs(self):
         """Pretty way to Print all song names"""
         try:
@@ -217,7 +219,7 @@ class Media():
         @@params: name  - Media.songs name or index of Media.songs 
         """
         songs = self.songs
-        index = self._parseSelection(name)
+        index = self._getIndexOf(name)
         if index is not None:
             self._selected_song = songs[index]
             self._current_index = index
@@ -258,7 +260,7 @@ class Media():
         @@params: track - name or track index of song   
         """
 
-        selection = self._parseSelection(track)
+        selection = self._getIndexOf(track)
         if selection is None:
             return 
 
@@ -302,7 +304,7 @@ class Media():
                 Verbose('Must play a song before setting autoplay')
                 return 
 
-            current_track = self._parseSelection(current_song)+1
+            current_track = self._getIndexOf(current_song)+1
             while current_track < len(self) and self.autoplay:
                 state = self.player._state.get('playing')
                 next_track = current_track + 1
@@ -376,7 +378,7 @@ class Media():
         @@rename:   rename the song (optional)
             default will be song's name 
         """
-        selection = self._parseSelection(track)
+        selection = self._getIndexOf(track)
         if selection is None:
             return
         
@@ -393,7 +395,7 @@ class Media():
             title  = rename.strip() + ".mp3" 
         else:
             title  = ' - '.join(( self.artist,song.strip()+".mp3" ))
-        title = Path.toStandard(title)
+        title = Path.standardizeName(title)
         songname = Path.join(output,title)
 
         try:
@@ -420,9 +422,8 @@ class Media():
             Print('Invalid directory: %s'%output)
             return
 
-
         title = "-".join((self.artist, self.album))
-        title = Path.toStandard(title)
+        title = Path.standardizeName(title)
         fname = Path.join(output,title) 
         
         # make a directory to store all the ablum's songs
@@ -431,5 +432,6 @@ class Media():
 
         for num, song in enumerate(self.songs):
             self.download(song, output=fname)
+        Queued(self.download,song,fname).run()
         Print("\n%s %s saved" % (self.artist, self.album))
 
