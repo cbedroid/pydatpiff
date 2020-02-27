@@ -22,7 +22,8 @@ class BaseMeta(type):
     """
     def __new__(cls,name,bases,body):
         methods =['setTrack', '_format_time','duration']
-        #current_position
+        # current_position,_song
+
 
         for method in methods:
             if method not in body:

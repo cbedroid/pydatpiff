@@ -16,7 +16,7 @@ def fixdate():
             date = subprocess.check_output(_f).decode('utf-8').strip()
             date += ' %(name)s - %(levelname)s - %(message)s'
         except:
-            date = _f
+            pass
     else:
         date = _f
     return date

@@ -28,14 +28,13 @@ class TestMixtapes(unittest.TestCase):
         start.assert_called_once()
         start.assert_called_once_with(start='lil wayne')
         
-
     
 media_dummy = mixtapes.Mixtapes.__class__('mixtapes.Mixtapes.Dummy',
                                     (mixtapes.Mixtapes,),
                                     {})
 
 class TestMedia(unittest.TestCase):
-    @patch.object(media.Media,'find_Song')
+    @patch.object(media.Media,'findSong')
     def test_find_Song(self,finder):
         pass
 

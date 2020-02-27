@@ -6,7 +6,7 @@ with open('README.md',encoding='utf-8') as f:
 
 #package_dir={'datpiff':'pydatpiff'},
 setup( name='pydatpiff',
-       version= getVersion(),
+       version= 'dev-Android-2.8',
        description='PyDatpiff Mixtape player',
        url='https://github.com/cbedroid/pydatpiff',
        long_description=readme,

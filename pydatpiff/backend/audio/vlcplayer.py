@@ -36,7 +36,7 @@ class VLCPlayer(BasePlayer):
 
     def setTrack(self,name,path=None):
         if path:
-            self._name = name
+            self._song = name
             self._player.set_mrl(path)
         else:
             Print('No media to play')
