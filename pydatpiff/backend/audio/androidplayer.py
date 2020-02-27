@@ -68,23 +68,20 @@ class Android(BasePlayer):
         when loading the content of a track when player state changes from
         pause to playing and vice versa.
         """
-        print('\nClock started')
-        start = time()
         while True:
-            if self._state['playing'] and not self._state['pause']:
-                #state_time was here
-                self._elapse = time() - self._load_time
-            #else: #catch the current postion  paused,rewinf, and fast-forward 
-            #    # its self.elapse because self.elapse has the pause position
-            #    self.current_position = 0
-            if time() - start > 3:
-                start = time()
+            start = time()
+            test = time()
+            while self.state['pause']:
+                if time() - start >=1:
+                    self._start_time += time()- start
+                    start = time()
+                if not self.state['pause']:
+                    print('Real time Stopped')
+                    break
+                #if time() - test > 5:
+                #    print('UPDATED START_TIME',self._start_time)
+                #    test  = time()
 
-            if hasattr(self,'__content'):
-                if self.current_position > (len(self)/self.bytes_per_sec)\
-                        and self._state['playing']:
-                    print('\nTrack finish')
-                    self._resetState()
 
     @property
     def __am_start_Intent(self):
@@ -157,20 +154,23 @@ class Android(BasePlayer):
 
     @property
     def current_position(self):
+        #self.update_from_paused_position(pos)
+        
+        # if track is paused 
+        if self.state['pause'] and hasattr(self,'_last_position'):
+            return self._last_position
+        
         pos = time() - self._start_time
-        """
-        if self.state['pause']:
-            if hasattr(self,'_pause_pos'):
-                return self._pause_pos
-            else:
-                setattr(self,'_pause_pos',pos)
-        """
+        self._last_position = pos
         return pos if pos > 0 else 0 
 
     @current_position.setter
     def current_position(self,pos):
         self._start_time -= pos
 
+        
+    
+        
     def __load(self,position):
         """
         Write media content to file
@@ -179,18 +179,8 @@ class Android(BasePlayer):
         """
         #spot in seconds
         with open(self.DROID_TMP,'wb') as mp3:
-            if self.state['pause']:
-                difference = self.current_position - (
-                                self._pause_position + position
-                                )
-                print('PAUSE_POSITION:',self._pause_position)
-                print('OLD CurrentPosition:',self.current_position)
-                print('Difference:',difference)
-                self.current_position = -(difference)
-                print('New CurrentPosition:',self.current_position)
-            else:
-                self.current_position = position
-
+            self.current_position = position
+            print(self.info)
             spot = int(self.current_position+position) 
             topos = spot*self.bytes_per_sec if spot > 0 else 1*self.bytes_per_sec
             topos = int(topos)
@@ -207,6 +197,8 @@ class Android(BasePlayer):
         :param: path - path location of the media track
         """
         self._resetState()
+        self._last_position = 0
+        self._pause_pos = 0
 
         if Path.isFile(path):
             self._song = name

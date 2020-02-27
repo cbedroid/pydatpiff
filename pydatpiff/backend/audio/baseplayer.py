@@ -103,6 +103,7 @@ class BasePlayer(metaclass=BaseMeta):
                             self._set_all_state(False,stop=True)
 
             #If track is stop then recall function for next track
+            self.__is_monitoring = False
             self._monitor()            
         
     def setTrack(self,*args,**kwargs):
