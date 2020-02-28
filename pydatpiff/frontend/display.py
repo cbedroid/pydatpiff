@@ -54,3 +54,9 @@ class Show():
         Verbose('Song: %s - %s' % (artist, songname))
         Verbose("Size:", size)
  
+    @staticmethod
+    def  mediaDownloadMsg(songname,size):
+        Verbose('\nDownloading:', songname,
+                '\nSIZE:  ', size
+                )
+

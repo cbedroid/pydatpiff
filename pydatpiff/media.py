@@ -14,7 +14,6 @@ from .backend.config import User,Datatype,Queued,Threader
 #   will cahnge import to another name
 #    change name of player 
 
-
 class Media():
     """ Media player that control the songs selected from Mixtapes """
     
@@ -430,10 +429,10 @@ class Media():
                 response = self._session.method('GET', link)
                 response.raise_for_status()
 
-            with open(songname, "wb") as ws:
-                ws.write(response.content)
-                Verbose('\nSONGNAME: ', songname,
-                               '\nSIZE:  ', file_size(len(response.content)))
+    
+            size = file_size(len(response.content))
+            Path.writeFile(songname, response.content, mode="wb")
+            Show.mediaDownloadMsg(title,size)
             self._cacheSong(songname, response)
         except:
             Print('Cannot download song %s' % songname)
@@ -459,9 +458,6 @@ class Media():
         # make a directory to store all the ablum's songs
         if not os.path.isdir(fname):
             os.mkdir(fname)
-
-        for num, song in enumerate(self.songs):
-            self.download(song, output=fname)
-        Queued(self.download,song,fname).run()
+        Queued(self.download,self.songs,fname).run()
         Print("\n%s %s saved" % (self.artist, self.album))
 
