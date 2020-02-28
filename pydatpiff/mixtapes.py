@@ -16,11 +16,14 @@ class Mixtapes(object):
 
 
     def __init__(self, category=None,search=None,*args,**kwargs):
-        '''
-        Mixtapes Initialize 
+        """
+        Mixtapes Initialization.
 
-        @@params: category:  -- see Mixtapes.category
-        '''
+        :param: category - name of the catgeory to search from.
+                            see Mixtapes.category
+
+        :param: search - search for an artist or mixtape's name
+        """
         super(Mixtapes,self).__init__(*args,**kwargs)
         self._session = Session()
         self._session.clear_cache()
@@ -44,22 +47,29 @@ class Mixtapes(object):
             return 0
 
 
-    def search(self,artist):
-        """search for an artist mixtapes."""
-        artist = str(artist).strip()
-        if not artist: 
+    def search(self,name):
+        """
+        Search for an artist or mixtape's name.
+
+        :param: name - name of an artist or mixtapes name 
+        """
+        name = str(artist).strip()
+        if not name: 
             return 
 
-        Verbose('\nSearching for %s mixtapes ...'%artist)
+        Verbose('\nSearching for %s mixtapes ...'%name)
         url = Urls.url['search']
-        return  self._session.method('POST',url,data=Urls.payload(artist))
+        return  self._session.method('POST',url,data=Urls.payload(name))
 
 
     def _Start(self,category='hot', search=None):
-        '''
-        Starts the web page from category selected by user
-        (see Mixtapes.__init__)
-        '''
+        """
+        Initial setup. Gets all available mixtapes.
+        
+        :param: category - name of the catgeory to search from.
+                            (self Mixtapes.category)
+        :param: search - search for an artist or mixtape's name
+        """
         if search: # Search for an artist 
             body = self.search(search)
             if not body or body is None: # on failure return response from a category 
@@ -73,7 +83,8 @@ class Mixtapes(object):
 
    
     def _setup(self):
-        """Initial variable and set attributes on page load up."""
+        """Initial class variable and set theirattributes on page load up.
+        """
         # all method below are property setter method 
         # each "re string" get pass to the corresponding html response text
 
@@ -85,16 +96,16 @@ class Mixtapes(object):
 
 
     def _searchTree(f):
-        '''
+        """
         Wrapper function that parse and filter all requests response content.
         After parsing and filtering the responses text, it then creates a 
         dunder variable from the parent function name. 
         
-        @@params: f  (wrapper function) 
+        :param: f  (wrapper function) 
          #----------------------------------------------------------
          example: "function()" will create an attribute "_function"
          #----------------------------------------------------------
-        '''
+        """
         @wraps(f) 
         def inner(self, *args,**kwargs):
             name = f.__name__
@@ -112,7 +123,7 @@ class Mixtapes(object):
 
     @property
     def artists(self):
-        ''' return all Mixtapes artists name'''
+        """ return all Mixtapes artists' name"""
         if hasattr(self,'_artists'):
             return self._artists
 
@@ -124,6 +135,7 @@ class Mixtapes(object):
 
     @property
     def mixtapes(self):
+        """ Return all mixtapes name""" 
         if hasattr(self,'_mixtapes'):
             return self._mixtapes
 
@@ -136,20 +148,19 @@ class Mixtapes(object):
 
     @property
     def links(self):
-        """Return all of the Mixtapes url links"""
+        """Return all of the Mixtapes' url links"""
         if hasattr(self,'_links'):
             return self._links
 
     @links.setter
     @_searchTree
     def links(self,path):
-        ''' return all the album links from web page'''
         return path
     
 
     @property
     def views(self):
-        """Return the view count of each mixtapes"""
+        """Return the views count of each mixtapes"""
         if hasattr(self,'_views'):
             return self._views
 
@@ -161,9 +172,8 @@ class Mixtapes(object):
 
     @property
     def display(self):
-        ''' Prettify all Mixtapes information  
-            and display it to screen 
-        '''
+        """ Prettify all Mixtapes information and display it to screen 
+        """
         links = self._links
         data = zip(self._artists, self._mixtapes, links, self._views)
         for count,(a, t, l, v) in list(enumerate(data,start=1)):
@@ -172,12 +182,13 @@ class Mixtapes(object):
 
 
     def _select(self,select):
-        '''
-        User select function that queue an ablum to the media player
+        """
+        Queue and load  a mixtape to media player.
+                            (See pydatpiff.media.Media.setMedia)
         
-        @@params:: select - (int) user selection by indexing an artist name or album name
+        :param: select - (int) user selection by indexing an artist name or album name
                             (str)
-        '''
+        """
         try:
             # Return the user select by either integer or str
             # we map the integer to artists and str to mixtapes 

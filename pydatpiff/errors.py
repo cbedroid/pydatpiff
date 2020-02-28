@@ -123,7 +123,7 @@ class Error(Exception):
 
 
 class MixtapesError(Error):
-    """ handle all the Media errors"""
+    """ handle all the Mixtapes errors"""
     __error__ = {
                  1: 'No Mixtapes Found',
                  2: 'Invalid category selected',
@@ -141,6 +141,7 @@ class MediaError(Error):
                  5: 'song selection error',
                  6: 'unsupported media player',
                  7: 'media player not found',
+                 8: 'song cache storage failed',
                 }
 
 

@@ -51,9 +51,9 @@ class Media():
             return 0
 
     def __init__(self, mixtape=None):
-        """ Initialize Media 
-
-        @@params: mixtape - Datpiff.Mixtapes object
+        """ 
+        Initialize Media and load all mixtapes.
+        :params: mixtape - Datpiff.Mixtapes object
         """
         if 'mixtapes.Mixtapes' not in str(type(mixtape)):
             raise MediaError(2,'must pass a mixtape object to Media class')
@@ -82,7 +82,7 @@ class Media():
         
         #TODO:look this video with James Powell
         # https://www.youtube.com/watch?v=R2ipPgrWypI&t=1748s at 55:00.
-        # Implement a generate function , so user dont have to wait on all the results at once 
+        # Implement a generator function , so user dont have to wait on all the results at once 
         # Also thread this main function, to unblock user from still using program while 
         # it wait for result to be finished.
         songname = Datatype.strip_lowered(songname)
@@ -99,7 +99,9 @@ class Media():
         """
         Search through all Albums and return all Albums
         that contains similiar songs' title.
-        :param: song: title of the song to search for
+
+        :param: song - title of the song to search for
+        :param: links - all mixtapes links
         """
         index,link = links
         album = Album(link)
@@ -112,14 +114,14 @@ class Media():
     def setMedia(self, selection):
         """
         Initialize and set the an Album to Media Player.
-        A pydatpiff.Mixtape's ablum will be load to the media player.
+        A pydatpiff.mixtapes.Mixtape's ablum will be load to the media player.
 
-        :params: selection - pydatpiff.Mixtapes album's name or artist's name.
+        :param: selection - pydatpiff.Mixtapes album's name or artist's name.
             int - will return the Datpiff.Mixtape artist at that index.
             str - will search for an artist from Mixtapes.artists (default)
                   or album from Mixtapes.ablum. 
 
-            note: see pydatpiff.Mixtapes for album or artist selection 
+            note: see pydatpiff.mixtape.Mixtapes for album or artist selection 
         """
 
         result = self.mixtape._select(selection)
@@ -133,15 +135,20 @@ class Media():
         self.album_name = self.mixtape.mixtapes[result]
         link = self.mixtape._links
 
-        self._loadAlbum(link[result])
+        self._setup_Album_and_Mp3(link[result])
         Verbose('Setting Media to %s - %s' % (self.artist, self.album))
 
 
-    def _loadAlbum(self,link):
+    def _setup_Album_and_Mp3(self,link):
+        """
+        Initial an Album and sets all Mp3 songs'tags
+        
+        param: link - Album's mixtape link
+        """ 
         self._album = Album(link)
         response = self._album.embed_response
         self._Mp3 = Mp3(response)
-        self._song_cache = {}
+        self.song_cache_storage = {}
 
        
     def _getIndexOf(self, select):
@@ -165,7 +172,6 @@ class Media():
 
     @artist.setter
     def artist(self, name):
-        """Set the current artist name."""
         self.setMedia(name)
 
 
@@ -183,7 +189,7 @@ class Media():
 
     @property
     def songs(self):
-        """ Return all album songs."""
+        """ Return all songs from album."""
         if not hasattr(self,'_Mp3'):
             e_msg = 'Set media by calling -->  Media.setMedia("Album name")'
             raise MediaError(3,e_msg)
@@ -192,7 +198,7 @@ class Media():
 
     @property
     def mp3urls(self):
-        """Returns the parsed mp3 url"""
+        """Returns all parsed mp3 url"""
         return list(self._Mp3.mp3Urls)
 
 
@@ -215,8 +221,7 @@ class Media():
     def song(self, name):
         """ 
         Set current song
-
-        @@params: name  - Media.songs name or index of Media.songs 
+        :param: name - name of song or song's index
         """
         songs = self.songs
         index = self._getIndexOf(name)
@@ -227,29 +232,37 @@ class Media():
             Print('\n\t song was not found')
 
 
-    def _cacheSong(self, song, data):
+    def _cacheSong(self, song, content):
         """
-        _cacheSong - Captures the songname and content when user play
-         or download a song. This prevents downloading song content twice
-         when playing or downloading a song. Data from each song will be 
-         stored in _song_cache for future access.
+         Preserve the data from song and store it for future calls.
+         This prevents calling the requests function again for the same song. 
+         Each data from a song will be stored in song_cache_storage for future access.
+
+        :param: song - name of the song
+        :param: content - song content 
         """
         name = "-".join((self.artist, song))
         try:
-            self._song_cache[name] = data
+            self.song_cache_storage[name] = content
         except MemoryError:
-            self._song_cache = {}
+            self.song_cache_storage = {}
 
 
 
-    def _checkCache(self, song):
-        """Check if song have already been download.
-        If so,requests response is return.
+    def _checkCache(self, songname):
         """
-        in_cache = '-'.join((self.artist, song))
-        if hasattr(self, '_song_cache'):
-            if in_cache in self._song_cache:
-                response = self._song_cache[in_cache]
+        Check whether song has been download already.
+
+        :param: 
+            
+        """
+        requested_song = '-'.join((self.artist, songname))
+        if hasattr(self, 'song_cache_storage'):
+            if requested_song in self.song_cache_storage:
+                response = self.song_cache_storage.get(requested_song)
+                if not response:
+                    extended_msg = "%s not in cache_storage"%songname
+                    raise MediaError(8,extended_msg)
                 return response
 
 
@@ -257,7 +270,7 @@ class Media():
         """
         Return content of the song in IO Bytes object
 
-        @@params: track - name or track index of song   
+        :param: track - name of song  or song index
         """
 
         selection = self._getIndexOf(track)
@@ -281,12 +294,19 @@ class Media():
 
     @property
     def autoplay(self):
-        ''' Continuous play song from current album'''
+        """Continuously play song from current album."""
         if hasattr(self,'_auto_play'):
             return self._auto_play
 
     @autoplay.setter
     def autoplay(self,auto=False):
+        """ 
+        Sets the autoplay function.
+       
+       :param: auto - disable or enable autoplay
+                datatype: boolean
+                default: False
+        """
         self._auto_play = auto
         self._continousPlay()
         if auto:
@@ -297,7 +317,11 @@ class Media():
 
     @Threader
     def _continousPlay(self):
-         if self.autoplay:
+        """ 
+        Thread function that automatically control the playing
+        of each song when autoplay is enable.
+        """    
+        if self.autoplay:
             total_song = len(self)
             current_song =  self.song
             if not current_song:
@@ -322,8 +346,8 @@ class Media():
         """ 
         Play song (uses vlc media player) 
 
-         @@params: track - name or index of song type(str or int)
-         @@params: demo  - True: demo sample of song
+         :param: track - name or index of song type(str or int)
+         :param: demo  - True: demo sample of song
                               False: play full song 
                               *default: False
         """
@@ -373,10 +397,10 @@ class Media():
         """
         Download song from Datpiff
 
-        @@params: track - name or index of song type(str or int)
-        @@output: location to save the song (optional)
-        @@rename:   rename the song (optional)
-            default will be song's name 
+        :param: track - name or index of song type(str or int)
+        :param: output - location to save the song (optional)
+        :param: rename -   rename the song (optional)
+                default will be song's name 
         """
         selection = self._getIndexOf(track)
         if selection is None:
@@ -416,6 +440,11 @@ class Media():
 
 
     def downloadAlbum(self, output=None):
+        """
+        Download the full ablum.
+        :param: output - directory to save album 
+                :default - current directory
+        """
         if not output:
             output = os.getcwd()
         elif not os.path.isdir(output):
