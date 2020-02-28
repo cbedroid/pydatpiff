@@ -27,17 +27,21 @@ class Android(BasePlayer):
     def __len__(self):
         return len(self.__content)
 
+
     def _resetState(self,**kwargs):
+        """Reset all state of track (see Android.state)"""
         self._state = dict(playing=False,pause=False,
             load=False,stop=False)
         self._state.update(**kwargs)
 
+
     def _is_playing(self,boolean=False):
-        """ Return whether a song is being played or paused.
-            
-            variable state - belongs to BasePlayer
-            sets the playing state = boolean
-            sets the pause state = not boolean
+        """ 
+        Set the state of playing and pause.
+
+        param: boolean - True or False
+                True: sets playing True and pause False 
+                False: sets playing False and pause True 
         """
         self.state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
 
@@ -59,15 +63,16 @@ class Android(BasePlayer):
 
 
     @Threader
-    def _real_time_elapse(self):
+    def __capturePauseDuration(self):
         """
-        Starts and stop the elapse time according to the player state.
-        Elapse time (real clock time) will start when player state is 'playing'
-        and stop when player state is 'paused'.
+        Captures the time duration when the track is paused.
+        Once track is unpause time will be added to the original track time
+        (Android._start_time).
         This time will be used to calculate the accuracy of current_position
-        when loading the content of a track when player state changes from
-        pause to playing and vice versa.
+        when loading the content of a track when pause state changes from
+        pause to playing.
         """
+
         while True:
             start = time()
             test = time()
@@ -78,14 +83,11 @@ class Android(BasePlayer):
                 if not self.state['pause']:
                     print('Real time Stopped')
                     break
-                #if time() - test > 5:
-                #    print('UPDATED START_TIME',self._start_time)
-                #    test  = time()
 
 
     @property
     def __am_start_Intent(self):
-        """ Prepares android java 'am start' intent to play song""" 
+        """Invokes Android java 'am start' intent to play song""" 
         path = re.sub('\B\/','',self.DROID_TMP) #remove start '/'
         intent = 'am start --user 0 -a android.intent.action.VIEW -d '
         return intent + 'file:///{} -t audio/*'.format(path)
@@ -93,12 +95,13 @@ class Android(BasePlayer):
         
     @property
     def duration(self):
+        """Total time of track in seconds"""
         return self.__Mutagen.info.length
    
         
     @property
     def _song_path(self):
-        """ Returns media song path from media class"""
+        """Returns media song path from media class"""
         if hasattr(self,'_media_song_path'):
             return self._media_song_path
         else:
@@ -128,7 +131,6 @@ class Android(BasePlayer):
         """Open file path  and return its content"""
 
         self.__Mutagen = MP3(self.__meta_data_path)
-
         with open(self._song_path,'rb') as f:
             self.__content = f.read()
         self._state['load'] = True
@@ -141,7 +143,7 @@ class Android(BasePlayer):
 
     @property
     def _pause_position(self):
-        """ Return the position when the pause is pause"""
+        """Return the position when the pause is pause"""
         if not hasattr(self,'_pause_pos'):
             setattr(self,'_pause_pos',self.current_position)
             return 0
@@ -154,8 +156,7 @@ class Android(BasePlayer):
 
     @property
     def current_position(self):
-        #self.update_from_paused_position(pos)
-        
+        """Current time position of track"""
         # if track is paused 
         if self.state['pause'] and hasattr(self,'_last_position'):
             return self._last_position
@@ -168,7 +169,6 @@ class Android(BasePlayer):
     def current_position(self,pos):
         self._start_time -= pos
 
-        
     
         
     def __load(self,position):
@@ -193,7 +193,7 @@ class Android(BasePlayer):
         """ 
         Prepares the media tracks and set its attributes and current state
 
-        :params: name - name of the of the media track
+        :param: name - name of the of the media track
         :param: path - path location of the media track
         """
         self._resetState()
@@ -211,7 +211,7 @@ class Android(BasePlayer):
 
     @property
     def play(self):
-        self._real_time_elapse()
+        self.__capturePauseDuration()
         self._start_time = time()
         self._play()
 
@@ -219,7 +219,7 @@ class Android(BasePlayer):
     def _play(self,position=0):
         """
         Play media songs
-        :param:pos   - play a song at the given postion (seconds)
+        :param: pos - play a song at the given postion (seconds)
         """ 
         self.__preloadTrack()
 
@@ -237,14 +237,14 @@ class Android(BasePlayer):
     def volume(self,vol=None):
         """
         Android volume controls
-        @params:: vol - set the media volume range 0 - 100 
+        :param: vol - set the media volume range 0 - 100 
         """
         os.system('termux-volume music %s'% vol)
 
    
     @property
     def pause(self):
-        """Pause song"""
+        """Pause and unpause the song."""
         # capture the position the media player was pause
         if not self._state['pause']:
             self.stop
@@ -258,25 +258,40 @@ class Android(BasePlayer):
             print("Unpause")
             self._play()
 
+
     def _seeker(self,pos=5, rew=True):
-        """Control fast forward and rewind function"""
+        """
+        Control fast forward and rewind function
+
+        :param: pos - time to rewind or fast-forward (in seconds)
+        """
         spot = pos
         if self._state['pause']:
             self._state['pause'] = False
 
-        #self.current_position = spot
         self._play(position=pos)
 
 
     def rewind(self,pos=5):
+        """
+        Rewind Track
+        :param: pos - time to rewind or fast-forward (in seconds)
+        """
+
         self._seeker(-(pos),True)
         
 
     def ffwd(self,pos=5):
+        """
+        Fast-forward Track
+        :param: pos - time to rewind or fast-forward (in seconds)
+        """
+
         self._seeker(pos,False)
 
     @property
     def stop(self):
+        """ Stop track"""
         service = "am stopservice "
         cmd = service + "org.videolan.vlc/org.videolan.vlc.PlaybackService"
         results = Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE)
