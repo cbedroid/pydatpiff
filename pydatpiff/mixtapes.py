@@ -53,11 +53,11 @@ class Mixtapes(object):
 
         :param: name - name of an artist or mixtapes name 
         """
-        name = str(artist).strip()
+        name = str(name).strip()
         if not name: 
             return 
 
-        Verbose('\nSearching for %s mixtapes ...'%name)
+        Verbose('\nSearching for %s mixtapes ...'%name.title())
         url = Urls.url['search']
         return  self._session.method('POST',url,data=Urls.payload(name))
 
@@ -111,7 +111,7 @@ class Mixtapes(object):
             name = f.__name__
             path = f(self,*args,**kwargs)
             pattern = re.compile(path)
-            data = Pages(self._responses).parsePages(pattern)
+            data = Pages(self._responses).getRePattern(pattern)
             if hasattr(self,'_artists'):
                 # we map all attributes length to _artists length 
                 data = data[:len(self._artists)]
@@ -170,15 +170,14 @@ class Mixtapes(object):
         return path
 
 
-    @property
     def display(self):
         """ Prettify all Mixtapes information and display it to screen 
         """
         links = self._links
         data = zip(self._artists, self._mixtapes, links, self._views)
         for count,(a, t, l, v) in list(enumerate(data,start=1)):
-            Print("# %s\nArtist: %s\nAlbum: %s\nLinks: %s\nViews: %s\n%s"
-                    % (count, a, t, l[1:], v, "-"*40))
+            Print("# %s\nArtist: %s\nAlbum: %s\nLinks: %s\nViews: %s\n%s\n"
+                    % (count, a, t, 'https://datpiff.com'+l, v, "-"*60))
 
 
     def _select(self,select):

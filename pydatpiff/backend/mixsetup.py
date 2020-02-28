@@ -6,7 +6,7 @@ from .config import User,Datatype,Queued
 from ..errors import MixtapesError
 
 class Pages():
-    RETRY = 5 # TODO: fix retry:: some reason parsePages fails on first try
+    RETRY = 5 # TODO: fix retry:: some reason getRePattern fails on first try
     MAX_MIXTAPES = 520 # maximum amount of available mixtapes possible
 
     def __init__(self,base_response):
@@ -17,12 +17,9 @@ class Pages():
 
     @property
     def findPagesLinks(self):
-        '''
-        Return the href link from mix category or search page
-        @params:: text  - the Mixtapes() _Start requests response text
-            #The start up page from Mixtapes() all the page numbers
-            # We grab that data and return all the page's link 
-        '''
+        """
+        Return a list of html page links from mixtapes.Mixtapes._Start method.
+        """
         try:
             # captures the queried response text
             XPath = re.findall(r'class\="links"(.*[\n\r]*.*\d)*</a>'
@@ -37,27 +34,34 @@ class Pages():
             return [self.base_response.url]
 
 
-    def _Response(self,url):
-        ''' This is only for Queued use only'''
+    def _getResponse(self,url):
+        """
+        Calls requests 'GET' method and returns the response content.
+        This function should only be called when using Queued method.
+
+        :param: url - mixtape's link
+            :datatype: html formatted string
+        """
         return self._session.method('GET',url).text
 
 
-    def parsePages(self,re_string,bypass=False):
-        '''
-        Return the combine data from eachMixtapes convert_href page
+    def getRePattern(self,re_string,bypass=False):
+        """
+        Uses Regex pattern to return the matching html data from each mixtapes
+        :params: re_string - Regex pattern 
+        :return: list object
 
-        @params:: re_string - python re pattern 
-        
-        @@EXAMPLE
-        re_string =  '<div class\="artist">(.*[.\w\s]*)</div>'
-        This re_string will return all the pattern in the Mixtapes link's page text
-        '''
+        :EXAMPLE:
+            re_string = '<div class\="artist">(.*[.\w\s]*)</div>'
+            This re_string will return all of the artist names from 
+            the Mixtapes web page (see _getResponse for Mixtapes web page link).
+        """
         data = []
         re_Xpath = re.compile(re_string)
         # each page requests response data
         # Map each page links url to request.Session and 
         # place Session in 'queue and thread' 
-        lrt = Queued(self._Response,self.findPagesLinks).run()
+        lrt = Queued(self._getResponse,self.findPagesLinks).run()
         list_response_text = Datatype.removeNone(lrt)
 
         #Remove all unwanted characters from Xpath 
@@ -71,7 +75,7 @@ class Pages():
         if not data:
             if self.trys < self.RETRY:
                 self.trys+=1
-                return self.parsePages(re_string)
+                return self.getRePattern(re_string)
             else:
                 raise MixtapesError(3)
         elif len(data) < self.MAX_MIXTAPES and not bypass:
@@ -81,10 +85,10 @@ class Pages():
 
             if self.trys < self.RETRY:
                 self.trys+=1
-                return self.parsePages(re_string)
+                return self.getRePattern(re_string)
             else:
                 #print('Fuck it')
-                return self.parsePages(re_string,True)
+                return self.getRePattern(re_string,True)
 
         return data
 

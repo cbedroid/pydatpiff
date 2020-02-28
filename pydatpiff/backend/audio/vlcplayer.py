@@ -137,7 +137,7 @@ class VLCPlayer(BasePlayer):
         if self._state['stop']:
             return 
         if rew: 
-            to_postiion = self._player.get_time() - (pos * 1000)
+            to_position = self._player.get_time() - (pos * 1000)
         else:
             to_position = self._player.get_time() + (pos * 1000)
             if to_position > self.duration:

@@ -46,3 +46,11 @@ def Verbose(*args):
     Print(*args)
 
 
+class Show():
+    @staticmethod
+    def mediaPlayMsg(artist,songname,size,demo=False):
+        sorf = 'Demo' if demo else 'Full Song'
+        Verbose('\n%s %s %s' % ('-'*20, sorf, '-'*20))
+        Verbose('Song: %s - %s' % (artist, songname))
+        Verbose("Size:", size)
+ 

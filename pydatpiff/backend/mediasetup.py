@@ -1,5 +1,5 @@
 import re
-from .webhandler import Html
+from .webhandler import MediaScrape
 from ..urls import Urls
 from ..utils.request import Session
 from ..errors import AlbumError
@@ -24,7 +24,7 @@ class Album():
     @property
     def ID(self):
         """Album ID Number  """
-        return Html.get_end_digits(self.link)
+        return MediaScrape.get_end_digits(self.link)
 
 
     @property
@@ -72,13 +72,13 @@ class Mp3():
     @property
     def song_duration(self):
         """Duration of songs"""
-        return Html.get_duration_from(self.content)
+        return MediaScrape.get_duration_from(self.content)
 
 
     @property
     def songs(self):
         """Songs from mixtape album."""
-        return Html.find_song_names(self.content)
+        return MediaScrape.find_song_names(self.content)
 
 
     @property
@@ -88,7 +88,7 @@ class Mp3():
         Return url encoded song index joined with song name 
         Ex: 02) - Off the Wall.mp3' -->  02)%20-%20Off%20the%20Wall.mp3
         """
-        return Html.find_name_of_mp3(self.content)
+        return MediaScrape.find_name_of_mp3(self.content)
 
 
     @property
@@ -99,7 +99,7 @@ class Mp3():
         Ex: 6/m1393dba
         """
         try:
-            return Html.toId(self.content)
+            return MediaScrape.toId(self.content)
         except:
             Mp3Error(1)
 

@@ -1,14 +1,13 @@
 import os
 import io
-from .frontend.display import Print,Verbose
 from .urls import Urls
 from .errors import MediaError
 from .utils.request import Session
-from .backend.filehandler import file_size,Tmp,Path
-from .backend.mediasetup import Album,Mp3
-from .backend.config import User,Datatype,Queued,Threader
 from .backend.audio.player import Player
-import traceback
+from .backend.mediasetup import Album,Mp3
+from .frontend.display import Print,Verbose,Show
+from .backend.filehandler import file_size,Tmp,Path
+from .backend.config import User,Datatype,Queued,Threader
 
 #TODO NOT finish writig baseplayer method and subclasses
 #   from .backend.audio.player import BasePlayer as player 
@@ -318,8 +317,7 @@ class Media():
     @Threader
     def _continousPlay(self):
         """ 
-        Thread function that automatically control the playing
-        of each song when autoplay is enable.
+        Automatically play each song from Album when autoplay is enable.
         """    
         if self.autoplay:
             total_song = len(self)
@@ -342,6 +340,7 @@ class Media():
                     self.play(next_track)
                     current_track = next_track
             
+
     def play(self, track=None, demo=False):
         """ 
         Play song (uses vlc media player) 
@@ -380,13 +379,14 @@ class Media():
             samp = int(track_size/5)
             start = int(samp/5)
             chunk = content[start:samp+start]
+        size = file_size(samp)
 
-        with open(self._tmpfile.name, "wb") as ws:
-            ws.write(chunk)
-        sorf = 'Demo' if demo else 'Full Song'
-        Verbose('\n%s %s %s' % ('-'*20, sorf, '-'*20))
-        Verbose('Song: %s - %s' % (self.artist, songname))
-        Verbose("Size:", file_size(samp))
+        # write song to file
+        Path.writeFile(self._tmpfile.name, chunk, mode="wb")
+
+        #display message to user
+        Show.mediaPlayMsg(self.artist,songname,size,demo)
+
         song = " - ".join((self.artist, songname))
         self.player.setTrack(song,self._tmpfile.name)
         self.player.play
@@ -399,7 +399,7 @@ class Media():
 
         :param: track - name or index of song type(str or int)
         :param: output - location to save the song (optional)
-        :param: rename -   rename the song (optional)
+        :param: rename - rename the song (optional)
                 default will be song's name 
         """
         selection = self._getIndexOf(track)
@@ -442,6 +442,7 @@ class Media():
     def downloadAlbum(self, output=None):
         """
         Download the full ablum.
+
         :param: output - directory to save album 
                 :default - current directory
         """

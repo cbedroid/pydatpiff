@@ -13,7 +13,7 @@
 
 **PyDatpiff requires:**
  - see requirements:  [requirements.txt](https://github.com/cbedroid/pydatpiff/blob/master/requirements.txt)
-- *python>= 3.3*
+- *python >= 3.3*
 - [VLC](https://www.videolan.org/vlc/index.html)- VideoLan Client media player and framework
 # Installation
 Install [VLC](https://www.videolan.org/vlc/index.html)  *(if not already install)*

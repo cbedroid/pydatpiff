@@ -31,7 +31,21 @@ ampersands = [
 	"&Ntilde;", "&ntilde;",
 ]
 
-class Html:
+
+class Html():
+    @staticmethod
+    def remove_ampersands(string):
+        results = []
+        if not isinstance(string,(list,tuple)):
+            string = [string]
+        for x in string:
+            for amps in ampersands:
+                x = re.sub(amps,'',x)
+            results.append(x)
+        return results
+ 
+
+class MediaScrape:
     @staticmethod
     def checkRe(f):
         @wraps(f)
@@ -56,24 +70,13 @@ class Html:
     @classmethod
     def find_song_names(cls,text):
         songs = re.findall(r'"title"\:"(.*\w*)",\s?"artist"',text)
-        songs = list(cls.remove_ampersands(songs))
+        songs = list(Html.remove_ampersands(songs))
         return songs
     
     @classmethod
     def get_duration_from(cls,text):
         return  re.findall(r'"duration"\>(.*\d*)\<',text)
-
-    @staticmethod
-    def remove_ampersands(string):
-        results = []
-        if not isinstance(string,(list,tuple)):
-            string = [string]
-        for x in string:
-            for amps in ampersands:
-                x = re.sub(amps,'',x)
-            results.append(x)
-        return results
-                
+               
 
     def find_name_of_mp3(text):
         songs = re.findall(r'fix.concat\(\s\'(.*\w*)\'',text)

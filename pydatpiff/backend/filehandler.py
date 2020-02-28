@@ -88,3 +88,10 @@ class Path():
     def standardizeName(name):
         return re.sub('[^A-Za-z0-9_\-\.] ', '', name)
 
+    @staticmethod
+    def writeFile(filename,content,mode='wb'):
+        with open(filename,mode) as f:
+            f.write(content)
+            return True
+
+            
