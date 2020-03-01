@@ -4,7 +4,7 @@ from .urls import Urls
 from .errors import MediaError
 from .utils.request import Session
 from .backend.audio.player import Player
-from .backend.mediasetup import Album,Mp3
+from .backend.mediasetup import EmbedPlayer,Mp3
 from .frontend.display import Print,Verbose,Show
 from .backend.filehandler import file_size,Tmp,Path
 from .backend.config import User,Datatype,Queued,Threader
@@ -102,9 +102,9 @@ class Media():
         :param: links - all mixtapes links
         """
         index,link = links
-        album = Album(link)
+        album = EmbedPlayer(link)
         name = album.name
-        tracks = Mp3(album.embed_response).songs
+        tracks = Mp3(album.player_response).songs
         if any(song in Datatype.strip_lowered(track) for track in tracks):
             return index,name 
 
@@ -143,9 +143,12 @@ class Media():
         
         param: link - Album's mixtape link
         """ 
-        self._album = Album(link)
-        response = self._album.embed_response
-        self._Mp3 = Mp3(response)
+        EP = EmbedPlayer(link)
+        self._Mp3 = Mp3(EP.player_response)
+        #get the ablum's uploader
+        self.uploader = EP.uploader
+        #get ablum bio
+        self.bio = EP.bio
         self.song_cache_storage = {}
 
        
@@ -177,7 +180,6 @@ class Media():
     def album(self):
         """Return the current album name."""
         return self.album_name
-        return Album.name
 
 
     @album.setter

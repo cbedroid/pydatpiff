@@ -180,7 +180,7 @@ class Android(BasePlayer):
         #spot in seconds
         with open(self.DROID_TMP,'wb') as mp3:
             self.current_position = position
-            print(self.info)
+            self.info
             spot = int(self.current_position+position) 
             topos = spot*self.bytes_per_sec if spot > 0 else 1*self.bytes_per_sec
             topos = int(topos)

@@ -153,8 +153,10 @@ class AlbumError(Error):
 
 
 class Mp3Error(Error):
-    pass
-
+    __error__  = {
+                   1: 'player id error',
+                 }
+ 
 
 class PlayerError(Error):
     __error__  = {
