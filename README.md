@@ -4,7 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
 # Introduction
 
-**PyDatpiff**   -  Unofficial Datpiff python program that interact with online [Datpiff](https://www.datpiff.com) Mixtapes. PyDatpiff allow users to play and download songs from thier favorite music artist.
+**PyDatpiff**   -  Unofficial [Datpiff](https://www.datpiff.com) Mixtapes. Listen and download the newest release songs to the oldies.
 
   - supports windows, mac, and linux
   - python 3.3 - above

@@ -11,8 +11,7 @@ class VLCPlayer(BasePlayer):
         try:
             self._vlc = vlc.Instance('-q')
             self._player = self._vlc.media_player_new()
-        except Exception as e:
-            print('VLC: ',e)
+        except:
             extended_msg = 'Please check if your device supports VLC'
             raise PlayerError(1,extended_msg)
 

@@ -35,18 +35,7 @@ class Android(BasePlayer):
         self._state.update(**kwargs)
 
 
-    def _is_playing(self,boolean=False):
-        """ 
-        Set the state of playing and pause.
-
-        param: boolean - True or False
-                True: sets playing True and pause False 
-                False: sets playing False and pause True 
-        """
-        self.state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
-
-
-
+    
     @property
     def elapse(self):
         """ 
@@ -117,7 +106,6 @@ class Android(BasePlayer):
             error = 'internal Error: android media path %s not found'%path
             raise AndroidError(error)
 
-
     
     def _format_time(self,pos=None):
         """Format current song time to clock format """
@@ -160,8 +148,14 @@ class Android(BasePlayer):
         # if track is paused 
         if self.state['pause'] and hasattr(self,'_last_position'):
             return self._last_position
-        
-        pos = time() - self._start_time
+        # Odd,but the the current_position + position
+        # is alway 3 seconds off vs the bytes_per_secs
+        # ex: bpr = 12345 * 5 = 61725
+        # but this is not the correct correlation
+        # to the actual position of the track so we add 3 more seconds
+        # to fix this problem.
+
+        pos = (time() - self._start_time) - 5
         self._last_position = pos
         return pos if pos > 0 else 0 
 
@@ -180,7 +174,6 @@ class Android(BasePlayer):
         #spot in seconds
         with open(self.DROID_TMP,'wb') as mp3:
             self.current_position = position
-            self.info
             spot = int(self.current_position+position) 
             topos = spot*self.bytes_per_sec if spot > 0 else 1*self.bytes_per_sec
             topos = int(topos)
@@ -209,6 +202,7 @@ class Android(BasePlayer):
         self._load_time = time()
         self.elapse = 0
 
+
     @property
     def play(self):
         self.__capturePauseDuration()
@@ -234,13 +228,41 @@ class Android(BasePlayer):
         self._is_playing(True)
 
 
-    def volume(self,vol=None):
+    @staticmethod
+    def __constrain_volume(level=75):
+        """
+        Constrain and map Termux(android linux app)
+        maxium and minium volume levels.
+        For more details: https://wiki.termux.com/wiki/Termux-volume
+        """
+        level = str(level).strip()
+        if not level.isnumeric():
+            raise TypeError()
+        level = int(level)
+        
+        max_level = 15
+        min_level = 0
+        percentage = level/max_level
+        if percentage > 1: percentage = 1
+        
+        results = percentage * max_level
+        if results > 0 and results < 1:
+            return 0
+        return round(results)
+     
+    def volume(self,vol=15):
         """
         Android volume controls
         :param: vol - set the media volume range 0 - 100 
         """
-        os.system('termux-volume music %s'% vol)
-
+        try:
+            vol = self.__constrain_volume(vol)
+        except:
+            return 
+        else:
+            cmd = 'termux-volume music %s'% vol
+            Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE)
+       
    
     @property
     def pause(self):

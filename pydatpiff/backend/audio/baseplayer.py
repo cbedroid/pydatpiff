@@ -24,7 +24,6 @@ class BaseMeta(type):
         methods =['setTrack', '_format_time','duration']
         # current_position,_song
 
-
         for method in methods:
             if method not in body:
                 error = 'Method: "%s.%s" must be implemented in derived class '\
@@ -67,6 +66,40 @@ class BasePlayer(metaclass=BaseMeta):
     def state(self,**state):
         self._state.update(**state)
 
+    def _is_playing(self,boolean=False):
+        """ 
+        Set the state of playing and pause.
+
+        param: boolean - True or False
+                True: sets playing True and pause False 
+                False: sets playing False and pause True 
+        """
+        self.state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
+
+    @staticmethod
+    def __wait(delay):
+        start = time()
+        while (time() - start) < 10:
+            pass
+
+    def _didTrackStop(self,mode=1): 
+        """Check if track has ended"""
+        WAIT = 2
+        current = self._format_time(self.current_position)
+        end = self._format_time(self.duration)
+
+        if current >= end:
+            #recheck position to see if track has ended or its a false positive
+            if mode == 1:
+                re_check = time()
+                while (time() - re_check) < WAIT:
+                    pass
+                return _didTrackStop(mode=2)
+
+            print('Monitoring changed state\n',self.state)
+            self._set_all_state(False,stop=True)
+            return True
+
 
     @Threader
     def _monitor(self):
@@ -76,6 +109,7 @@ class BasePlayer(metaclass=BaseMeta):
         """
         while not self.__is_monitoring:
             if self.state['playing']:
+                self._is_playing(True)
                 self.__is_monitoring = True
         print('Monitoring')
         # If media.autoplay changes track before song finish 
@@ -85,27 +119,24 @@ class BasePlayer(metaclass=BaseMeta):
         SLEEP_TIME = 3
     
         if True:
-            start = time()
-            while (time() - start) < 10:
-                pass
-
+            self.__wait(10)
             print('\n\n%s\nmonitoring\n%s'%(30*'-',30*'-'))
 
             while self.state['load']:
                 playing = self.state.get('playing')
                 if playing:
-                    sleep(SLEEP_TIME) # wait for track to load
+                    #sleep(SLEEP_TIME) 
+                    self.__wait(SLEEP_TIME) # wait for track to load
                     current_position = self._format_time(self.current_position)
                     endtime = self._format_time(self.duration)
-                    
-                    if current_position == endtime:
-                        print('Monitoring changed state\n',self.state)
-                        if not self.state['pause']:
-                            self._set_all_state(False,stop=True)
+                    print('Current: %s End: %s'%(current_position,endtime))
+
+                    if self._didTrackStop():
+                        break
 
             #If track is stop then recall function for next track
             self.__is_monitoring = False
-            self._monitor()            
+            self._monitor() # recursive callback           
         
     def setTrack(self,*args,**kwargs):
         raise NotImplementedError
