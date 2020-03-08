@@ -158,6 +158,11 @@ class Mp3Error(Error):
                  }
  
 
+class MvpError(Error):
+    __error__  = {
+                   1: 'song path does not exist',
+                 }
+ 
 class PlayerError(Error):
     __error__  = {
                    1: 'Unsupport media object',
