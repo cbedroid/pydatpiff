@@ -66,7 +66,7 @@ class BasePlayer(metaclass=BaseMeta):
     def state(self,**state):
         self._state.update(**state)
 
-    def _is_playing(self,boolean=False):
+    def _is_playing(self,boolean=None):
         """ 
         Set the state of playing and pause.
 
@@ -74,7 +74,11 @@ class BasePlayer(metaclass=BaseMeta):
                 True: sets playing True and pause False 
                 False: sets playing False and pause True 
         """
-        self.state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
+        if boolean is not None: # update state if boolean param True or False
+            self.state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
+        else:
+            # if boolean param not specified, then return the playing state
+            return self.state['playing']
 
     @staticmethod
     def __wait(delay):

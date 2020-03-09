@@ -1,5 +1,6 @@
 import subprocess 
 from mutagen.mp3 import MP3
+from ..config import Threader
 
 
 
@@ -25,9 +26,25 @@ class Popen(subprocess.Popen):
                 pass
 
 
+    @Threader
+    def register(self,callback,*args,**kwargs):
+        """
+        Kills subprocess Popen when error occur or when 
+        process job finish"""
+        print('Registering POLL')
+
+        while True:
+            if self.poll() is not None:
+                print('Killing Popen')
+                callback(*args,**kwargs)
+                self.kill()
+                break
+                
+
 class MetaData(MP3):
     def __init__(self,track):
         super().__init__(track)
+
 
     @property
     def trackDuration(self):
