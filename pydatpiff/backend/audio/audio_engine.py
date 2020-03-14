@@ -1,4 +1,5 @@
 import subprocess 
+import psutil
 from mutagen.mp3 import MP3
 from ..config import Threader
 
@@ -6,6 +7,8 @@ from ..config import Threader
 
 
 class Popen(subprocess.Popen):
+    registered_popen = []
+
     def __init__(self,*args,**kwargs):
         """ build subprocess Popen object"""
 
@@ -17,11 +20,10 @@ class Popen(subprocess.Popen):
 
     @staticmethod
     def kill_on_start():
-        try:
-            subprocess.check_output('pkill -9 mpv',shell=True)
-        except:
+        for process in psutil.process_iter():
             try:
-                subprocess.check_output('sudo pkill -9 mpv',shell=True)
+                if 'mpv' in process.name():
+                    process.terminate()
             except:
                 pass
 
@@ -31,15 +33,28 @@ class Popen(subprocess.Popen):
         """
         Kills subprocess Popen when error occur or when 
         process job finish"""
-        print('Registering POLL')
-
+        self.registered_popen.append(self) 
         while True:
             if self.poll() is not None:
-                print('Killing Popen')
                 callback(*args,**kwargs)
                 self.kill()
                 break
-                
+    
+
+    @classmethod
+    def unregister(cls):
+        """Unregister and terminate Popen process"""
+        for popen in cls.registered_popen:
+            popen.kill()
+        cls.registered_popen = []
+
+
+    @property
+    def is_running(self):
+        if self.poll() is None:
+            return True
+        return False
+
 
 class MetaData(MP3):
     def __init__(self,track):

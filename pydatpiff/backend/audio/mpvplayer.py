@@ -1,14 +1,13 @@
-import os 
 import re
-import fcntl
-import subprocess as sp
 from time import time 
 from functools import wraps
 from ..filehandler import Path
+from ..config import Threader
 from ...frontend.display import Print
 from ...errors import MvpError
 from .audio_engine import Popen,MetaData
 from .baseplayer import BasePlayer
+
 
 
 class MPV(BasePlayer):
@@ -29,9 +28,6 @@ class MPV(BasePlayer):
                 '%s'%song 
                 ]
 
-        #'--force-window',
-
-       
 
     def _format_time(self,pos=None):
         """Format current song time to clock format """
@@ -40,17 +36,32 @@ class MPV(BasePlayer):
         secs = int(pos%60)
         return  mins,secs
 
+    @property
+    def _previous_track_time(self):
+        """Returns the last captured time of track"""
+        return self.__previous_time
+        
+    @_previous_track_time.setter
+    def _previous_track_time(self,timer):
+        self.__previous_time = timer
+
+
         
     @property
     def current_position(self):
+        """current clock time position of track"""
         timer = 0
+
         if hasattr(self,'_time_elapse'):
             timer = time() - self._time_elapse
 
-            if self.state['pause']:
-                return self.__last_time_update
+            if self.state['pause']: # track was paused
+                paused = self._previous_track_time
+                return paused
 
-        self.__last_time_update = timer
+        self.__previous_time = timer
+        if self.state['stop']: # track stop 
+            return 0
         return timer
 
     @current_position.setter
@@ -79,11 +90,10 @@ class MPV(BasePlayer):
         """
 
         if  hasattr(self,'_popen'):
-            if self.state['load'] and self._popen is None: 
+            if self.state['load'] and self._popen.is_running: 
                 self._popen.stdin.write('{}\n'.format(cmd).encode('utf8'))
                 self._popen.stdin.flush()
                 return 
-        Print('No Track loaded')
 
 
     def setTrack(self,name,path):
@@ -95,20 +105,24 @@ class MPV(BasePlayer):
             self._metadata = MetaData(path)
         else:
             raise MvpError(1)
-        self.state['load'] = True
+
+        Popen.unregister()
+        self._popen = Popen(self._pre_popen(self._song_path))
      
 
     @property
     def play(self):
         #setTrack will handle track loading 
-        if self._is_playing() and self._popen.poll() is None:
+        if self.state['pause'] and self._popen.is_running:
             self.pause
             return 
-        
-        self._popen = Popen(self._pre_popen(self._song_path))
-        self._popen.register(callback=self._resetState)
-        self._time_elapse = time()
-        self._is_playing(True) 
+
+        elif not self.track_is_loaded:
+            self._popen.register(callback=self._resetState)
+            self._time_elapse = time()
+            self._autoAdjustPause()
+            self._is_playing(True) 
+            self.state['load'] = True
 
 
     @property
@@ -123,14 +137,13 @@ class MPV(BasePlayer):
         state = cmd[self.state['pause']]
         pause = 'set pause {} \n'.format(state)
         self._write_cmd(pause)
-
         last_pause_state = self.state['pause']
         current_pos = self.current_position
 
         self._is_playing(last_pause_state)
         # if the track is pause then capture the time it was pause 
         if self.state['pause']:
-            self.__last_time_update = self.current_position
+            self.__previous_time = self.current_position
 
 
     def _adjustTrackTime(self,sec):
@@ -138,35 +151,57 @@ class MPV(BasePlayer):
         Adjust the track's time in seconds when track is
         alter either by rewind,fast-forward, or paused.
         """
-        self._time_elapse += self.contrain_seek(sec)
+        constrains = self.constrain_seek(sec)
+        self._time_elapse += constrains 
+        self.__previous_time -= constrains 
 
 
-    @property
-    def contrain_seek(self,seek):
+    def constrain_seek(self,seek):
         """
         Force constraints on setting virtual timer,
         when rewinding and fast-fowarding.
         """
+        seek = float(seek)
         current_pos = self.current_position
-        if current_pos  - seek < 0:
+        if current_pos  + seek < 0:
             return 0
-        else:
-            return int(self.duration) * -1
 
-    def time_callback(f):
+        return int(seek) * -1
+
+
+    @Threader
+    def _autoAdjustPause(self):
+        """
+        Captures the time duration when the track is paused.
+        Once track is unpause time will be added to the original track time
+        (MPV._time_elapse).
+        This time will be used to calculate the accuracy of current_position
+        when pause state changes from pause to playing.
+        """
+
+        while True:
+            start = time()
+            test = time()
+            while self.state['pause']:
+                if time() - start >=1:
+                    self._time_elapse += time() - start
+                    start = time()
+
+
+    def _duration_callback(f):
         """
         Callback function that force track time to be alter
-        whenever track position is being seeked.
+        whenever track position is being seeked see: MPV._seeker.
         """
         @wraps(f)
         def inner(self,time_sec):
-            self._adjustTrackTime()
+            self._adjustTrackTime(time_sec)
             return  f(self,time_sec)
         return inner
     
 
 
-    @time_callback
+    @_duration_callback
     def _seeker(self,sec=5):
         """
         Control fast forward and rewind function.
@@ -193,9 +228,6 @@ class MPV(BasePlayer):
         sec = '-' + str(sec)
         self._seeker(sec)
         
-        # no need to catch TypeError while converting to int
-        # if seeker pass then obviously the data type is numeric.
-        
 
     def ffwd(self,sec):
         """
@@ -213,5 +245,5 @@ class MPV(BasePlayer):
         """Stop the current track from playing."""
         self._write_cmd('quit \n')
         self._resetState()
-        self._popen.kill()
-
+        self.state['stop'] = True
+        Popen.unregister()

@@ -80,6 +80,10 @@ class BasePlayer(metaclass=BaseMeta):
             # if boolean param not specified, then return the playing state
             return self.state['playing']
 
+    @property
+    def track_is_loaded(self):
+        return self.state['load']
+
     @staticmethod
     def __wait(delay):
         start = time()
