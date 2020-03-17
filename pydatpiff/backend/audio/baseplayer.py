@@ -177,7 +177,7 @@ class BasePlayer(metaclass=BaseMeta):
             mode = 'Stopped'
         print('TRACK:',self.name)
         print('MODE:',mode)
-        pos = 'POSITION: {0}:{1} - {2}:{3}'.format(c_min,c_sec,l_min,l_sec)
+        pos = '\nPOSITION: {0}:{1} - {2}:{3}\n'.format(c_min,c_sec,l_min,l_sec)
         print(pos)
 
     @property

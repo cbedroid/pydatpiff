@@ -36,22 +36,45 @@ class MPV(BasePlayer):
         secs = int(pos%60)
         return  mins,secs
 
+
+    @Threader
+    def registerPauseEvent(self):
+        """
+        Captures the time duration when the track is paused.
+        Once track is unpause time will be added to the original track time
+        (MPV._time_elapse).
+        This time will be used to calculate the accuracy of current_position
+        when pause state changes from pause to playing.
+        """
+
+        start = time()
+        rollback = 0
+        while self.state['pause']:
+            if time() - start >=1:
+                rollback+=1
+                start = time()
+
+            if not self.state['pause']:
+                self._time_elapse +=  rollback
+                break
+
+
     @property
     def _previous_track_time(self):
         """Returns the last captured time of track"""
         return self.__previous_time
         
+
     @_previous_track_time.setter
     def _previous_track_time(self,timer):
         self.__previous_time = timer
 
 
-        
     @property
     def current_position(self):
         """current clock time position of track"""
-        timer = 0
 
+        timer = 0
         if hasattr(self,'_time_elapse'):
             timer = time() - self._time_elapse
 
@@ -59,15 +82,15 @@ class MPV(BasePlayer):
                 paused = self._previous_track_time
                 return paused
 
-        self.__previous_time = timer
+        self._previous_track_time = timer
         if self.state['stop']: # track stop 
             return 0
         return timer
 
+
     @current_position.setter
     def current_position(self,position):
         self._time_elapse += position
-
 
 
     @property
@@ -120,7 +143,6 @@ class MPV(BasePlayer):
         elif not self.track_is_loaded:
             self._popen.register(callback=self._resetState)
             self._time_elapse = time()
-            self._autoAdjustPause()
             self._is_playing(True) 
             self.state['load'] = True
 
@@ -141,9 +163,12 @@ class MPV(BasePlayer):
         current_pos = self.current_position
 
         self._is_playing(last_pause_state)
-        # if the track is pause then capture the time it was pause 
         if self.state['pause']:
-            self.__previous_time = self.current_position
+            self.registerPauseEvent()
+
+        # if the track is pause then capture the time it was pause 
+        #if self.state['pause']:
+        #self.__previous_time = self.current_position
 
 
     def _adjustTrackTime(self,sec):
@@ -153,7 +178,8 @@ class MPV(BasePlayer):
         """
         constrains = self.constrain_seek(sec)
         self._time_elapse += constrains 
-        self.__previous_time -= constrains 
+        self.__previous_time += -constrains 
+        print('Previous time:',self._previous_time)
 
 
     def constrain_seek(self,seek):
@@ -167,25 +193,6 @@ class MPV(BasePlayer):
             return 0
 
         return int(seek) * -1
-
-
-    @Threader
-    def _autoAdjustPause(self):
-        """
-        Captures the time duration when the track is paused.
-        Once track is unpause time will be added to the original track time
-        (MPV._time_elapse).
-        This time will be used to calculate the accuracy of current_position
-        when pause state changes from pause to playing.
-        """
-
-        while True:
-            start = time()
-            test = time()
-            while self.state['pause']:
-                if time() - start >=1:
-                    self._time_elapse += time() - start
-                    start = time()
 
 
     def _duration_callback(f):
