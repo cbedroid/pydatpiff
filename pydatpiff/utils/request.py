@@ -1,12 +1,15 @@
 import requests
+import warning
 from .helper import String
 from ..errors import RequestError
+
 
 
 class Session(object):
     '''Dynamic way to way to keep requests.Session through out whole programs.'''
     
     TIMEOUT = 10
+    TIMEOUT_COUNT = 0
     def __new__(cls,*args,**kwargs):
         if not hasattr(cls,'cache'):
             cls.cache = {}
@@ -68,21 +71,32 @@ class Session(object):
             #HEAD
             if method == "head":
                 web = self.session.head(url,timeout=self.TIMEOUT)
+
         except requests.exceptions.InvalidURL as e:
             raise RequestError(1)
-            return 
+
+        except: requests.exceptions.Timeout:
+            self.TIMEOUT_COUNT +=1
+            if self.TIMEOUT_COUNT >= 3:
+                print('\n') # need for spacing
+                warn_msg = "\nWarning:Please your internet connection ! "
+                warning.warn(warn_msg)
+                self.TIMEOUT_COUNT = 0
+            raise RequestError(2):
+
         except Exception as e:
-            raise RequestError(2)
-            return 
+            raise RequestError(3)
          
+
         status = web.status_code
         try:
             web.raise_for_status()
         except:
-            raise RequestError(3)
+            raise RequestError(4)
         else:
             url = url.strip()
             self.put_in_cache(url,web)
+            self.TIMEOUT_COUNT = 0
         finally:
             return web
 

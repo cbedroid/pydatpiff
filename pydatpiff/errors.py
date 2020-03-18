@@ -167,7 +167,7 @@ class PlayerError(Error):
     __error__  = {
                    1: 'Unsupport media object',
                    2: 'no song found',
-                   3: 'Derive class missing function',
+                   3: 'derive class missing function',
                    4: 'call back method missing'
                  }    
 
@@ -175,9 +175,10 @@ class PlayerError(Error):
 class RequestError(Error):
     # _type = self.__class__._qualname__
     __error__ = {
-                 1: 'Invalid url scheme',
-                 2: 'Request failed',
-                 3: 'Request Non-200 status code',
+                 1: 'invalid url scheme',
+                 2: 'web page timed out',
+                 3: 'request failed',
+                 4: 'requests status code error',
                 }
 
 

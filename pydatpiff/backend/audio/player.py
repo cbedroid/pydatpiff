@@ -8,21 +8,25 @@ class Player:
     @classmethod
     def getPlayer(cls,*args,**kwargs):
         player = None
-        """
+
+
         try:
             return VLCPlayer()
         except:
             pass
-        """
+
         try:
-            print('USING MPV PLAYER')
             return MPV()
         except Exception as e:
-            print("MPV FAILED:",e)
+            pass
+
+
+        try:
+            return MPV()
+        except Exception as e:
             pass
 
         try:
-            print('USING ANDROID PLYER')
             return Android()
         except:
             pass

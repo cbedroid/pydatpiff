@@ -18,7 +18,7 @@
 # Installation
  - [VLC](https://www.videolan.org/vlc/index.html)- VideoLan Client media player and framework
   ### OR
-  - [MPV](https://mpv.io/installation/) -  MPV Framework. (For Android and Linux Support)
+  - [MPV](https://mpv.io/installation/) -  MPV Framework. ( For Android and Linux Support )
 
 ```bash
 pip install pydatpiff
@@ -131,8 +131,9 @@ Song's name __do not__ have to be an exact match.
 
 #OR
 
->>> media.play(2)
-
+>>> media.play(3)
+>>> Song &#9836;: Jay-Z - Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street
+Size:  1.91 MB
 ```
 
  ### CONTROLLING MEDIA PLAYER

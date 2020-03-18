@@ -1,9 +1,8 @@
+import os
 import subprocess 
-import psutil
+import atexit
 from mutagen.mp3 import MP3
 from ..config import Threader
-
-
 
 
 class Popen(subprocess.Popen):
@@ -12,18 +11,36 @@ class Popen(subprocess.Popen):
     def __init__(self,*args,**kwargs):
         """ build subprocess Popen object"""
 
-        self.kill_on_start()
+        self.stop_mpv()
         kwargs['stdin']  = subprocess.PIPE
         kwargs['stdout'] = subprocess.PIPE
         kwargs['stderr'] = subprocess.PIPE
+
+        atexit.register(self.kill_on_quit)
         super().__init__(*args,**kwargs)    
 
+
+
     @staticmethod
-    def kill_on_start():
-        for process in psutil.process_iter():
-            try:
-                if 'mpv' in process.name():
-                    process.terminate()
+    def _pid_of_mpv():
+        player = subprocess.check_output('pgrep -af mpv',shell=True)
+        if player:
+            return player.decode('utf8').split(' ')[0]
+
+    @classmethod
+    def stop_mpv(cls):
+        try: # for Linux device, Mac,Ubuntu,Debain...etc
+            return subprocess.check_call('pkill -9 mpv',shell=True)
+        except subprocess.CalledProcessError:
+            pid = cls._pid_of_mpv()
+            if not pid: # then mpv player was never invoked,we return here
+                return 
+        try:
+            return os.kill(int(pid),9) #kill mpv using os
+        except ProcessLookupError:
+            try: # For windows
+                return subprocess.check_call('taskkill /f /im mpv.exe',
+                        shell=True,stderr=subprocess.PIPE)
             except:
                 pass
 
@@ -56,6 +73,12 @@ class Popen(subprocess.Popen):
         return False
 
 
+    @classmethod
+    def kill_on_quit(cls):
+        cls.stop_mpv()
+
+
+
 class MetaData(MP3):
     def __init__(self,track):
         super().__init__(track)
@@ -64,10 +87,3 @@ class MetaData(MP3):
     @property
     def trackDuration(self):
         return self.info.length
-
-
-
-           
-
-
-

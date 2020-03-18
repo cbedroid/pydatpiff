@@ -84,6 +84,7 @@ class Mp3():
     def __len__(self):
         if self.songs:
             return len(self.songs)
+        return 0
 
 
     def __str__(self):

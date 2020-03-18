@@ -152,7 +152,7 @@ class Media():
         self.song_cache_storage = {}
 
        
-    def _getIndexOf(self, select):
+    def _track_index_of(self, select):
         """
         Parse all user input and return the correct song index.
         :param select: -  Media.songs name or index of Media.songs 
@@ -224,7 +224,7 @@ class Media():
         :param: name - name of song or song's index
         """
         songs = self.songs
-        index = self._getIndexOf(name)
+        index = self._track_index_of(name)
         if index is not None:
             self._selected_song = songs[index]
             self._current_index = index
@@ -273,7 +273,7 @@ class Media():
         :param: track - name of song  or song index
         """
 
-        selection = self._getIndexOf(track)
+        selection = self._track_index_of(track)
         if selection is None:
             return 
 
@@ -296,6 +296,7 @@ class Media():
     def autoplay(self):
         """Continuously play song from current album."""
         if hasattr(self,'_auto_play'):
+            self.player._media_autoplay = self._auto_play
             return self._auto_play
 
     @autoplay.setter
@@ -310,36 +311,45 @@ class Media():
         self._auto_play = auto
         self._continousPlay()
         if auto:
-            Verbose('SETTING AUTO PLAY ON')
+            Verbose('\t----- AUTO PLAY ON -----')
         else:
-            Verbose('SETTING AUTO PLAY OFF')
+            Verbose('\t----- AUTO PLAY OFF -----')
 
-
+        
     @Threader
     def _continousPlay(self):
         """ 
         Automatically play each song from Album when autoplay is enable.
         """    
         if self.autoplay:
-            total_song = len(self)
-            current_song =  self.song
-            if not current_song:
+            total_songs = len(self)
+            if not self.song:
                 Verbose('Must play a song before setting autoplay')
                 return 
 
-            current_track = self._getIndexOf(current_song)+1
-            while current_track < len(self) and self.autoplay:
-                state = self.player._state.get('playing')
-                next_track = current_track + 1
-                if not state:
-                    Verbose('Loading next track')
-                    if next_track > len(self):
-                        Verbose('AUTO PLAY OFF')
+            trackno = self._track_index_of(self.song)+2
+            if trackno > total_songs:
+                Print('AutoPlayError: Current track is the last track')
+                self.autoplay = False
+                return
+
+            while self.autoplay:
+                current_track = self._track_index_of(self.song)+1
+                stopped = self.player._state.get('stop')
+                if  stopped:
+                    next_track = current_track + 1
+
+                    if next_track > total_songs:
+                        Verbose('No more songs to play')
                         self.autoplay = False
                         break
+                    else:
+
+                    Verbose('Loading next track')
                     Verbose('AUTO PLAY ON')
                     self.play(next_track)
-                    current_track = next_track
+                    while self.player._state['stop']:
+                        pass
             
 
     def play(self, track=None, demo=False):
@@ -403,7 +413,7 @@ class Media():
         :param: rename - rename the song (optional)
                 default will be song's name 
         """
-        selection = self._getIndexOf(track)
+        selection = self._track_index_of(track)
         if selection is None:
             return
         

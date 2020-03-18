@@ -1,8 +1,8 @@
 import threading
 from time import sleep,time
 from ...frontend.display import Print
-from ...errors import PlayerError
 from ..config import Threader
+from ...errors import PlayerError
 
 class DerivedError(Exception):
     pass
@@ -92,7 +92,15 @@ class BasePlayer(metaclass=BaseMeta):
 
     def _didTrackStop(self,mode=1): 
         """Check if track has ended"""
-        WAIT = 2
+
+        """
+            Give a moment to allow track time to fully end.
+            Critical  while autoplay feature is enabled.
+            (see pydatpiff.media.autoplay) 
+        """
+        #WAIT = 2
+        WAIT = 1 
+               
         current = self._format_time(self.current_position)
         end = self._format_time(self.duration)
 
@@ -102,9 +110,8 @@ class BasePlayer(metaclass=BaseMeta):
                 re_check = time()
                 while (time() - re_check) < WAIT:
                     pass
-                return _didTrackStop(mode=2)
+                return self._didTrackStop(mode=2)
 
-            print('Monitoring changed state\n',self.state)
             self._set_all_state(False,stop=True)
             return True
 
@@ -119,17 +126,16 @@ class BasePlayer(metaclass=BaseMeta):
             if self.state['playing']:
                 self._is_playing(True)
                 self.__is_monitoring = True
-        print('Monitoring')
+        #print('Monitoring')
         # If media.autoplay changes track before song finish 
         # adjust sleep time 
 
         # wait for 3 sec, if the track is load then monitor when the track stops
-        SLEEP_TIME = 3
+        #SLEEP_TIME = 3
+        SLEEP_TIME = 1
     
         if True:
             self.__wait(10)
-            print('\n\n%s\nmonitoring\n%s'%(30*'-',30*'-'))
-
             while self.state['load']:
                 playing = self.state.get('playing')
                 if playing:
@@ -137,7 +143,6 @@ class BasePlayer(metaclass=BaseMeta):
                     self.__wait(SLEEP_TIME) # wait for track to load
                     current_position = self._format_time(self.current_position)
                     endtime = self._format_time(self.duration)
-                    print('Current: %s End: %s'%(current_position,endtime))
 
                     if self._didTrackStop():
                         break
@@ -168,17 +173,25 @@ class BasePlayer(metaclass=BaseMeta):
 
         l_min,l_sec = self._format_time(self.duration)
         l_sec = l_sec if len(str(l_sec)) >1 else str(l_sec).zfill(2) 
-        
+       
+        #9615 
         if self.state['playing']:
-            mode = 'Playing' 
+            mode = chr(9199) or '|>' 
         elif self.state['pause']:
-            mode = 'Paused'
+            mode = chr(9208) or '||'
         else:
-            mode = 'Stopped'
-        print('TRACK:',self.name)
-        print('MODE:',mode)
-        pos = '\nPOSITION: {0}:{1} - {2}:{3}\n'.format(c_min,c_sec,l_min,l_sec)
-        print(pos)
+            mode = chr(9209) or '[]'
+        Print('\n%s TRACK: %s'%(chr(9836),self.name))
+        pos = '{0} {1}:{2} - {3}:{4}\n'.format(mode,
+                                                c_min,c_sec,
+                                                l_min,l_sec)
+        if hasattr(self,'_media_autoplay'):
+            if self._media_autoplay:
+                Print(" "*6,chr(9850),pos)
+                return
+
+        Print(" "*6,pos)
+
 
     @property
     def _volumeLevel(self):

@@ -40,18 +40,19 @@ def Print(*args):
                 
 
 def Verbose(*args):
-    verbose = output()
-    if not verbose:
+    if not output():
         return 
     Print(*args)
 
 
 class Show():
+    """Flashes media info message to user"""
     @staticmethod
     def mediaPlayMsg(artist,songname,size,demo=False):
-        sorf = 'Demo' if demo else 'Full Song'
-        Verbose('\n%s %s %s' % ('-'*20, sorf, '-'*20))
-        Verbose('Song: %s - %s' % (artist, songname))
+        if demo:
+            Verbose('\n%s %s %s' % ('-'*20, 'DEMO', '-'*20))
+        Verbose('\nArtist: %s'%artist)
+        Verbose('Song: %s' % songname)
         Verbose("Size:", size)
  
     @staticmethod

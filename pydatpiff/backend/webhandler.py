@@ -64,7 +64,6 @@ class MediaScrape:
         try:
             return re.search('.*profile/(.*\w*.*)"',string).group(1)
         except Exception as e:
-            print('WH uploader',e)
             return " ";
 
 
@@ -74,10 +73,8 @@ class MediaScrape:
             desc = re.findall('description"\scontent="(.*)"',string)
             if desc:
                 return Html.remove_ampersands(desc[-1])[0].strip()
-            print("DESC:',desc")
             return " "
         except Exception as e:
-            print(e)
             return " " 
 
 

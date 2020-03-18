@@ -150,25 +150,26 @@ class MPV(BasePlayer):
     @property
     def pause(self):
         """Pause and unpause the track."""
+        if self.state['load']:
 
-        cmd = { True:'no',
-                False:'yes'
-              } 
-        # set pause according to the state of pause.
-        # if state is paused then unpause and vice versa.
-        state = cmd[self.state['pause']]
-        pause = 'set pause {} \n'.format(state)
-        self._write_cmd(pause)
-        last_pause_state = self.state['pause']
-        current_pos = self.current_position
+            cmd = { True:'no',
+                    False:'yes'
+                  } 
+            # set pause according to the state of pause.
+            # if state is paused then unpause and vice versa.
+            state = cmd[self.state['pause']]
+            pause = 'set pause {} \n'.format(state)
+            self._write_cmd(pause)
+            last_pause_state = self.state['pause']
+            current_pos = self.current_position
 
-        self._is_playing(last_pause_state)
-        if self.state['pause']:
-            self.registerPauseEvent()
+            self._is_playing(last_pause_state)
+            if self.state['pause']:
+                self.registerPauseEvent()
 
-        # if the track is pause then capture the time it was pause 
-        #if self.state['pause']:
-        #self.__previous_time = self.current_position
+        else:
+            print('No track is playing')
+            return -1
 
 
     def _adjustTrackTime(self,sec):
@@ -179,7 +180,6 @@ class MPV(BasePlayer):
         constrains = self.constrain_seek(sec)
         self._time_elapse += constrains 
         self.__previous_time += -constrains 
-        print('Previous time:',self._previous_time)
 
 
     def constrain_seek(self,seek):
