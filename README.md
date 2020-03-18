@@ -1,4 +1,5 @@
 
+  
 <img src="https://raw.github.com/cbedroid/pydatpiff/master/github/Logo.png" width="800" height="200">
 
 [![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
@@ -14,14 +15,31 @@
 **PyDatpiff requires:**
  - see requirements:  [requirements.txt](https://github.com/cbedroid/pydatpiff/blob/master/requirements.txt)
 - *python >= 3.3*
-- 
+ 
 # Installation
- - [VLC](https://www.videolan.org/vlc/index.html)- VideoLan Client media player and framework
-  ### OR
-  - [MPV](https://mpv.io/installation/) -  MPV Framework. ( For Android and Linux Support )
+ Initial media player uses VLC to play music.
+ For systems that are incompatible with  VLC,  MPV will be used as a fallback  player.
 
+&nbsp; &nbsp;  &nbsp;   &nbsp;  &nbsp;  &nbsp;  &nbsp; *click link to download*
+ 
+[VLC](https://www.videolan.org/vlc/index.html)- VideoLan Client media player and framework.
+
+[MPV](https://mpv.io/installation/) -  MPV Framework. ( For Android and Linux Support )
+
+For linux systems,  &nbsp; use `apt-get` to  install required repos
+
+#### VLC
+```bash 
+sudo apt-get install vlc 
+```
+#### MPV
+```bash 
+sudo apt-get install mpv 
+```
+
+#### Install Pydatpiff Module
 ```bash
-pip install pydatpiff
+pip3 install pydatpiff
 ```
 
 # Quick Start
@@ -30,7 +48,7 @@ pip install pydatpiff
 	
 There are two parameters that can be pass to Mixtapes Instance.
 
-*Only one parameter should be called at a time. If no parameter is pass, category      will    be set the __"hot"__.*
+Only one parameter should be called at a time. If no parameter is pass, category will be set to   __"hot"__ by default. 
 - **params:** `category` and `search`:
 	 - __*category*__ :
 	    
@@ -39,8 +57,6 @@ There are two parameters that can be pass to Mixtapes Instance.
      - __*search*__:
 		
         - artist name or artist mixtape name.
-
-
 
 
 ---
@@ -62,9 +78,7 @@ There are two parameters that can be pass to Mixtapes Instance.
 ```python
 import pydatpiff
 >>> mix = pydatpiff.Mixtapes(category='hot')
-
 #OR
-
 #Search for an artist's mixtape
 >>> mix = pydatpiff.Mixtapes(search='Jay-Z')
 
@@ -95,12 +109,12 @@ import pydatpiff
 
 ```python
 
-#We pass in the 'mix' object from Mixtapes class
+#We pass in the "mix" object from Mixtapes class
 >>> media = pydatpiff.Media(mix)
 
-#Set the media to an ablum.
+#Set the media player to an ablum.
 >>> media.setMedia('Creative Control')
-#Or
+#OR
 >>> media.setMedia(1) # set media by index.  1='Creative Control'
 
 #TO VIEW ALL AVAILABLE SONGS
@@ -108,9 +122,10 @@ import pydatpiff
 ```
  [ 'Jay-Z - Intro', 'Jay-Z - Advantage Carter (Prod. By Green Lantern)', 'Jay-Z - Welcome 2 Atla                                                                                                nta V103 Feat. Young Jeezy & DJ Greg Street', "Jay-Z - Jay's Back ASAP", 'Jay-Z - Live In London                                                                                                ', 'Jay-Z - Green Magic', 'Jay-Z - Brooklyn Sound Boy', 'Jay-Z - Child Abuse (Prod. By Green Lan                                                                                                tern)', 'Jay-Z - Jay-Z Speaks On Green Lantern', 'Jay-Z - Flashy Life', 'Jay-Z - Got Me On My Sh                                                                                                it (Prod. By Green Lantern)',..etc ]
 
---- --
+--- --- 
 # Find A Song 
-<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/EmojiThinking.png" width="100" height="100"> **. . . CANT FIND A SONG??**
+
+<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/EmojiThinking.png" width="100" height="100"> **. . . CANT FIND A SONG ??**
 ```python
    #Search for a song
    >>> media.findSong('green lan') # returns mixtape's index and name
@@ -132,39 +147,47 @@ Song's name __do not__ have to be an exact match.
 #OR
 
 >>> media.play(3)
->>> Song &#9836;: Jay-Z - Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street
-Size:  1.91 MB
 ```
+---
+>
+> ### Play Songs -  &#9836;&#9836;&#9836;  
+>  Artist: Jay-Z
+
+> Song: Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street
+
+> Size:  1.91 MB
+
+---
 
  ### CONTROLLING MEDIA PLAYER
- Media player *can   `rewind` , `fast-forward` , `pause` ,  `stop` and control `volume`*.
+ Media player *can    `rewind` , `fast-forward` , `pause` ,  `stop` and control `volume`* of song.
 
 ``` python
  # create an object of the player class
  >>> player = media.player
 
- # Rewind
->>> player.rewind()
+ # Rewind ⏪
+>>> player.rewind() 
 >>> player.rewind(10) # rewind 10 sec ago
 
-# Fast-Forward
->>> player.ffwd()
+# Fast-Forward ⏩
+>>> player.ffwd() 
 >>> player.ffwd(10) # fast-forward 10 sec ahead
 
-# Pause
+# Pause ⏸
 >>> player.pause
 
-# Stop
+# Stop ⏹
 >>> player.stop # stop song
 
-# Volume
+# Volume 🔊
 >>> player.volume(50) # set media volume to 50
 >>> player.volumeDown(5) # set media volume down 5 steps
 >>> player.volumeUp(5) # set media volume up 5 steps
 
 ```
-
-  ### DOWNLOAD SONG AND ALBUM
+--- 
+  ### DOWNLOAD SONGS AND ALBUMS
   - **Download Song**
 	  
 	   - __params__: `song` , `output`, and `rename`
@@ -183,12 +206,12 @@ Size:  1.91 MB
 
 ```python
 #Download a single song
->>> media.download(1,output="directory_to_save_song")
+>>> media.download(3,output="directory_to_save_song")
 #OR
 >>> media.download('Welcome',output="directory_to_save_song")
 
 
-#Download whole album
+#Download full album
 >>> media.downloadAlbum(output='directory_to_save_album')
 ```
 --- ---
@@ -196,5 +219,3 @@ Size:  1.91 MB
 - [Code](https://github.com/cbedroid/pydatpiff)
 - [PyPI](https://pypi.org/project/pydatpiff/)
 - [Issues & Bugs](https://github.com/cbedroid/pydatpiff/issues)
-
-
