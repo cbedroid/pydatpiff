@@ -2,7 +2,7 @@ import os
 import re
 import sys 
 from time import time
-from subprocess import PIPE,Popen
+from subprocess import PIPE,Popen,check_call
 from mutagen.mp3 import MP3
 from ..filehandler import Path
 from ..config import Threader
@@ -22,10 +22,18 @@ class Android(BasePlayer):
 
     def __init__(self,*args,**kwargs):
         """ Initialize BasePlayer from Android class"""
+        try:
+            self._test_android()
+        except:
+            raise AndroidError('IncompatableAndroidDevice')
         super(Android,self).__init__(*args,**kwargs)
     
     def __len__(self):
         return len(self.__content)
+
+    @staticmethod
+    def _test_android():
+        check_call('am start',shell=True)
 
 
     def _resetState(self,**kwargs):

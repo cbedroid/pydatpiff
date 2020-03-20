@@ -1,7 +1,7 @@
 import os
 import io
 from .urls import Urls
-from .errors import MediaError
+from .errors import MediaError,InstallationError
 from .utils.request import Session
 from .backend.audio.player import Player
 from .backend.mediasetup import EmbedPlayer,Mp3
@@ -29,7 +29,7 @@ class Media():
                 cls.player = None
 
             if cls.player is None: # Incase user reinitalize Media class
-                raise MediaError(7)
+                raise MediaError(7,InstallationError._extra)
 
         return super(Media, cls).__new__(cls)
 

@@ -187,3 +187,12 @@ class BuildError(Error):
                  1, 'user selection',
                 }
 
+class InstallationError(Error):
+    _extra = "\nPydatpiff Audio requires either VLC or MPV installation." \
+            "\n\nView"\
+            " https://github.com/cbedroid/pydatpiff/blob/master/README.md" \
+            " for more installation instructions."""
+    __error__ = {
+                 1, 'Pydatpiff installion error',
+                }
+
