@@ -1,12 +1,12 @@
 import re
 from time import time 
 from functools import wraps
-from ..filehandler import Path
-from ..config import Threader
-from ...frontend.display import Print
-from ...errors import MvpError
 from .audio_engine import Popen,MetaData
 from .baseplayer import BasePlayer
+from ..filehandler import Path
+from ..config import Threader
+from ...errors import MvpError
+from ...frontend.display import Print
 
 
 
@@ -60,29 +60,27 @@ class MPV(BasePlayer):
 
 
     @property
-    def _previous_track_time(self):
-        """Returns the last captured time of track"""
+    def _last_paused_time(self):
+        """Returns the last time track was paused"""
         return self.__previous_time
         
 
-    @_previous_track_time.setter
-    def _previous_track_time(self,timer):
+    @_last_paused_time.setter
+    def _last_paused_time(self,timer):
         self.__previous_time = timer
 
 
     @property
     def current_position(self):
-        """current clock time position of track"""
+        """Current position's time of track"""
 
         timer = 0
         if hasattr(self,'_time_elapse'):
             timer = time() - self._time_elapse
-
             if self.state['pause']: # track was paused
-                paused = self._previous_track_time
-                return paused
+                return self._last_paused_time
 
-        self._previous_track_time = timer
+        self._last_paused_time = timer
         if self.state['stop']: # track stop 
             return 0
         return timer
@@ -100,7 +98,7 @@ class MPV(BasePlayer):
 
 
     def _resetState(self,**kwargs):
-        """Reset all state of track (see Android.state)"""
+        """Reset all track's states (see Android.state)"""
         self._state = dict(playing=False,pause=False,
             load=False,stop=False)
         self._state.update(**kwargs)
@@ -254,3 +252,4 @@ class MPV(BasePlayer):
         self._resetState()
         self.state['stop'] = True
         Popen.unregister()
+

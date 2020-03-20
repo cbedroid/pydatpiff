@@ -48,10 +48,11 @@ class Media():
         else:
             return 0
 
-    def __init__(self, mixtape=None):
+    def __init__(self, mixtape=None,**kwargs):
         """ 
         Initialize Media and load all mixtapes.
-        :params: mixtape - Datpiff.Mixtapes object
+
+        :param: mixtape - Datpiff.Mixtapes object
         """
         if 'mixtapes.Mixtapes' not in str(type(mixtape)):
             raise MediaError(2,'must pass a mixtape object to Media class')
@@ -63,7 +64,7 @@ class Media():
         self._session = Session()
         self.mixtape = mixtape
         self._artist_name = None
-        self.album_name = None
+        self._album_name = None
         self._current_index = None
         self._selected_song = None
         self._downloaded_song = None
@@ -130,7 +131,7 @@ class Media():
 
         # set up all Album's Info
         self._artist_name = self.mixtape.artists[result]
-        self.album_name = self.mixtape.mixtapes[result]
+        self._album_name = self.mixtape.mixtapes[result]
         link = self.mixtape._links
 
         self._setup_Album_and_Mp3(link[result])
@@ -179,7 +180,7 @@ class Media():
     @property
     def album(self):
         """Return the current album name."""
-        return self.album_name
+        return self._album_name
 
 
     @album.setter
@@ -343,7 +344,6 @@ class Media():
                         Verbose('No more songs to play')
                         self.autoplay = False
                         break
-                    else:
 
                     Verbose('Loading next track')
                     Verbose('AUTO PLAY ON')

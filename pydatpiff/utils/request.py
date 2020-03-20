@@ -1,5 +1,5 @@
 import requests
-import warning
+import warnings
 from .helper import String
 from ..errors import RequestError
 
@@ -75,14 +75,14 @@ class Session(object):
         except requests.exceptions.InvalidURL as e:
             raise RequestError(1)
 
-        except: requests.exceptions.Timeout:
+        except requests.exceptions.Timeout:
             self.TIMEOUT_COUNT +=1
             if self.TIMEOUT_COUNT >= 3:
                 print('\n') # need for spacing
                 warn_msg = "\nWarning:Please your internet connection ! "
-                warning.warn(warn_msg)
+                warnings.warn(warn_msg)
                 self.TIMEOUT_COUNT = 0
-            raise RequestError(2):
+            raise RequestError(2)
 
         except Exception as e:
             raise RequestError(3)

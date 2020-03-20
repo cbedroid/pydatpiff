@@ -1,8 +1,7 @@
-import traceback
-from .androidplayer import Android, AndroidError
-from .vlcplayer import VLCPlayer
 from .mpvplayer import MPV
+from .vlcplayer import VLCPlayer
 from ...errors import PlayerError
+from .androidplayer import Android, AndroidError
 
 class Player:
     @classmethod
@@ -22,14 +21,9 @@ class Player:
 
 
         try:
-            return MPV()
-        except Exception as e:
-            pass
-
-        try:
             return Android()
         except:
             pass
 
-        raise TypeError('NO player has been found')
+        raise TypeError('No player has been found')
 

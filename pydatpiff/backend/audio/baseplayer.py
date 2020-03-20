@@ -1,33 +1,37 @@
 import threading
 from time import sleep,time
-from ...frontend.display import Print
 from ..config import Threader
 from ...errors import PlayerError
+from ...frontend.display import Print
 
 class DerivedError(Exception):
     pass
 
 
-'''
-#TODO:name_change
-    duration (inherited)  ->> duration
-'''
 class BaseMeta(type):
     """
     For Authors and Contributors only !
     Metaclass that will force constrains on any derived class that inherit BasePlayer
 
     Certain functions must be available in derived subclass.
-    All of the functions and method will be force here
+    All of the functions and methods will be force here
     """
     def __new__(cls,name,bases,body):
-        methods =['setTrack', '_format_time','duration']
-        # current_position,_song
+        methods =['setTrack', '_format_time',
+                 'duration','_seeker',
+                 ]
+
+        #more variables: _songs,current_position
+
+        cls._name = name
+        cls._bases = bases
+        cls._body = body
 
         for method in methods:
             if method not in body:
                 error = 'Method: "%s.%s" must be implemented in derived class '\
-                        '"%s" to use BasePlayer'%(name,method,name)
+                        'to use BasePlayer'%(name,method)
+
                 raise DerivedError(error)
         return super().__new__(cls,name,bases,body)
 

@@ -8,6 +8,7 @@ import concurrent.futures as cf
 import threading
 from functools import wraps
 from ..utils.request import Session
+from ..errors import BuildError
 
 
 

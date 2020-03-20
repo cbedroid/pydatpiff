@@ -15,7 +15,6 @@ class Popen(subprocess.Popen):
         kwargs['stdin']  = subprocess.PIPE
         kwargs['stdout'] = subprocess.PIPE
         kwargs['stderr'] = subprocess.PIPE
-
         atexit.register(self.kill_on_quit)
         super().__init__(*args,**kwargs)    
 
@@ -32,17 +31,22 @@ class Popen(subprocess.Popen):
         try: # for Linux device, Mac,Ubuntu,Debain...etc
             return subprocess.check_call('pkill -9 mpv',shell=True)
         except subprocess.CalledProcessError:
+            pass
+
+        try:
             pid = cls._pid_of_mpv()
             if not pid: # then mpv player was never invoked,we return here
                 return 
-        try:
+
             return os.kill(int(pid),9) #kill mpv using os
         except ProcessLookupError:
-            try: # For windows
-                return subprocess.check_call('taskkill /f /im mpv.exe',
-                        shell=True,stderr=subprocess.PIPE)
-            except:
-                pass
+            pass
+
+        try: # For windows
+            return subprocess.check_call('taskkill /f /im mpv.exe',
+                            shell=True,stderr=subprocess.PIPE)
+        except:
+            pass
 
 
     @Threader
@@ -87,3 +91,4 @@ class MetaData(MP3):
     @property
     def trackDuration(self):
         return self.info.length
+
