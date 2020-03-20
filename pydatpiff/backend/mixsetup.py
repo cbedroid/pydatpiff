@@ -21,6 +21,16 @@ class Pages():
         Return a list of html page links from mixtapes.Mixtapes._Start method.
         """
         try:
+            """
+                What we are trying to accomplish.
+                ---------------------------------
+            On pydatpiff.Mixtape startup, once a user select a category or 
+            search for an artist. We then grab the content from that reponse.
+            The initial request should return the FIRST page of the website.
+            DAMN IT,we are greedy and we want them all!! So we parse through
+            the content and search for any album links belonging to the artist.
+            """
+
             # captures the queried response text
             XPath = re.findall(r'class\="links"(.*[\n\r]*.*\d)*</a>'
                                 ,self.base_response.text)
@@ -30,7 +40,7 @@ class Pages():
             # map the convert_href to the base_url 
             return [''.join((self.base_url,link)) for link in convert_href]
         except: 
-            # No page numbers in original url text,then return the original url
+            # if No page numbers in original url text,then return the original url
             return [self.base_response.url]
 
 
@@ -70,7 +80,7 @@ class Pages():
                         if pat is not None))
                         for RT in list_response_text]
 
-        # hackable way to fix this function from not return data on first try
+        # hackable way to fix this function when its not returning data on first try
         # recalling the function if its returns None 
         if not data:
             if self.trys < self.RETRY:
@@ -79,7 +89,7 @@ class Pages():
             else:
                 raise MixtapesError(3)
         elif len(data) < self.MAX_MIXTAPES and not bypass:
-            # Try to get the maximun amount of mixtapes
+            # Try to get the maximum amount of mixtapes
             # Since the first time this function is called, the data weirdly return None
             # We keep trying until we get the max amount of mixtapes
 

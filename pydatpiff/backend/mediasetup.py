@@ -1,7 +1,7 @@
 import re
 from .webhandler import MediaScrape
 from ..urls import Urls
-from ..utils.request import Session
+from ..utils.request import Session,requests
 from ..errors import AlbumError
 
 
@@ -115,9 +115,12 @@ class Mp3():
     @property
     def urlencode_track(self):
         """
-        Track prefix song  
-        Return url encoded song index joined with song name 
-        Ex: 02) - Off the Wall.mp3' -->  02)%20-%20Off%20the%20Wall.mp3
+        Url encodes all mp3 songs' name 
+        Each song will be prefix with its track index and url encoded.
+
+        return: - A list of url encoded songs. 
+                return datatype: list
+        Ex:-02) - Off the Wall.mp3' -->  02)%20-%20Off%20the%20Wall.mp3
         """
         return MediaScrape.get_mp3_title(str(self))
 
@@ -133,8 +136,7 @@ class Mp3():
         except:
             Mp3Error(1)
 
-    
-    
+
     @property
     def mp3Urls(self):
         mp3 = []
