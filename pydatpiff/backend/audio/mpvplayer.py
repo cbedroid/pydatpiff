@@ -138,7 +138,7 @@ class MPV(BasePlayer):
             self.pause
             return 
 
-        elif not self.track_is_loaded:
+        elif not self._track_is_loaded:
             self._popen.register(callback=self._resetState)
             self._time_elapse = time()
             self._is_playing(True) 

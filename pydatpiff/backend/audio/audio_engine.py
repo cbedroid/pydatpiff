@@ -11,7 +11,6 @@ class Popen(subprocess.Popen):
     def __init__(self,*args,**kwargs):
         """ build subprocess Popen object"""
 
-        self.stop_mpv()
         kwargs['stdin']  = subprocess.PIPE
         kwargs['stdout'] = subprocess.PIPE
         kwargs['stderr'] = subprocess.PIPE
@@ -19,12 +18,15 @@ class Popen(subprocess.Popen):
         super().__init__(*args,**kwargs)    
 
 
-
     @staticmethod
     def _pid_of_mpv():
-        player = subprocess.check_output('pgrep -af mpv',shell=True)
-        if player:
-            return player.decode('utf8').split(' ')[0]
+        try:
+            player = subprocess.check_output('pgrep -af mpv',shell=True)
+            if player:
+                return player.decode('utf8').split(' ')[0]
+        except:
+            return 
+
 
     @classmethod
     def stop_mpv(cls):
@@ -50,14 +52,15 @@ class Popen(subprocess.Popen):
 
 
     @Threader
-    def register(self,callback,*args,**kwargs):
+    def register(self,callback=None,*args,**kwargs):
         """
         Kills subprocess Popen when error occur or when 
         process job finish"""
         self.registered_popen.append(self) 
         while True:
             if self.poll() is not None:
-                callback(*args,**kwargs)
+                if callback:
+                    callback(*args,**kwargs)
                 self.kill()
                 break
     
@@ -67,11 +70,11 @@ class Popen(subprocess.Popen):
         """Unregister and terminate Popen process"""
         for popen in cls.registered_popen:
             popen.kill()
-        cls.registered_popen = []
+        #cls.registered_popen = []
 
 
     @property
-    def is_running(self):
+    def is_Alive(self):
         if self.poll() is None:
             return True
         return False
@@ -80,7 +83,11 @@ class Popen(subprocess.Popen):
     @classmethod
     def kill_on_quit(cls):
         cls.stop_mpv()
-
+    
+    @classmethod
+    def kill_on_start(cls):
+        for process in self.registered_popen:
+            process.kill() 
 
 
 class MetaData(MP3):

@@ -7,7 +7,6 @@ class Player:
     @classmethod
     def getPlayer(cls,*args,**kwargs):
         player = None
-
         try:
             return VLCPlayer()
         except:
@@ -18,11 +17,12 @@ class Player:
         except Exception as e:
             pass
 
-        """
         try:
             return Android()
         except:
             pass
-        """
+
         raise InstallationError(1,MediaError,_extra)
 
+        
+        

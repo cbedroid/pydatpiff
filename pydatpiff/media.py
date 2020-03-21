@@ -24,7 +24,7 @@ class Media():
 
         if not hasattr(cls,'player'):
             try:
-                cls.player = Player.getPlayer()
+                cls.player = Player.getPlayer(**kwargs)
             except Exception as e:
                 cls.player = None
 

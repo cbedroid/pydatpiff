@@ -85,7 +85,7 @@ class BasePlayer(metaclass=BaseMeta):
             return self.state['playing']
 
     @property
-    def track_is_loaded(self):
+    def _track_is_loaded(self):
         return self.state['load']
 
     @staticmethod

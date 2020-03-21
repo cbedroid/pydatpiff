@@ -65,7 +65,7 @@ class Logger(object):
 class Error(Exception):
     __error__ = {
                  1:'invalid mixtapes object',
-                 2:'no mixtapes found'
+                 2:'no mixtapes found',
                 }
 
     code = None
@@ -168,7 +168,8 @@ class PlayerError(Error):
                    1: 'Unsupport media object',
                    2: 'no song found',
                    3: 'derive class missing function',
-                   4: 'call back method missing'
+                   4: 'call back method missing',
+                   5: 'unsupported player',
                  }    
 
 
