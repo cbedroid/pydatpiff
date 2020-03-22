@@ -162,7 +162,7 @@ class MPV(BasePlayer):
                 self.registerPauseEvent()
 
         else:
-            print('No track is playing')
+            print('No track playing')
             return -1
 
 

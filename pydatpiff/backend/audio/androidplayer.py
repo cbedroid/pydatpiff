@@ -35,14 +35,6 @@ class Android(BasePlayer):
     def _test_android():
         check_call('am start',shell=True)
 
-
-    def _resetState(self,**kwargs):
-        """Reset all state of track (see Android.state)"""
-        self._state = dict(playing=False,pause=False,
-            load=False,stop=False)
-        self._state.update(**kwargs)
-
-
     
     @property
     def elapse(self):
@@ -73,12 +65,11 @@ class Android(BasePlayer):
         while True:
             start = time()
             test = time()
-            while self.state['pause']:
+            while self._isTrackPaused:
                 if time() - start >=1:
                     self._start_time += time()- start
                     start = time()
-                if not self.state['pause']:
-                    print('Real time Stopped')
+                if not self._isTrackPaused:
                     break
 
 
@@ -129,7 +120,7 @@ class Android(BasePlayer):
         self.__Mutagen = MP3(self.__meta_data_path)
         with open(self._song_path,'rb') as f:
             self.__content = f.read()
-        self._state['load'] = True
+        self._isTrackLoaded = True
 
 
     @property
@@ -154,7 +145,7 @@ class Android(BasePlayer):
     def current_position(self):
         """Current time position of track"""
         # if track is paused 
-        if self.state['pause'] and hasattr(self,'_last_position'):
+        if self._isTrackPaused and hasattr(self,'_last_position'):
             return self._last_position
         # Odd,but the the current_position + position
         # is alway 3 seconds off vs the bytes_per_secs
@@ -225,16 +216,15 @@ class Android(BasePlayer):
         """ 
         self.__preloadTrack()
 
-        if not self._state['load']:
+        if not self._isTrackLoaded:
             self.__startClock()
-            self._state['load'] = True
+            self._isTrackLoaded = True
 
         self.__load(position)
         self._player = Popen(self.__am_start_Intent ,shell=True,
                     stdin=PIPE,stdout=PIPE,stderr=PIPE)
-        self._state['pause'] = False
-        self._is_playing(True)
-
+        self._isTrackPaused = False
+        self._isTrackPlaying = True
 
     @staticmethod
     def __constrain_volume(level=75):
@@ -276,11 +266,11 @@ class Android(BasePlayer):
     def pause(self):
         """Pause and unpause the song."""
         # capture the position the media player was pause
-        if not self._state['pause']:
+        if not self._isTrackPaused:
             self.stop
             # USE VERBOSE FOR PRINT
             print("Paused")
-            self._is_playing(False)
+            self._isTrackPlaying = False
             #Capture time when state is pause 
             self._pause_position = self.current_position
 
@@ -296,8 +286,8 @@ class Android(BasePlayer):
         :param: pos - time to rewind or fast-forward (in seconds)
         """
         spot = pos
-        if self._state['pause']:
-            self._state['pause'] = False
+        if self._isTrackPaused:
+            self._isTrackPaused = False
 
         self._play(position=pos)
 

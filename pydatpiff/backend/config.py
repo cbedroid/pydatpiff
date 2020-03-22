@@ -206,7 +206,6 @@ class User():
                 return results[choice][1][1]
             return results[choice][1]
         except Exception as e:
-            print(e)
             return 
 
 
