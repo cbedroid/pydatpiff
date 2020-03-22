@@ -38,11 +38,19 @@ class BaseMeta(type):
 
 class BasePlayer(metaclass=BaseMeta):
     """Media player controller""" 
+
     def __init__(self,*args,**kwargs):
         self._state={'playing':False,'pause':False,
                  'stop':False,'load':False}
         self.__is_monitoring = False
         self._monitor()
+
+    def _resetState(self,**kwargs):
+        """Reset all track's states (see Android.state)"""
+        self._state = dict(playing=False,pause=False,
+            load=False,stop=False)
+        self._state.update(**kwargs)
+
 
     @property
     def name(self):
@@ -70,7 +78,22 @@ class BasePlayer(metaclass=BaseMeta):
     def state(self,**state):
         self._state.update(**state)
 
-    def _is_playing(self,boolean=None):
+    @property
+    def _isTrackPlaying(self):
+        """Return the track playing state"""
+        # if boolean param not specified, then return the playing state
+        return self.state['playing']
+
+    @property
+    def _isTrackPaused(self):
+        return self.state['pause']
+
+    @_isTrackPaused.setter
+    def _isTrackPaused(self,boolean=False):
+        self.state['pause'] = bool(boolean)
+
+    @_isTrackPlaying.setter
+    def _isTrackPlaying(self,boolean=False):
         """ 
         Set the state of playing and pause.
 
@@ -78,16 +101,21 @@ class BasePlayer(metaclass=BaseMeta):
                 True: sets playing True and pause False 
                 False: sets playing False and pause True 
         """
+        
         if boolean is not None: # update state if boolean param True or False
-            self.state.update(dict(playing=bool(boolean),pause=not bool(boolean)))
-        else:
-            # if boolean param not specified, then return the playing state
-            return self.state['playing']
+            self.state.update(dict(playing=bool(boolean),
+                                pause=not bool(boolean)))
 
     @property
-    def _track_is_loaded(self):
+    def _isTrackLoaded(self):
+        """ Return player loaded state"""
         return self.state['load']
 
+    @_isTrackLoaded.setter
+    def _isTrackLoaded(self,boolean=False):
+        self.state['load'] = bool(boolean)
+
+     
     @staticmethod
     def __wait(delay):
         start = time()
@@ -127,10 +155,9 @@ class BasePlayer(metaclass=BaseMeta):
         when media state changes.
         """
         while not self.__is_monitoring:
-            if self.state['playing']:
-                self._is_playing(True)
+            if self._isTrackPlaying:
+                self._isTrackPlaying = True
                 self.__is_monitoring = True
-        #print('Monitoring')
         # If media.autoplay changes track before song finish 
         # adjust sleep time 
 
@@ -138,22 +165,21 @@ class BasePlayer(metaclass=BaseMeta):
         #SLEEP_TIME = 3
         SLEEP_TIME = 1
     
-        if True:
-            self.__wait(10)
-            while self.state['load']:
-                playing = self.state.get('playing')
-                if playing:
-                    #sleep(SLEEP_TIME) 
-                    self.__wait(SLEEP_TIME) # wait for track to load
-                    current_position = self._format_time(self.current_position)
-                    endtime = self._format_time(self.duration)
+        self.__wait(5)
+        while self._isTrackLoaded:
+            playing = self.state.get('playing')
+            if playing:
+                #sleep(SLEEP_TIME) 
+                self.__wait(SLEEP_TIME) # wait for track to load
+                current_position = self._format_time(self.current_position)
+                endtime = self._format_time(self.duration)
 
-                    if self._didTrackStop():
-                        break
+                if self._didTrackStop():
+                    break
 
-            #If track is stop then recall function for next track
-            self.__is_monitoring = False
-            self._monitor() # recursive callback           
+        #If track is stop then recall function for next track
+        self.__is_monitoring = False
+        self._monitor() # recursive callback           
         
     def setTrack(self,*args,**kwargs):
         raise NotImplementedError
@@ -170,7 +196,7 @@ class BasePlayer(metaclass=BaseMeta):
     @property
     def info(self):
         """Returns feedback for media song being played"""
-        if not self.state['load']:
+        if not self._isTrackLoaded:
             return 'No media' 
         c_min,c_sec = self._format_time(self.current_position)
         c_sec = c_sec if len(str(c_sec)) >1 else str(c_sec).zfill(2) 
@@ -179,9 +205,9 @@ class BasePlayer(metaclass=BaseMeta):
         l_sec = l_sec if len(str(l_sec)) >1 else str(l_sec).zfill(2) 
        
         #9615 
-        if self.state['playing']:
+        if self._isTrackPlaying:
             mode = chr(9199) or '|>' 
-        elif self.state['pause']:
+        elif self.is_TrackPaused:
             mode = chr(9208) or '||'
         else:
             mode = chr(9209) or '[]'

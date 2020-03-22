@@ -13,10 +13,11 @@ from ...frontend.display import Print
 class MPV(BasePlayer):
 
     def __init__(self):
-         self._popen = None
-         self._state={'playing':False,'pause':False,
+        self._popen = None
+        self._state={'playing':False,'pause':False,
                  'stop':False,'load':False}
-
+        
+        self._default_volume = 100
     
     def _pre_popen(self,song):
         return ['mpv',
@@ -49,12 +50,12 @@ class MPV(BasePlayer):
 
         start = time()
         rollback = 0
-        while self.state['pause']:
+        while self._isTrackPaused:
             if time() - start >=1:
                 rollback+=1
                 start = time()
 
-            if not self.state['pause']:
+            if not self._isTrackPaused:
                 self._time_elapse +=  rollback
                 break
 
@@ -77,7 +78,7 @@ class MPV(BasePlayer):
         timer = 0
         if hasattr(self,'_time_elapse'):
             timer = time() - self._time_elapse
-            if self.state['pause']: # track was paused
+            if self._isTrackPaused: # track was paused
                 return self._last_paused_time
 
         self._last_paused_time = timer
@@ -97,13 +98,7 @@ class MPV(BasePlayer):
         return self._metadata.trackDuration
 
 
-    def _resetState(self,**kwargs):
-        """Reset all track's states (see Android.state)"""
-        self._state = dict(playing=False,pause=False,
-            load=False,stop=False)
-        self._state.update(**kwargs)
-
-
+    
     def _write_cmd(self,cmd):
         """
         Write command to Popen stdin
@@ -111,7 +106,7 @@ class MPV(BasePlayer):
         """
 
         if  hasattr(self,'_popen'):
-            if self.state['load'] and self._popen.is_running: 
+            if self._isTrackLoaded and self._popen.is_Alive: 
                 self._popen.stdin.write('{}\n'.format(cmd).encode('utf8'))
                 self._popen.stdin.flush()
                 return 
@@ -121,6 +116,7 @@ class MPV(BasePlayer):
         self._virtual_time = 0
 
         if Path.isFile(path):
+            self._resetState()
             self._song = name
             self._song_path = path
             self._metadata = MetaData(path)
@@ -128,27 +124,27 @@ class MPV(BasePlayer):
             raise MvpError(1)
 
         Popen.unregister()
-        self._popen = Popen(self._pre_popen(self._song_path))
      
 
     @property
     def play(self):
         #setTrack will handle track loading 
-        if self.state['pause'] and self._popen.is_running:
+        if self._isTrackLoaded and self._isTrackPaused:
             self.pause
             return 
 
-        elif not self._track_is_loaded:
-            self._popen.register(callback=self._resetState)
+        elif not self._isTrackLoaded:
+            self._popen = Popen(self._pre_popen(self._song_path))
+            self._popen.register()
             self._time_elapse = time()
-            self._is_playing(True) 
-            self.state['load'] = True
+            self._isTrackPlaying = True 
+            self._isTrackLoaded = True
 
 
     @property
     def pause(self):
         """Pause and unpause the track."""
-        if self.state['load']:
+        if self._isTrackLoaded:
 
             cmd = { True:'no',
                     False:'yes'
@@ -161,8 +157,8 @@ class MPV(BasePlayer):
             last_pause_state = self.state['pause']
             current_pos = self.current_position
 
-            self._is_playing(last_pause_state)
-            if self.state['pause']:
+            self._isTrackPlaying = last_pause_state
+            if self._isTrackPaused:
                 self.registerPauseEvent()
 
         else:
@@ -252,4 +248,55 @@ class MPV(BasePlayer):
         self._resetState()
         self.state['stop'] = True
         Popen.unregister()
+
+
+    @property
+    def _volumeLevel(self):
+        """ Current media player volume"""
+        return self._default_volume
+
+    @_volumeLevel.setter
+    def _volumeLevel(self,level):
+        self._default_volume = level
+
+
+    def _set_volume(self,level,combine=True):
+        try:
+            level = int(level)
+        except:
+            return 
+
+        MAX_LEVEL = 200
+        if combine: 
+            # combine will add the original volume level + 
+            # the new volume level.
+            # use combine = False to set volume to exact level( no filtering) 
+            level  = self._volumeLevel + level
+
+        if level > MAX_LEVEL:  
+            level = MAX_LEVEL
+
+        elif level < 0:
+            level = 0
+
+        self._volumeLevel = level
+        self._write_cmd('set volume %s'%level)
+
+    def volumeUp(self,vol=5):
+        """Turn the media volume up"""
+        self._set_volume(vol)
+         
+
+    def volumeDown(self,vol=5):
+        """Turn the media volume down"""
+        try:
+            vol = int(vol)
+        except:
+            return 
+        self._set_volume(-(vol))
+ 
+
+    def volume(self,vol=100):
+        """Set the volume to exact number"""
+        self._set_volume(vol,False)
 

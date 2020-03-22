@@ -7,6 +7,7 @@ from .baseplayer import BasePlayer
 class VLCPlayer(BasePlayer):
     
     def __init__(self,*args,**kwargs):
+    
         super(VLCPlayer,self).__init__(*args,**kwargs)
         try:
             self._vlc = vlc.Instance('-q')
@@ -26,11 +27,11 @@ class VLCPlayer(BasePlayer):
                 self._state[k] = False
 
         elif 'pause' in state.lower():
-            self._state['pause'] = True
-            self._state['playing'] = False
+            self._isTrackPaused = True
+            self._isTrackPlaying = False
         else:
-            self._state['playing'] = True
-            self._state['pause'] = False
+            self._isTrackPlaying = True
+            self._isTrackPaused = False
         return self.state
 
     def setTrack(self,name,path=None):
@@ -115,7 +116,7 @@ class VLCPlayer(BasePlayer):
     def play(self):
         """ Play media song"""
         if not self.state['stop']:
-            if self.state['pause']:
+            if self._isTrackPaused:
                 # unpause if track is already playing but paused
                 self.pause
             else:
@@ -141,10 +142,10 @@ class VLCPlayer(BasePlayer):
     def pause(self):
         """Pause the media song"""
 
-        pause = self.state['pause']
-        self.state['playing'] = pause 
+        pause = self._isTrackPaused
+        self.isTrackPlaying = pause 
         self._player.pause()
-        self.state['pause'] =  not pause
+        self._isTrackPaused =  not pause
      
     def _seeker(self,pos=10,rew=True):
         if self._state['stop']:
