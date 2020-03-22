@@ -22,14 +22,18 @@ class Media():
             Tmp.removeTmpOnstart()
             cls._tmpfile = Tmp.create()
 
-        if not hasattr(cls,'player'):
+        if hasattr(cls,'player'):
+            if kwargs.get('player'):
+                cls.player = Player.getPlayer(**kwargs)
+
+        elif not hasattr(cls,'player'):
             try:
                 cls.player = Player.getPlayer(**kwargs)
             except Exception as e:
                 cls.player = None
 
-            if cls.player is None: # Incase user reinitalize Media class
-                raise MediaError(7,InstallationError._extra)
+        if cls.player is None: # Incase user reinitalize Media class
+            raise MediaError(7,InstallationError._extra)
 
         return super(Media, cls).__new__(cls)
 
@@ -192,7 +196,7 @@ class Media():
     def songs(self):
         """ Return all songs from album."""
         if not hasattr(self,'_Mp3'):
-            e_msg = 'Set media by calling -->  Media.setMedia("Album name")'
+            e_msg = '\nSet media by calling -->  Media.setMedia("Album name")'
             raise MediaError(3,e_msg)
         return self._Mp3.songs
 
