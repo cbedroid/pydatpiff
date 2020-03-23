@@ -1,4 +1,4 @@
-
+  
   
 <img src="https://raw.github.com/cbedroid/pydatpiff/master/github/Logo.png" width="800" height="200">
 
@@ -119,26 +119,29 @@ import pydatpiff
 
 #TO VIEW ALL AVAILABLE SONGS
 >>> media.songs
+
+[ 'Jay-Z - Intro', 'Jay-Z - Advantage Carter (Prod. By Green Lantern)', 
+  'Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street'                                                                                         , "Jay-Z - Jay's Back ASAP", 
+  'Jay-Z - Live In London',                                                                                               
+  'Jay-Z - Green Magic',
+  'Jay-Z - Brooklyn Sound Boy', 
+  'Jay-Z - Child Abuse (Prod. By Green Lantern)',                                                                                               
+  'Jay-Z - Jay-Z Speaks On Green Lantern', 
+  'Jay-Z - Flashy Life',
+  'Jay-Z - Got Me On My Shit (Prod. By Green Lantern)',
+  ..etc
+ ]                         
 ```
- [ 'Jay-Z - Intro', 'Jay-Z - Advantage Carter (Prod. By Green Lantern)', 'Jay-Z - Welcome 2 Atla                                                                                                nta V103 Feat. Young Jeezy & DJ Greg Street', "Jay-Z - Jay's Back ASAP", 'Jay-Z - Live In London                                                                                                ', 'Jay-Z - Green Magic', 'Jay-Z - Brooklyn Sound Boy', 'Jay-Z - Child Abuse (Prod. By Green Lan                                                                                                tern)', 'Jay-Z - Jay-Z Speaks On Green Lantern', 'Jay-Z - Flashy Life', 'Jay-Z - Got Me On My Sh                                                                                                it (Prod. By Green Lantern)',..etc ]
 
 --- --- 
-# Find A Song 
 
-<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/EmojiThinking.png" width="100" height="100"> **. . . CANT FIND A SONG ??**
-```python
-   #Search for a song
-   >>> media.findSong('green lan') # returns mixtape's index and name
-```
+&nbsp; &nbsp; &nbsp; <a><img src="https://github.com/cbedroid/pydatpiff/blob/master/github/gif/gif_mixtapes.gif " align=center width=550 height=400/></a>
 
-[(1, 'Creative Control'), (36, 'Headliner & Legends (Jay-Z Freestyles) '), (69, 'Power Us Up( Jay-z, Kanye West, Swizz Beatz)'), (172, 'J3 Rocnation '), (254, "Bakin' Session")]
 
---- ---
-# Lets Play Some Songs !!
-### PLAYING SONG
-Songs can be played either by referencing the song  **index** or   **name**.
+## PLAY A SONG
+>Songs can be played either by referencing the song  **index** or   **name**.
 
-Song's name __do not__ have to be an exact match.
+>Song's name __do not__ have to be an exact match.
 
 
 ```python
@@ -149,17 +152,35 @@ Song's name __do not__ have to be an exact match.
 >>> media.play(3)
 ```
 ---
->
-> ### Play Songs -  &#9836;&#9836;&#9836;  
->  Artist: Jay-Z
 
-> Song: Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street
-
-> Size:  1.91 MB
+ ### Play Song -  &#9836;&#9836;&#9836;  
+  Artist: Jay-Z
+ 
+  Song: Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street
+ 
+  Size:  1.91 MB
 
 ---
 
- ### CONTROLLING MEDIA PLAYER
+&nbsp; &nbsp; &nbsp; <a><img src ="https://github.com/cbedroid/pydatpiff/blob/master/github/gif/gif_media.gif " align=center width=550 height=400/></a>
+
+# Find A Song 
+
+<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/EmojiThinking.png" width="100" height="100"> **. . . CANT FIND A SONG ??**
+```python
+   #Search for a song
+   >>> media.findSong('green lan') # returns mixtape's index and name
+	
+   #results
+   [(1, 'Creative Control'),
+    (36, 'Headliner & Legends (Jay-Z Freestyles) '), 
+    (69, 'Power Us Up( Jay-z, Kanye West, Swizz Beatz)'), 
+    (172, 'J3 Rocnation '),(254, "Bakin' Session")
+   ]
+```
+--- 
+ 
+ ## CONTROLLING MEDIA PLAYER
  Media player *can    `rewind` , `fast-forward` , `pause` ,  `stop` and control `volume`* of song.
 
 ``` python
@@ -186,10 +207,11 @@ Song's name __do not__ have to be an exact match.
 >>> player.volumeUp(5) # set media volume up 5 steps
 
 ```
---- 
-  ### DOWNLOAD SONGS AND ALBUMS
-  - **Download Song**
-	  
+ 
+ ## DOWNLOAD SONGS AND ALBUMS
+> ## Download Song
+
+  - **media.download**
 	   - __params__: `song` , `output`, and `rename`
 		    
             - *__song__* : index or name of song.
@@ -198,7 +220,11 @@ Song's name __do not__ have to be an exact match.
 
             - *__rename__* : rename song. *(optional)*
 
--    **Download Album**
+
+ 
+ > ## Download Album 
+ 
+  -	 **media.downloadAlbum**
         - __params__: `output`
           
             - *__output__* : directory to save song. *(default: current directory)*
@@ -214,6 +240,7 @@ Song's name __do not__ have to be an exact match.
 #Download full album
 >>> media.downloadAlbum(output='directory_to_save_album')
 ```
+
 --- ---
 ## LINKS
 - [Code](https://github.com/cbedroid/pydatpiff)
