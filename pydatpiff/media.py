@@ -8,6 +8,7 @@ from .backend.mediasetup import EmbedPlayer,Mp3
 from .frontend.display import Print,Verbose,Show
 from .backend.filehandler import file_size,Tmp,Path
 from .backend.config import User,Datatype,Queued,Threader
+from .mixtapes import Mixtapes
 
 #TODO NOT finish writig baseplayer method and subclasses
 #   from .backend.audio.player import BasePlayer as player 
@@ -58,9 +59,10 @@ class Media():
 
         :param: mixtape - Datpiff.Mixtapes object
         """
-        if 'mixtapes.Mixtapes' not in str(type(mixtape)):
+        if not self.__isMixtapesObject(mixtape):
             raise MediaError(2,'must pass a mixtape object to Media class')
-
+            
+        
         Verbose('Media initialized')
         if not mixtape:
             raise MediaError(1)
@@ -74,7 +76,14 @@ class Media():
         self.__downloaded_song = None
         super(Media, self).__init__()
 
-     
+    def __isMixtapesObject(self,obj):
+        try:
+            if  issubclass(obj.__class__,Mixtapes):
+                return True
+        except:
+            pass
+        return False
+         
     def findSong(self,songname):
         """
         Search through all mixtapes songs and return all songs 
