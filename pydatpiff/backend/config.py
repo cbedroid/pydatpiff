@@ -34,12 +34,11 @@ class Queued():
         self.thread_pool = []
 
 
-    def run(self):
+    def run(self,*args,**kwargs):
         with cf.ThreadPoolExecutor() as ex:
-            if self.args or self.kwargs:
-                #print('running with args and kwargs')
-                args = tuple(self.args) * len(self.input)
-                kwargs = list(dict(self.kwargs) for _ in range(len(self.input)))
+            if args or kwargs:
+                args = tuple(args) * len(self.input)
+                kwargs = list(dict(kwargs) for _ in range(len(self.input)))
                 data =  ex.map(self.main_job,self.input,args,kwargs) 
             else:
                 data = ex.map(self.main_job,self.input)
