@@ -79,7 +79,7 @@ class Session(object):
             self.TIMEOUT_COUNT +=1
             if self.TIMEOUT_COUNT >= 3:
                 print('\n') # need for spacing
-                warn_msg = "\nWarning:Please your internet connection ! "
+                warn_msg = "\nWarning: Please check your internet connection ! "
                 warnings.warn(warn_msg)
                 self.TIMEOUT_COUNT = 0
             raise RequestError(2)
