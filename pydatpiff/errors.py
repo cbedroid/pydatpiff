@@ -156,6 +156,14 @@ class Mp3Error(Error):
     __error__  = {
                    1: 'player id error',
                  }
+
+
+class DatpiffError(Error):
+    __error__ = {
+          1: "Datpiff media server down",
+          2: "Datpiff desktop version failed",
+          3: "Datpiff mobile version failed",
+    }
  
 
 class MvpError(Error):
