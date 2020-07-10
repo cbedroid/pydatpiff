@@ -2,10 +2,10 @@ import os
 import sys 
 import unittest
 from unittest.mock import Mock,patch,PropertyMock
-from pydatpiff.errors import AlbumError
-from pydatpiff.backend import mediasetup,webhandler
-from pydatpiff.utils import request
-from test_utils import mockSessionResponse
+from ..errors import AlbumError
+from ..backend import mediasetup,webhandler
+from ..utils import request
+from .test_utils import mockSessionResponse
 
 
 class TestAlbum(unittest.TestCase):
@@ -35,12 +35,13 @@ class TestAlbum(unittest.TestCase):
 
     def test_datpiff_player_has_response_text(self):
         # since the mock Session return <blah blah blah> 
-        # regex group shuld throw Attribute error here
+        # regex group should throw Attribute error here
         with self.assertRaises(AttributeError) as error:
             self.assertEqual(error,self.dp.dpp_html)
             
     def test_datpiff_player_response(self):
-        # test DatpiffPlayer reponse return correct request response
+        # test DatpiffPlayer response return correct request response 
+        # when dpp_link is set correctly
         with patch.object(mediasetup,'Album',autospec=True) as dp:
             link = PropertyMock(return_value = self.dp_real_link)
             dp.dpp_link = link 
@@ -49,7 +50,7 @@ class TestAlbum(unittest.TestCase):
 
 
         with patch.object(mediasetup.Album,'dpp_link',new_callable=PropertyMock) as link:
-            # test DatpiffPlayer link has right value
+            # test DatpiffPlayer link is return correct value
             link.return_value = self.dp_real_link
             dp = self.dp
             dp.dpp_link = link

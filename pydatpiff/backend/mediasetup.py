@@ -10,16 +10,19 @@ SERVER_DOWN_MSG = ("\n\t--- UNOFFICIAL DATPIFF MESSAGE --"
                  " Please check back later ")
 #warnings.
 class DatpiffPlayer():
-    """ Datpiff's media player page"""
+    """ Datpiff's frontend media player object"""
     # Flag for mobile version.
     # Fallback if desktop version is not working ('website issue')
     USE_MOBILE = False 
     def __init__(self,link):
+        """ 
+          Media player frontend for pydatpiff
+        """
         # Setting  '_album_link' from "link", although the parent class 
         # will set this on __init__ --> parent class "Album"
         # ... no biggie doe.. we're just making sure its set 
         self._album_link = link 
-        #self.dpp_link = self._album_link 
+        self.dpp_link = self._album_link 
         self.__changeVersion()
 
 
@@ -29,16 +32,16 @@ class DatpiffPlayer():
         which version ( desktop or mobile ) to use. 
 
         As of July 10,2020, Datpiff's desktop version is broken,
-        and there is an is populating  album data.
+        and is not populating album data.
         
-        Data NOT being popluated are ONLY the followings: 
+        Data that is NOT being popluated are ONLY the followings: 
           - Album.name 
           - Mp3.songs
 
         All other function still work as intented.
 
         This function will check if an album name is populated correct.
-        if not then mobile version will be used as a a fallback
+        if not then mobile version will be used as a fallback
         """
         # we check if Album.name is populated, if not switch to mobile version
         try:
@@ -68,7 +71,7 @@ class DatpiffPlayer():
         # July 10 2020 , This will fixed error with songs name not populating
         # if desktop verison fails, flag program to use Mobile version as a fallback
         version = "mobile"  if self.USE_MOBILE else "embeds"
-        link =   "".join((f'https://{version}.datpiff.com/mixtape/', 
+        link = "".join((f'https://{version}.datpiff.com/mixtape/', 
                                 str(album_id),
                                 '?trackid=1&platform=desktop'))
         self._dpp_link = link
@@ -109,8 +112,8 @@ class Album(DatpiffPlayer):
       Renders Datpiff's Mixtape page and create URI link to it's media player object.
       Data from URI link will be process and use to populate data for mixtapes. This data 
       includes: 
-          Uploader's name and bio 
-          Mixtape's name and songs 
+          Album uploader's name and bio 
+          Album's name and songs 
     """
     def __new__(cls,*args,**kwargs):
         if not hasattr(cls,'_session'):

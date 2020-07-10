@@ -1,8 +1,8 @@
 import os 
 import sys 
 from unittest.mock import Mock,patch
-from pydatpiff.mixtapes import Mixtapes 
-from pydatpiff.media  import Media
+from ..mixtapes import Mixtapes 
+from ..media  import Media
 
 
 def run_mix(category='hot',search=None):
