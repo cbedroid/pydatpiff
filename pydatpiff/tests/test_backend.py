@@ -56,6 +56,3 @@ class TestAlbum(unittest.TestCase):
             dp.dpp_link = link
             self.assertEqual(self.dp_real_link,self.dp.dpp_link) 
          
-
-
-

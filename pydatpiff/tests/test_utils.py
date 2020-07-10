@@ -4,7 +4,6 @@ from unittest.mock import Mock,patch
 from ..mixtapes import Mixtapes 
 from ..media  import Media
 
-
 def run_mix(category='hot',search=None):
     if search:
         return Mixtapes(search=search)
@@ -28,4 +27,3 @@ def mockSessionResponse(status=200,text="content here",
             response.status_code.side_effect = raise_for_status
 
         return response
-
