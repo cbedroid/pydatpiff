@@ -1,12 +1,11 @@
 import re
 from functools import wraps
 from .urls import Urls
-from .utils.request import Session
+from .utils.request  import Session
 from .errors import MixtapesError
 from .frontend.display import Print,Verbose
 from .backend.config import User,Datatype
-from .backend.mixsetup import Pages
-
+from .backend.mixsetup import DOMProcessor
 
 class Mixtapes(object):
     category = list(Urls.category)
@@ -111,7 +110,7 @@ class Mixtapes(object):
             name = f.__name__
             path = f(self,*args,**kwargs)
             pattern = re.compile(path)
-            data = Pages(self._responses).getRePattern(pattern)
+            data = DOMProcessor(self._responses).processRegex(pattern)
             if hasattr(self,'_artists'):
                 # we map all attributes length to _artists length 
                 data = data[:len(self._artists)]

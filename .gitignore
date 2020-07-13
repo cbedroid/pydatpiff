@@ -12,3 +12,6 @@
 *dist*
 venv/*
 .env
+*coverage/*
+*coverage
+*htmlcov/*

@@ -3,17 +3,6 @@ import re
 import tempfile
 import math
 
-class Dict():
-    def __init__(self):
-        self.data = collection.defaultdict(dict)
-
-    def setAttr(self,name,_list,start=1):
-        """Convert list object to a enumerate dictionary"""
-        for count,data in enumerate(_list,start=start):
-            self.data[count][name] = data
-        
-
-
 def file_size(buf_size):
     """Convert file size and returns user readable size""" 
     if buf_size == 0:
@@ -39,9 +28,11 @@ class Tmp(object):
     being able to remove these files. 
     """
 
+    """
     def __init__(self):
         pass
-
+        
+    """
     @staticmethod
     def create():
         """Create a temporary file with suffix __datpiff"""
@@ -86,7 +77,7 @@ class Path():
 
     @staticmethod
     def standardizeName(name):
-        return re.sub('[^A-Za-z0-9_\-\.] ', '', name)
+        return re.sub(r'[^\w_\-\.]', '', name)
 
     @staticmethod
     def writeFile(filename,content,mode='wb'):

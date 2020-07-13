@@ -5,8 +5,8 @@ from .webhandler import Html
 from .config import User,Datatype,Queued
 from ..errors import MixtapesError
 
-class Pages():
-    RETRY = 5 # TODO: fix retry:: some reason getRePattern fails on first try
+class DOMProcessor():
+    RETRY = 5 # TODO: fix retry:: some reason processRegex fails on first try
     MAX_MIXTAPES = 520 # maximum amount of available mixtapes possible
 
     def __init__(self,base_response):
@@ -16,7 +16,7 @@ class Pages():
         self.trys = 1
 
     @property
-    def findPagesLinks(self):
+    def get_page_links(self):
         """
         Return a list of html page links from mixtapes.Mixtapes._Start method.
         """
@@ -44,7 +44,7 @@ class Pages():
             return [self.base_response.url]
 
 
-    def _getResponse(self,url):
+    def _getHtmlResponse(self,url):
         """
         Calls requests 'GET' method and returns the response content.
         This function should only be called when using Queued method.
@@ -55,7 +55,7 @@ class Pages():
         return self._session.method('GET',url).text
 
 
-    def getRePattern(self,re_string,bypass=False):
+    def processRegex(self,re_string,bypass=False):
         """
         Uses Regex pattern to return the matching html data from each mixtapes
         :params: re_string - Regex pattern 
@@ -64,14 +64,14 @@ class Pages():
         :EXAMPLE:
             re_string = '<div class\="artist">(.*[.\w\s]*)</div>'
             This re_string will return all of the artist names from 
-            the Mixtapes web page (see _getResponse for Mixtapes web page link).
+            the Mixtapes web page (see _getHtmlResponse for Mixtapes web page link).
         """
         data = []
         re_Xpath = re.compile(re_string)
         # each page requests response data
         # Map each page links url to request.Session and 
         # place Session in 'queue and thread' 
-        lrt = Queued(self._getResponse,self.findPagesLinks).run()
+        lrt = Queued(self._getHtmlResponse,self.get_page_links).run()
         list_response_text = Datatype.removeNone(lrt)
 
         #Remove all unwanted characters from Xpath 
@@ -85,7 +85,7 @@ class Pages():
         if not data:
             if self.trys < self.RETRY:
                 self.trys+=1
-                return self.getRePattern(re_string)
+                return self.processRegex(re_string)
             else:
                 raise MixtapesError(3)
         elif len(data) < self.MAX_MIXTAPES and not bypass:
@@ -95,10 +95,10 @@ class Pages():
 
             if self.trys < self.RETRY:
                 self.trys+=1
-                return self.getRePattern(re_string)
+                return self.processRegex(re_string)
             else:
                 #print('Fuck it')
-                return self.getRePattern(re_string,True)
+                return self.processRegex(re_string,True)
 
         return data
 
