@@ -5,8 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
 # Introduction
 
-**PyDatpiff**   -  Unofficial [Datpiff](https://www.datpiff.com) Mixtapes. Listen and download the newest release songs to the oldies.
-
+**PyDatpiff**   -   🎶 Unofficial [Datpiff](https://www.datpiff.com) Music Application. Play and download the latest Hip-Hop and RnB songs.
   - supports windows, mac, and linux
   - python 3.3 - above
 
