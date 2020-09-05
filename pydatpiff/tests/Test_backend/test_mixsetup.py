@@ -1,30 +1,27 @@
 import os
-import sys 
+import sys
 import unittest
-from unittest.mock import Mock,patch,PropertyMock
+from unittest.mock import Mock, patch, PropertyMock
 from ...backend import mixsetup
 from ...urls import Urls
 from ...errors import MixtapesError
-from ..test_utils import mockSessionResponse,mockRegex
+from ..test_utils import mockSessionResponse, mockRegex
 
 
-dp_real_link = 'https://mobile.datpiff.com/mixtape/983402?trackid=1&platform=desktop'  
-dummy_text = '<blah blah blah>'
-dummy_json_data = {"success":True,'data':'foo-bar'}
+dp_real_link = "https://mobile.datpiff.com/mixtape/983402?trackid=1&platform=desktop"
+dummy_text = "<blah blah blah>"
+dummy_json_data = {"success": True, "data": "foo-bar"}
 
 mocked_session = mockSessionResponse(
-      status=200,
-      text = dummy_text,
-      json = dummy_json_data,
-      url="https://datpiff.com"
+    status=200, text=dummy_text, json=dummy_json_data, url="https://datpiff.com"
 )
 
-#mixsetup.Session = mocked_session
+# mixsetup.Session = mocked_session
 class TestDOMProcessor(unittest.TestCase):
     def setUp(self):
-        self.session = patch.object(mixsetup,"Session",spec=True)
+        self.session = patch.object(mixsetup, "Session", spec=True)
         self.session.method = Mock()
-        self.session.method.text = Mock(return_value = mocked_session.text)
+        self.session.method.text = Mock(return_value=mocked_session.text)
         self.session.return_value = mocked_session
 
         self.MOCKED_SESSION = self.session.start()
@@ -41,17 +38,15 @@ class TestDOMProcessor(unittest.TestCase):
         SESSION = self.MOCKED_SESSION()
         assert self.MS._session is SESSION
 
-
     def test_get_page_links(self):
-        # test get_page_links returns a list containing the session.url when 
-        # it can not find regex pattern in session response  html content 
-        url = [Urls().url['base']]
+        # test get_page_links returns a list containing the session.url when
+        # it can not find regex pattern in session response  html content
+        url = [Urls().url["base"]]
         MS = self.MS
-        self.assertEqual([mocked_session.url],MS.get_page_links)
+        self.assertEqual([mocked_session.url], MS.get_page_links)
 
     def test_getHtmlResponse(self):
-        # test if function return a value 
-        ms = mixsetup.DOMProcessor('whatever')
-        gr = ms._getHtmlResponse = Mock(return_value = mocked_session.text)
-        self.assertEqual(gr.return_value,self.session.method.text.return_value)
-
+        # test if function return a value
+        ms = mixsetup.DOMProcessor("whatever")
+        gr = ms._getHtmlResponse = Mock(return_value=mocked_session.text)
+        self.assertEqual(gr.return_value, self.session.method.text.return_value)

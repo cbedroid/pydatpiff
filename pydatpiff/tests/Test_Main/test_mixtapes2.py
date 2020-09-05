@@ -1,20 +1,19 @@
 import os
-import sys 
+import sys
 import unittest
-from unittest.mock import Mock,MagicMock,patch,PropertyMock
-from ..test_utils import mockSessionResponse,Fake_Session_Mock
+from unittest.mock import Mock, MagicMock, patch, PropertyMock
+from ..test_utils import mockSessionResponse, Fake_Session_Mock
 from ... import mixtapes
-#from .. import pydatpiff
+
+# from .. import pydatpiff
 
 
-dp_real_link = 'https://mobile.datpiff.com/mixtape/983402?trackid=1&platform=desktop'  
-dummy_text = '<blah blah blah>'
-dummy_json_data = {"success":True,'data':'foo-bar'}
+dp_real_link = "https://mobile.datpiff.com/mixtape/983402?trackid=1&platform=desktop"
+dummy_text = "<blah blah blah>"
+dummy_json_data = {"success": True, "data": "foo-bar"}
 
 mocked_session = mockSessionResponse(
-      status=200,
-      text= dummy_text,
-      json_data = dummy_json_data
+    status=200, text=dummy_text, json_data=dummy_json_data
 )
 
 
@@ -31,7 +30,7 @@ mocked_session = mockSessionResponse(
 #     @classmethod
 #     def clear_cache(cls):
 #       cls.cache = {}
-    
+
 #     def method(self,*args,**kwargs):
 #       return mocked_session
 
@@ -52,7 +51,7 @@ mocked_session = mockSessionResponse(
 #   #   self.assertEqual(self.mix._session,mocked_session)
 
 #   def test_mixtapes_search_with_wrong_parameter_return_mixtapes(self):
-#     # break the search function and check if Mixtapes 
+#     # break the search function and check if Mixtapes
 #     # return default category mixtapes
 
 #     # break search by NOT specifying a search

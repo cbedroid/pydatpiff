@@ -57,6 +57,10 @@ Only one parameter should be called at a time. If no parameter is pass, **"categ
      - __*search*__:
 		
         - artist name or artist mixtape name.
+    
+    - __*limit*__:
+
+        - maximum amount of mixtapes to return. default=600 
 
 
 ---

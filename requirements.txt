@@ -1,5 +1,4 @@
 requests
-python-vlc 
+python - vlc
 mutagen
 pytest
-

@@ -3,17 +3,18 @@ import re
 import tempfile
 import math
 
+
 def file_size(buf_size):
-    """Convert file size and returns user readable size""" 
+    """Convert file size and returns user readable size"""
     if buf_size == 0:
-        return '0B'
-    
-    size_name = ['B','KB','MB','GB','TB','PB','EB','ZB','YB']
-    change = int(math.floor(math.log(buf_size,1024)))
-    power = math.pow(1024,change)
-    result = round(buf_size / power,2)
-    return '%s %s'%(result,size_name[change])
- 
+        return "0B"
+
+    size_name = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    change = int(math.floor(math.log(buf_size, 1024)))
+    power = math.pow(1024, change)
+    result = round(buf_size / power, 2)
+    return "%s %s" % (result, size_name[change])
+
 
 class Tmp(object):
     """
@@ -33,31 +34,32 @@ class Tmp(object):
         pass
         
     """
+
     @staticmethod
     def create():
         """Create a temporary file with suffix __datpiff"""
-        return tempfile.NamedTemporaryFile(suffix='_datpiff',delete=False)
-         
+        return tempfile.NamedTemporaryFile(suffix="_datpiff", delete=False)
 
     @staticmethod
     def removeTmpOnstart():
         """remove all temporary file created by Datpiff on start up"""
         # every tmpfile using media player will have this suffix
-        suffix = '_datpiff'
+        suffix = "_datpiff"
         tmp_dir = tempfile.gettempdir()
         if os.path.isdir(tmp_dir):
             for lf in os.listdir(tmp_dir):
                 if suffix in lf:
                     try:
-                        lf = '/'.join((tmp_dir,lf))
+                        lf = "/".join((tmp_dir, lf))
                         os.remove(lf)
                     except Exception as e:
                         pass
 
-class Path():
+
+class Path:
     @staticmethod
     def is_dir(path):
-        path = path or ''
+        path = path or ""
         return os.path.isdir(path)
 
     @staticmethod
@@ -68,21 +70,18 @@ class Path():
         """
         return os.path.isfile(path)
 
-
     @classmethod
-    def join(cls,path='',to=''):
+    def join(cls, path="", to=""):
         if not cls.is_dir(path):
             path = os.getcwd()
-        return os.path.join(path,to)
+        return os.path.join(path, to)
 
     @staticmethod
     def standardizeName(name):
-        return re.sub(r'[^\w_\-\.]', '', name)
+        return re.sub(r"[^\w_\-\.]", "", name)
 
     @staticmethod
-    def writeFile(filename,content,mode='wb'):
-        with open(filename,mode) as f:
+    def writeFile(filename, content, mode="wb"):
+        with open(filename, mode) as f:
             f.write(content)
             return True
-
-            
