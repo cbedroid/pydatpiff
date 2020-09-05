@@ -52,7 +52,7 @@ class Mixtapes(object):
             return 0
 
     @staticmethod
-    def _clean(self, data, expected=str, min_character=3):
+    def _clean(data, expected=str, min_character=3):
         """ Clean and force constraints on incoming data 
         Args:
             data (str): user input  
