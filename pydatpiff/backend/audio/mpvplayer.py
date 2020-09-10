@@ -13,7 +13,6 @@ class MPV(BasePlayer):
     def __init__(self):
         self._popen = None
         self._state = {"playing": False, "pause": False, "stop": False, "load": False}
-
         self._default_volume = 100
 
     def _pre_popen(self, song):
@@ -171,8 +170,9 @@ class MPV(BasePlayer):
         if current_pos + seek < 0:
             return 0
         # ffwd past track's duration, then set track 5 seconds before ending.
-        elif current_pos + seek > len(self):
-            return len(self) - 5
+        elif len(self) < current_pos + seek:
+            self._resetState(stop=True)
+            return len(self) - 5.0
 
         return int(seek) * -1
 
@@ -228,9 +228,12 @@ class MPV(BasePlayer):
     @property
     def stop(self):
         """Stop the current track from playing."""
+        userstop = False
         self._write_cmd("quit \n")
-        self._resetState()
-        self.state["stop"] = True
+        if self.current_position < len(self):
+            # user manaully stop track
+            userstop = True
+        self._resetState(stop=True,userstop=userstop)
         Popen.unregister()
 
     @property

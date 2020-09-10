@@ -18,7 +18,7 @@ class BaseMeta(type):
     They will be forced here in BaseMeta(MetaClass). See: BaseMeta.methods
     """
 
-        #more variables: _songs,current_position
+    #more variables: _songs,current_position
 
     def __new__(cls, name, bases, body):
         methods = [
@@ -48,13 +48,13 @@ class BasePlayer(metaclass=BaseMeta):
     """Media player base controller""" 
 
     def __init__(self, *args, **kwargs):
-        self._state = {"playing": False, "pause": False, "stop": False, "load": False}
+        self._state = {"playing": False, "pause": False, "stop": False,"userstop":False, "load": False}
         self.__is_monitoring = False
         self._monitor()
 
     def __len__(self):
         # duration will be forced to be implemented by Meta class
-        return self.duration
+        return int(self.duration)
         
 
     def _resetState(self,**kwargs):
@@ -132,7 +132,6 @@ class BasePlayer(metaclass=BaseMeta):
         """
         # WAIT = 2
         WAIT = 1
-
         current = self._format_time(self.current_position)
         end = self._format_time(self.duration)
 
@@ -144,13 +143,13 @@ class BasePlayer(metaclass=BaseMeta):
                     pass
                 return self._didTrackStop(mode=2)
               
-            self._resetState(False,stop=True)
+            self._resetState(stop=True)
             return True
 
     @Threader
     def _monitor(self):
         """
-        -- For AndroidPlayer --
+        -- For AndroidPlayer And MPV player --
         Monitor media track and automatically set state
         when media state changes.
         """
@@ -165,7 +164,7 @@ class BasePlayer(metaclass=BaseMeta):
 
         SLEEP_TIME = 1
 
-        self.__wait(5)
+        self.__wait(2)
         while self._isTrackLoaded:
             playing = self.state.get("playing")
             if playing:
@@ -174,9 +173,13 @@ class BasePlayer(metaclass=BaseMeta):
                 current_position = self._format_time(self.current_position)
                 endtime = self._format_time(self.duration)
 
-                if self._didTrackStop():
+                if self._didTrackStop() or current_position >= endtime:
+                    self.resetSate(False,stop=True)
                     break
-
+                if self._state['userstop']:
+                    # user pressed stop then stop monitoring and stop auto play
+                    return
+                    
         # If track is stop then recall function for next track
         self.__is_monitoring = False
         self._monitor()  # recursive callback

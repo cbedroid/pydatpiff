@@ -34,7 +34,7 @@ class Android(BasePlayer):
 
     @staticmethod
     def _test_android():
-        check_call("am start", shell=True)
+        check_call("am start", shell=True,stderr=PIPE,stdout=PIPE)
 
     @property
     def elapse(self):
