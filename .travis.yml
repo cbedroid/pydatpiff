@@ -1,0 +1,25 @@
+language: python 
+
+python: 
+    - 3.8
+
+
+before_install: 
+  - pip install -U pip
+  - python setup.py install
+  - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
+  - pip install  pytest
+  - pip install nose 
+  - pip install codecov 
+
+install:
+  - pip install -r requirements.txt
+  - pip install -e . 
+  - pip install ".[test]" .
+
+script:  
+  - "nosetests --with-coverage --cover-package pydatpiff"
+
+after_success: 
+  - codecov
+
