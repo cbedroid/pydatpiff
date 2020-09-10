@@ -3,30 +3,25 @@ import re
 from ...errors import PlayerError
 from .baseplayer import BasePlayer
 
-
 class VLCPlayer(BasePlayer):
-    
-    def __init__(self,*args,**kwargs):
-    
-        super(VLCPlayer,self).__init__(*args,**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(VLCPlayer, self).__init__(*args, **kwargs)
         try:
-            self._vlc = vlc.Instance('-q')
+            self._vlc = vlc.Instance("-q")
             self._player = self._vlc.media_player_new()
         except:
-            extended_msg = 'Please check if your device supports VLC'
-            raise PlayerError(1,extended_msg)
-
+            extended_msg = "Please check if your device supports VLC"
+            raise PlayerError(1, extended_msg)
 
     @property
     def _stateof(self):
         """Current state of the song being played"""
-        state = re.match(r'[\w.]*\.(\w*)',str(self._player.get_state())).group(1)
-        if state =='NothingSpecial':
-            #set all player value to False
-            for k,v in self._state.items():
+        state = re.match(r"[\w.]*\.(\w*)", str(self._player.get_state())).group(1)
+        if state == "NothingSpecial":
+            # set all player value to False
+            for k, v in self._state.items():
                 self._state[k] = False
-
-        elif 'pause' in state.lower():
+        elif "pause" in state.lower():
             self._isTrackPaused = True
             self._isTrackPlaying = False
         else:
@@ -34,67 +29,61 @@ class VLCPlayer(BasePlayer):
             self._isTrackPaused = False
         return self.state
 
-    def setTrack(self,name,path=None):
+    def setTrack(self, name, path=None):
         if path:
             self._song = name
             self._path = path
             self._player.set_mrl(path)
         else:
-            Print('No media to play')
+            Print("No media to play")
 
-
-    def _set_volume(self,vol=5,way='down'):
+    def _set_volume(self, vol=5, way="down"):
         """Turn the media volume up or down"""
-        if isinstance(vol,(int,str)):
+        if isinstance(vol, (int, str)):
             if not str(vol).isnumeric():
-                return 
+                return
 
             vol = int(vol)
             min_vol = 0
             max_vol = 100
             try:
                 current_volume = int(self._volumeLevel)
-                if way == 'down':
+                if way == "down":
                     if current_volume - vol < min_vol:
-                        vol = min_vol 
+                        vol = min_vol
                     else:
                         vol = current_volume - vol
-                elif way == 'up':
+                elif way == "up":
                     if current_volume + vol > max_vol:
                         vol = max_vol
                     else:
                         vol = current_volume + vol
-                elif way == 'exact':
-                    vol = 0 if vol < min_vol else vol 
+                elif way == "exact":
+                    vol = 0 if vol < min_vol else vol
                     vol = 100 if vol > max_vol else vol
-                Print('volume: %s'%vol)
+                Print("volume: %s" % vol)
             except:
                 pass
         self._player.audio_set_volume(vol)
-
 
     @property
     def _volumeLevel(self):
         """ Current media _player volume"""
         return self._player.audio_get_volume()
 
-
-    def volumeUp(self,vol=5):
+    def volumeUp(self, vol=5):
         """Turn the media volume up"""
-        self._set_volume(vol,way='up')
+        self._set_volume(vol, way="up")
 
-
-    def volumeDown(self,vol=5):
+    def volumeDown(self, vol=5):
         """Turn the media volume down"""
-        self._set_volume(vol,way='down')
+        self._set_volume(vol, way="down")
 
-
-    def volume(self,vol=None):
+    def volume(self, vol=None):
         """Set the volume to exact number"""
         if vol is None:
             return
-        self._set_volume(vol,way='exact')
- 
+        self._set_volume(vol, way="exact")
 
     @property
     def current_position(self):
@@ -104,82 +93,70 @@ class VLCPlayer(BasePlayer):
     def duration(self):
         return self._player.get_length()
 
-
-    def _format_time(self,pos=None):
+    def _format_time(self, pos=None):
         """Format current song time to clock format"""
-        mins = int(pos/60000)
-        secs = int((pos%60000)/1000)
-        return mins,secs
+        mins = int(pos / 60000)
+        secs = int((pos % 60000) / 1000)
+        return mins, secs
 
-   
     @property
     def play(self):
         """ Play media song"""
-        if not self.state['stop']:
+        if not self.state["stop"]:
             if self._isTrackPaused:
                 # unpause if track is already playing but paused
                 self.pause
             else:
                 self._player.play()
-
-            self._set_all_state(False,playing=True,load=True)
+            self._resetState(False, playing=True, load=True)
             return
-
         else:
             try:
-                self.setTrack(self._song,self._path)
-                self.state['stop'] = False
+                self.setTrack(self._song, self._path)
+                self.state["stop"] = False
                 return self.play
             except RecursionError:
-                self.state['stop'] = True
-                pass
-
-            
-
-
+                self.state["stop"] = True
 
     @property
     def pause(self):
         """Pause the media song"""
 
         pause = self._isTrackPaused
-        self.isTrackPlaying = pause 
+        self.isTrackPlaying = pause
         self._player.pause()
-        self._isTrackPaused =  not pause
-     
-    def _seeker(self,pos=10,rew=True):
-        if self._state['stop']:
-            return 
-        if rew: 
+        self._isTrackPaused = not pause
+
+    def _seeker(self, pos=10, rew=True):
+        if self._state["stop"]:
+            return
+        if rew:
             to_position = self._player.get_time() - (pos * 1000)
-            if to_position < 0: #seeking far before track starts 
+            # seeking far before track starts
+            if to_position < 0:
                 to_position = 0
         else:
             to_position = self._player.get_time() + (pos * 1000)
-            if to_position > self.duration: # seeking too far beyond track ends
-                to_position = self.duration-1
+            # seeking too far beyond track ends
+            if to_position > self.duration:
+                to_position = self.duration - 1
+
         self._player.set_time(to_position)
 
-
-
-    def rewind(self,pos=10):
+    def rewind(self, pos=10):
+        """Rewind track
+          @params: pos:: time(second) to rewind media. default:10(sec)
         """
-        Rewind the media song
-             vlc time is in milliseconds
-             @params: pos:: time(second) to rewind media. default:10(sec)
-        """
-        self._seeker(pos,True)
+        self._seeker(pos, True)
 
-
-    def ffwd(self,pos=10):
-        """Fast forward media 
-             vlc time is in milliseconds
-             @params: pos:: time(second) to rewind media. default:10(sec)
+    def ffwd(self, pos=10):
+        """Fast forward track
+          vlc time is in milliseconds
+          @params: pos:: time(second) to rewind media. default:10(sec)
         """
-        self._seeker(pos,False)
+        self._seeker(pos, False)
 
     @property
     def stop(self):
         self._player.stop()
-        self._set_all_state(False,stop=True)
-
+        self._resetState(False, stop=True)
