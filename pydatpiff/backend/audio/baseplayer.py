@@ -12,11 +12,13 @@ class DerivedError(Exception):
 class BaseMeta(type):
     """
     For Authors and Contributors only !
-    Metaclass that will force constrains on any derived class that inherit BasePlayer
+    Metaclass that will force constrains on any subclass that inherit BasePlayer
 
-    Certain functions must be available in derived subclass.
-    All of the functions and methods will be force here
+    The below functions and methodology must be implemented along with subclass.
+    They will be forced here in BaseMeta(MetaClass). See: BaseMeta.methods
     """
+
+        #more variables: _songs,current_position
 
     def __new__(cls, name, bases, body):
         methods = [
@@ -27,7 +29,6 @@ class BaseMeta(type):
         ]
 
         # more variables: _songs,current_position
-
         cls._name = name
         cls._bases = bases
         cls._body = body
@@ -44,14 +45,19 @@ class BaseMeta(type):
 
 
 class BasePlayer(metaclass=BaseMeta):
-    """Media player controller"""
+    """Media player base controller""" 
 
     def __init__(self, *args, **kwargs):
         self._state = {"playing": False, "pause": False, "stop": False, "load": False}
         self.__is_monitoring = False
         self._monitor()
 
-    def _resetState(self, **kwargs):
+    def __len__(self):
+        # duration will be forced to be implemented by Meta class
+        return self.duration
+        
+
+    def _resetState(self,**kwargs):
         """Reset all track's states (see Android.state)"""
         self._state = dict(playing=False, pause=False, load=False, stop=False)
         self._state.update(**kwargs)
@@ -61,13 +67,6 @@ class BasePlayer(metaclass=BaseMeta):
         if not hasattr(self, "_song"):
             raise PlayerError(2, "Cannot find a name for the song playing")
         return self._song
-
-    def _set_all_state(self, state=False, **kwargs):
-        """Change all states at once"""
-        if self.state:
-            for k, v in self.state.items():
-                self.state[k] = state
-        self.state.update(**kwargs)
 
     @property
     def state(self):
@@ -144,13 +143,14 @@ class BasePlayer(metaclass=BaseMeta):
                 while (time() - re_check) < WAIT:
                     pass
                 return self._didTrackStop(mode=2)
-
-            self._set_all_state(False, stop=True)
+              
+            self._resetState(False,stop=True)
             return True
 
     @Threader
     def _monitor(self):
         """
+        -- For AndroidPlayer --
         Monitor media track and automatically set state
         when media state changes.
         """
@@ -158,19 +158,19 @@ class BasePlayer(metaclass=BaseMeta):
             if self._isTrackPlaying:
                 self._isTrackPlaying = True
                 self.__is_monitoring = True
-        # If media.autoplay changes track before song finish
-        # adjust sleep time
 
-        # wait for 3 sec, if the track is load then monitor when the track stops
-        # SLEEP_TIME = 3
+        # If media.autoplay changes track before song finish 
+        # adjust sleep time 
+        # wait for duration(sec), if the track is load then monitor when the track stops
+
         SLEEP_TIME = 1
 
         self.__wait(5)
         while self._isTrackLoaded:
             playing = self.state.get("playing")
             if playing:
-                # sleep(SLEEP_TIME)
-                self.__wait(SLEEP_TIME)  # wait for track to load
+                self.__wait(SLEEP_TIME) # wait for track to load
+
                 current_position = self._format_time(self.current_position)
                 endtime = self._format_time(self.duration)
 

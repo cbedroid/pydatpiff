@@ -115,7 +115,7 @@ class MPV(BasePlayer):
 
     @property
     def play(self):
-        # setTrack will handle track loading
+        # setTrack method will handle the loading of track
         if self._isTrackLoaded and self._isTrackPaused:
             self.pause
             return
@@ -133,7 +133,8 @@ class MPV(BasePlayer):
         if self._isTrackLoaded:
 
             cmd = {True: "no", False: "yes"}
-            # set pause according to the state of pause.
+
+            # We are setting pause stated according to its previous state.
             # if state is paused then unpause and vice versa.
             state = cmd[self.state["pause"]]
             pause = "set pause {} \n".format(state)
@@ -152,21 +153,26 @@ class MPV(BasePlayer):
     def _adjustTrackTime(self, sec):
         """
         Adjust the track's time in seconds when track is
-        alter either by rewind,fast-forward, or paused.
+        alter either by rewind, fast-forward, or paused.
         """
         constrains = self.constrain_seek(sec)
         self._time_elapse += constrains
         self.__previous_time += -constrains
 
     def constrain_seek(self, seek):
-        """
-        Force constraints on setting virtual timer,
+        """ Force range constraints on setting seek time,
         when rewinding and fast-fowarding.
+        Time that is set out of range will be set to its nearest position.
         """
         seek = float(seek)
         current_pos = self.current_position
+
+        # rewind past track's starting point
         if current_pos + seek < 0:
             return 0
+        # ffwd past track's duration, then set track 5 seconds before ending.
+        elif current_pos + seek > len(self):
+            return len(self) - 5
 
         return int(seek) * -1
 
@@ -244,8 +250,7 @@ class MPV(BasePlayer):
 
         MAX_LEVEL = 200
         if combine:
-            # combine will add the original volume level +
-            # the new volume level.
+            # combine will add the original volume level + new volume level.
             # use combine = False to set volume to exact level( no filtering)
             level = self._volumeLevel + level
 

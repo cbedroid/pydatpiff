@@ -1,4 +1,5 @@
 {
+  "python.pythonPath": "/usr/local/bin/python3.8"
   "python.autoComplete.extraPaths": ['/usr/local/lib/python3.8/site-packages/',],
   "python.formatting.blackPath": "/usr/local/bin/black",
   "python.pythonPath": "/usr/local/bin/python3.8",
@@ -9,4 +10,5 @@
   "python.formatting.autopep8Path": "/usr/local/bin/autopep8",
   "python.jediPath": "/usr/local/lib/ython3.8/site-packages/jedi",
   "black.path": "/usr/local/bin/black"
+
 }

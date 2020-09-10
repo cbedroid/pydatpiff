@@ -3,10 +3,8 @@ import re
 from ...errors import PlayerError
 from .baseplayer import BasePlayer
 
-
 class VLCPlayer(BasePlayer):
     def __init__(self, *args, **kwargs):
-
         super(VLCPlayer, self).__init__(*args, **kwargs)
         try:
             self._vlc = vlc.Instance("-q")
@@ -23,7 +21,6 @@ class VLCPlayer(BasePlayer):
             # set all player value to False
             for k, v in self._state.items():
                 self._state[k] = False
-
         elif "pause" in state.lower():
             self._isTrackPaused = True
             self._isTrackPlaying = False
@@ -111,10 +108,9 @@ class VLCPlayer(BasePlayer):
                 self.pause
             else:
                 self._player.play()
-
-            self._set_all_state(False, playing=True, load=True)
+                
+            self._resetState(False, playing=True, load=True)
             return
-
         else:
             try:
                 self.setTrack(self._song, self._path)
@@ -122,7 +118,6 @@ class VLCPlayer(BasePlayer):
                 return self.play
             except RecursionError:
                 self.state["stop"] = True
-                pass
 
     @property
     def pause(self):
@@ -138,30 +133,31 @@ class VLCPlayer(BasePlayer):
             return
         if rew:
             to_position = self._player.get_time() - (pos * 1000)
-            if to_position < 0:  # seeking far before track starts
+            # seeking far before track starts
+            if to_position < 0:
                 to_position = 0
         else:
             to_position = self._player.get_time() + (pos * 1000)
-            if to_position > self.duration:  # seeking too far beyond track ends
+            # seeking too far beyond track ends
+            if to_position > self.duration:
                 to_position = self.duration - 1
+
         self._player.set_time(to_position)
 
     def rewind(self, pos=10):
-        """
-        Rewind the media song
-             vlc time is in milliseconds
-             @params: pos:: time(second) to rewind media. default:10(sec)
+        """Rewind track
+          @params: pos:: time(second) to rewind media. default:10(sec)
         """
         self._seeker(pos, True)
 
     def ffwd(self, pos=10):
-        """Fast forward media 
-             vlc time is in milliseconds
-             @params: pos:: time(second) to rewind media. default:10(sec)
+        """Fast forward track
+          vlc time is in milliseconds
+          @params: pos:: time(second) to rewind media. default:10(sec)
         """
         self._seeker(pos, False)
 
     @property
     def stop(self):
         self._player.stop()
-        self._set_all_state(False, stop=True)
+        self._resetState(False, stop=True)
