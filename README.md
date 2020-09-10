@@ -5,28 +5,28 @@
 [![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
 # Introduction
 
-**PyDatpiff**   -  Unofficial [Datpiff](https://www.datpiff.com) Mixtapes. Listen and download the newest release songs to the oldies.
-
+**PyDatpiff**   -   🎶 Unofficial [Datpiff](https://www.datpiff.com) Music Application. Play and download the latest Hip-Hop and RnB songs.
   - supports windows, mac, and linux
   - python 3.3 - above
 
-## Dependencies
+# Dependencies
 
 **PyDatpiff requires:**
  - see requirements:  [requirements.txt](https://github.com/cbedroid/pydatpiff/blob/master/requirements.txt)
 - *python >= 3.3*
  
 # Installation
- Initial media player uses VLC to play music.
- For systems that are incompatible with  VLC,  MPV will be used as a fallback  player.
+ 
+ The default media player uses VLC to play music.
+ For systems that are incompatible with VLC,  MPV will be used as the fallback player.
 
 &nbsp; &nbsp;  &nbsp;   &nbsp;  &nbsp;  &nbsp;  &nbsp; *click link to download*
  
-[VLC](https://www.videolan.org/vlc/index.html)- VideoLan Client media player and framework.
+[VLC](https://www.videolan.org/vlc/index.html) - VideoLan Client media player and framework.
 
-[MPV](https://mpv.io/installation/) -  MPV Framework. ( For Android and Linux Support )
+[MPV](https://mpv.io/installation/) -  MPV Framework. ( Supports IOS, Android and Linux Systems )
 
-For linux systems,  &nbsp; use `apt-get` to  install required repos
+For linux based systems,  &nbsp; use `apt-get` to  install required repos
 
 #### VLC
 ```bash 
@@ -48,7 +48,7 @@ pip3 install pydatpiff
 	
 There are two parameters that can be pass to Mixtapes Instance.
 
-Only one parameter should be called at a time. If no parameter is pass, category will be set to   __"hot"__ by default. 
+Only one parameter should be called at a time. If no parameter is pass, **"category"** will be set to   __"hot"__ by default. 
 - **params:** `category` and `search`:
 	 - __*category*__ :
 	    
@@ -57,6 +57,10 @@ Only one parameter should be called at a time. If no parameter is pass, category
      - __*search*__:
 		
         - artist name or artist mixtape name.
+    
+    - __*limit*__:
+
+        - maximum amount of mixtapes to return. default=600 
 
 
 ---
@@ -94,11 +98,11 @@ import pydatpiff
 
 **pydatpiff.Media** -  is a class that controls the PyDatpiff Media Player.
 
- _THINGS YOU CAN DO:_
- - `findSong` - find any song made by an artist
- - `play`  - plays songs from album
- - `download` - download song
- - `downloadAlbum` - download all songs from album
+ _HERE ARE SOMETHINGS YOU CAN DO:_
+ - `findSong` - Find any song made by an artist.
+ - `play`  - Plays songs from  current album.
+ - `download` - Download current song.
+ - `downloadAlbum` - Download all songs from an album.
 
  ### Setup media player with an album
  Setting media player with an album from above.

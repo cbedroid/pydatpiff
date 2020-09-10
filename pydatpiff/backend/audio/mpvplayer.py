@@ -133,6 +133,7 @@ class MPV(BasePlayer):
         if self._isTrackLoaded:
 
             cmd = {True: "no", False: "yes"}
+
             # We are setting pause stated according to its previous state.
             # if state is paused then unpause and vice versa.
             state = cmd[self.state["pause"]]
@@ -165,6 +166,7 @@ class MPV(BasePlayer):
         """
         seek = float(seek)
         current_pos = self.current_position
+
         # rewind past track's starting point
         if current_pos + seek < 0:
             return 0

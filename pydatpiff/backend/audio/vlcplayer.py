@@ -108,6 +108,7 @@ class VLCPlayer(BasePlayer):
                 self.pause
             else:
                 self._player.play()
+                
             self._resetState(False, playing=True, load=True)
             return
         else:
