@@ -1,13 +1,9 @@
 """
    Custom printing function using logger. 
-
-   Stdout can be disable on startup by setting frontend verbose flag False.
-   example:: frontend.verbose = True
 """
 import os
 import sys
 import logging
-from .. import output
 
 rootLogger = logging.getLogger()
 rootLogger.setLevel(logging.INFO)
@@ -41,8 +37,6 @@ def Print(*args):
 
 
 def Verbose(*args):
-    if not output():
-        return
     Print(*args)
 
 
