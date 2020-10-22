@@ -2,7 +2,7 @@
   
 <img src="https://user-images.githubusercontent.com/54720725/96840060-f872ab80-1417-11eb-93ac-c964217b98b1.png" width="800" height="200">
 
-#Introduction
+# Introduction
 
 **PyDatpiff**   -   🎶 Unofficial [Datpiff](https://www.datpiff.com) Music Application. Play and download the latest Hip-Hop and RnB songs.
   - supports windows, mac, and linux
@@ -19,11 +19,10 @@
  The default media player uses VLC to play music.
  For systems that are incompatible with VLC,  MPV will be used as the fallback player.
 
-&nbsp; &nbsp;  &nbsp;   &nbsp;  &nbsp;  &nbsp;  &nbsp; *click link to download*
  
-[VLC](https://www.videolan.org/vlc/index.html) - VideoLan Client media player and framework.
+[**VLC**](https://www.videolan.org/vlc/index.html) - VideoLan Client media player and framework.
 
-[MPV](https://mpv.io/installation/) -  MPV Framework. ( Supports IOS, Android and Linux Systems )
+[**MPV**](https://mpv.io/installation/) -  MPV Framework. ( Supports IOS, Android and Linux Systems )
 
 For linux based systems,  &nbsp; use `apt-get` to  install required repos
 
@@ -41,8 +40,33 @@ sudo apt-get install mpv
 pip3 install pydatpiff
 ```
 
-# Quick Start
- ##  Mixtapes
+# Let's Get Started...
+
+### Pydatpiff Category & Description
+
+Category reference a mixtapes level or ratings. Visit [**Datapiff**](https://datpiff.com) for more info.
+
+---
+ | Category                |               Description     |
+|-------------------|-------------------|
+|__"hot"__                      | Mixtapes that are hot for the week.
+|__"new"__                      | Mixtapes that are brand-new or just release.
+|__"top"__                      | Mixtapes that are top-ranking.
+|__"celebrated"__       | Top ranking celebrity mixtapes.
+|__"popular"__          | Popular mixtapes  available.
+|__"exclusive"__        | Exclusive mixtapes.
+|__"most download"__| Most downloaded mixtapes.
+|__"most listen"__      | Most listen mixtapes.
+|__"most favorite"__| Favorite mixtapes.
+|__"highest rating"__| Mixtapes with the highest rating.
+---
+
+
+
+# Mixtapes
+
+**pydatpiff.Mixtapes** - PyDatpiff class that find music by referencing a `category` or by searching for a particular `artist` or `mixtape`.
+ 
  __Import PyDatpiff module and Intialize Mixtapes class__
 	
 There are two parameters that can be pass to Mixtapes Instance.
@@ -62,28 +86,15 @@ Only one parameter should be called at a time. If no parameter is pass, **"categ
         - maximum amount of mixtapes to return. default=600 
 
 
----
- | Category                |               Description     |
-|-------------------|-------------------|
-|__"hot"__                      | Mixtapes that are hot for the week.
-|__"new"__                      | Mixtapes that are brand-new or just release.
-|__"top"__                      | Mixtapes that are top-ranking.
-|__"celebrated"__       | Top ranking celebrity mixtapes.
-|__"popular"__          | Popular mixtapes  available.
-|__"exclusive"__        | Exclusive mixtapes.
-|__"most download"__| Most downloaded mixtapes.
-|__"most listen"__      | Most listen mixtapes.
-|__"most favorite"__| Favorite mixtapes.
-|__"highest rating"__| Mixtapes with the highest rating.
----
-# Let's Get Started...
+
 *Create an Instance of the Mixtapes class*
 ```python
-import pydatpiff
->>> mix = pydatpiff.Mixtapes(category='hot')
+>>> from pydatpiff.mixtapes import Mixtapes
+
+>>> mix = Mixtapes(category='hot')
 #OR
 #Search for an artist's mixtape
->>> mix = pydatpiff.Mixtapes(search='Jay-Z')
+>>> mix = Mixtapes(search='Jay-Z')
 
 # To view all available mixtapes
 >>> mix.mixtapes
@@ -93,17 +104,18 @@ import pydatpiff
 
 
 # Media
-### Now Lets create a Media object to play  some songs !!
 
-**pydatpiff.Media** -  is a class that controls the PyDatpiff Media Player.
+**pydatpiff.Media** - PyDatpiff class that allow users to play and download songs 
+ 
 
- _HERE ARE SOMETHINGS YOU CAN DO:_
+Here are somethings you can do with **`Pydtapiff Media`**
  - `findSong` - Find any song made by an artist.
  - `play`  - Plays songs from  current album.
  - `download` - Download current song.
  - `downloadAlbum` - Download all songs from an album.
 
- ### Setup media player with an album
+
+ ## Setup and play song from an album
  Setting media player with an album from above.
 >`Albums`__:__ *['Creative Control', 'Carter Collection (15th Anniversary)', ..etc]*
 
@@ -113,7 +125,8 @@ import pydatpiff
 ```python
 
 #We pass in the "mix" object from Mixtapes class
->>> media = pydatpiff.Media(mix)
+>> from pydatpiff.media import Media
+>>> media = Media(mix)
 
 #Set the media player to an ablum.
 >>> media.setMedia('Creative Control')
@@ -138,13 +151,13 @@ import pydatpiff
 
 --- --- 
 
-&nbsp; &nbsp; &nbsp; <a><img src="https://github.com/cbedroid/pydatpiff/blob/master/github/gif/gif_mixtapes.gif " align=center width=550 height=400/></a>
+&nbsp; &nbsp; &nbsp; <a><img src="https://raw.githubusercontent.com/cbedroid/pydatpiff/master/github/gif/gif_media.gif" align=center width=550 height=400/></a>
 
 
-## PLAY A SONG
->Songs can be played either by referencing the song  **index** or   **name**.
+## PLAYING A SONG
+Songs can be played either by referencing the song  **index** or   **name**.
 
->Song's name __do not__ have to be an exact match.
+Song's name __do not__ have to be an exact match.
 
 
 ```python
@@ -154,22 +167,32 @@ import pydatpiff
 
 >>> media.play(3)
 ```
----
 
- ### Play Song -  &#9836;&#9836;&#9836;  
+
+ #### Play Song -  &#9836;&#9836;&#9836;  
   Artist: Jay-Z
  
   Song: Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street
  
   Size:  1.91 MB
 
----
 
-&nbsp; &nbsp; &nbsp; <a><img src ="https://github.com/cbedroid/pydatpiff/blob/master/github/gif/gif_media.gif " align=center width=550 height=400/></a>
-
+&nbsp; &nbsp; &nbsp; <a><img src ="https://raw.githubusercontent.com/cbedroid/pydatpiff/master/github/gif/gif_media.gif" align=center width=550 height=400/></a>
+--- ---
 # Find A Song 
 
-<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/EmojiThinking.png" width="100" height="100"> **. . . CANT FIND A SONG ??**
+<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/EmojiThinking.png" width="100" height="100"> 
+
+**. . . Can't find that song you been looking for??**
+
+  **No worries... We got you covered!**
+  
+Find any song made by an artist using the **`findSong`** method in **`media`**.
+
+  - search by `song's name`.
+  - search by `album's name`.
+
+ **media.findSong**
 ```python
    #Search for a song
    >>> media.findSong('green lan') # returns mixtape's index and name
@@ -186,11 +209,30 @@ import pydatpiff
  ## CONTROLLING MEDIA PLAYER
  Media player *can    `rewind` , `fast-forward` , `pause` ,  `stop` and control `volume`* of song.
 
+  
+ Using **`media.player`**, you will have complete control over your music player. 
+ 
+Simply create a variable ` player = media.player`
+ 
+ - `info` -  get information about a song 
+ - `name` -  get name of current song.
+ - `duration` - get duration of track.
+ - `rewind` - rewind track
+ - `ffwd` - fast-forward track
+ - `play` - play current *( track must be paused or stop )*.
+ - `pause` - pause/unpause track.
+ - `stop` - stop track.
+ - `volume` - set the volume level (1 - 100).
+ - `volumeUp` - increase volume ( *default: increase by 5*).
+ - `volumeDown` - decrease volume ( *default: decrease by 5*).
+ 
+
 ``` python
  # create an object of the player class
  >>> player = media.player
 
  # Rewind ⏪
+
 >>> player.rewind() 
 >>> player.rewind(10) # rewind 10 sec ago
 
