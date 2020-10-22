@@ -402,7 +402,7 @@ class Media:
         Path.writeFile(self.__tmpfile.name, chunk, mode="wb")
 
         # display message to user
-        Show.mediaPlayMsg(self.artist, songname, size, demo)
+        Show.mediaPlayMsg(self.artist,self.album,songname, size, demo)
 
         song = " - ".join((self.artist, songname))
         self.player.setTrack(song, self.__tmpfile.name)

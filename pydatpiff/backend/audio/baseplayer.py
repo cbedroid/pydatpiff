@@ -18,7 +18,7 @@ class BaseMeta(type):
     They will be forced here in BaseMeta(MetaClass). See: BaseMeta.methods
     """
 
-    #more variables: _songs,current_position
+    # more variables: _songs,current_position
 
     def __new__(cls, name, bases, body):
         methods = [
@@ -45,19 +45,24 @@ class BaseMeta(type):
 
 
 class BasePlayer(metaclass=BaseMeta):
-    """Media player base controller""" 
+    """Media player base controller"""
 
     def __init__(self, *args, **kwargs):
-        self._state = {"playing": False, "pause": False, "stop": False,"userstop":False, "load": False}
+        self._state = {
+            "playing": False,
+            "pause": False,
+            "stop": False,
+            "userstop": False,
+            "load": False,
+        }
         self.__is_monitoring = False
         self._monitor()
 
     def __len__(self):
         # duration will be forced to be implemented by Meta class
         return int(self.duration)
-        
 
-    def _resetState(self,**kwargs):
+    def _resetState(self, **kwargs):
         """Reset all track's states (see Android.state)"""
         self._state = dict(playing=False, pause=False, load=False, stop=False)
         self._state.update(**kwargs)
@@ -96,12 +101,12 @@ class BasePlayer(metaclass=BaseMeta):
 
     @_isTrackPlaying.setter
     def _isTrackPlaying(self, boolean=False):
-        """ 
+        """
         Set the state of playing and pause.
 
         param: boolean - True or False
-                True: sets playing True and pause False 
-                False: sets playing False and pause True 
+                True: sets playing True and pause False
+                False: sets playing False and pause True
         """
 
         if boolean is not None:  # update state if boolean param True or False
@@ -142,7 +147,7 @@ class BasePlayer(metaclass=BaseMeta):
                 while (time() - re_check) < WAIT:
                     pass
                 return self._didTrackStop(mode=2)
-              
+
             self._resetState(stop=True)
             return True
 
@@ -158,8 +163,8 @@ class BasePlayer(metaclass=BaseMeta):
                 self._isTrackPlaying = True
                 self.__is_monitoring = True
 
-        # If media.autoplay changes track before song finish 
-        # adjust sleep time 
+        # If media.autoplay changes track before song finish
+        # adjust sleep time
         # wait for duration(sec), if the track is load then monitor when the track stops
 
         SLEEP_TIME = 1
@@ -168,18 +173,18 @@ class BasePlayer(metaclass=BaseMeta):
         while self._isTrackLoaded:
             playing = self.state.get("playing")
             if playing:
-                self.__wait(SLEEP_TIME) # wait for track to load
+                self.__wait(SLEEP_TIME)  # wait for track to load
 
                 current_position = self._format_time(self.current_position)
                 endtime = self._format_time(self.duration)
 
                 if self._didTrackStop() or current_position >= endtime:
-                    self.resetSate(False,stop=True)
+                    self.resetSate(False, stop=True)
                     break
-                if self._state['userstop']:
+                if self._state["userstop"]:
                     # user pressed stop then stop monitoring and stop auto play
                     return
-                    
+
         # If track is stop then recall function for next track
         self.__is_monitoring = False
         self._monitor()  # recursive callback
@@ -214,10 +219,10 @@ class BasePlayer(metaclass=BaseMeta):
         else:
             mode = chr(9209) or "[]"
         Print("\n%s TRACK: %s" % (chr(9836), self.name))
-        pos = "{0} {1}:{2} - {3}:{4}\n".format(mode, c_min, c_sec, l_min, l_sec)
+        pos = "{0}  {1}:{2} - {3}:{4}\n".format(mode, c_min, c_sec, l_min, l_sec)
         if hasattr(self, "_media_autoplay"):
             if self._media_autoplay:
-                Print(" " * 6, chr(9850), pos)
+                Print(" " * 2, chr(9850), pos)
                 return
 
         Print(" " * 6, pos)
@@ -270,9 +275,9 @@ class BasePlayer(metaclass=BaseMeta):
         raise NotImplementedError
 
     def ffwd(self, pos=10):
-        """Fast forward media 
-             vlc time is in milliseconds
-             @params: pos:: time(second) to rewind media. default:10(sec)
+        """Fast forward media
+        vlc time is in milliseconds
+        @params: pos:: time(second) to rewind media. default:10(sec)
         """
         raise NotImplementedError
 

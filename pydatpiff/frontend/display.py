@@ -42,12 +42,11 @@ def Verbose(*args):
 
 class Show:
     """Flashes media info message to user"""
-
-    @staticmethod
-    def mediaPlayMsg(artist, songname, size, demo=False):
+    def mediaPlayMsg(artist, albumname,songname, size, demo=False):
         if demo:
             Verbose("\n%s %s %s" % ("-" * 20, "DEMO", "-" * 20))
-        Verbose("\nArtist: %s" % artist)
+        Verbose("\nAlbum: %s" % albumname)
+        Verbose("Artist: %s" % artist)
         Verbose("Song: %s" % songname)
         Verbose("Size:", size)
 

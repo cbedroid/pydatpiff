@@ -74,7 +74,13 @@ class DatpiffPlayer:
         # July 10 2020 , This will fixed error with songs name not populating
         # if desktop verison fails, flag program to use Mobile version as a fallback
         version = "mobile" if self.USE_MOBILE else "embeds"
-        link = "https://{version}.datpiff.com/mixtape/{album_id}?trackid=1&platform=desktop"
+        link = "".join(
+            (
+                "https://{}.datpiff.com/mixtape/".format(version),
+                str(album_id),
+                "?trackid=1&platform=desktop",
+            )
+        )
         self._dpp_link = link
 
     @property
