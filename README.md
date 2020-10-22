@@ -1,19 +1,18 @@
+ [![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
   
-  
-<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/Logo.png" width="800" height="200">
+<img src="https://user-images.githubusercontent.com/54720725/96840060-f872ab80-1417-11eb-93ac-c964217b98b1.png" width="800" height="200">
 
-[![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
-# Introduction
+#Introduction
 
 **PyDatpiff**   -   🎶 Unofficial [Datpiff](https://www.datpiff.com) Music Application. Play and download the latest Hip-Hop and RnB songs.
   - supports windows, mac, and linux
-  - python 3.3 - above
+  - python 3.5 - above
 
 # Dependencies
 
 **PyDatpiff requires:**
  - see requirements:  [requirements.txt](https://github.com/cbedroid/pydatpiff/blob/master/requirements.txt)
-- *python >= 3.3*
+- *python >= 3.5*
  
 # Installation
  
