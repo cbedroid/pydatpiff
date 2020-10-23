@@ -10,11 +10,6 @@ from .backend.filehandler import file_size, Tmp, Path
 from .backend.config import User, Datatype, Queued, Threader
 from .mixtapes import Mixtapes
 
-# TODO NOT finish writig baseplayer method and subclasses
-#   from .backend.audio.player import BasePlayer as player
-#   will cahnge import to another name
-#    change name of player
-
 
 class Media:
     """ Media player that control the songs selected from Mixtapes """
@@ -24,9 +19,18 @@ class Media:
             Tmp.removeTmpOnstart()
             cls.__tmpfile = Tmp.create()
 
-        if hasattr(cls, "player"):
-            if kwargs.get("player"):
-                cls.player = Player.getPlayer(**kwargs)
+        player = kwargs.get("player", None)
+        # Ths point here is to keep player global
+        # redefining player here, the user will have to update
+        # player locally in program themselves.
+        # NOTE: Need to find an effecient way to update
+        # player both in program and globally.
+
+        if hasattr(cls, "player") and player:
+            # if player is redfined
+            # Updated player. Effective only if user changes baseplayer
+            # Ex: changing MPV to VLC ..etc ...vice versa
+            cls.player = Player.getPlayer(**kwargs)
 
         elif not hasattr(cls, "player"):
             try:
@@ -34,8 +38,7 @@ class Media:
             except Exception as e:
                 cls.player = None
 
-        if cls.player is None:  # Incase user reinitalize Media class
-            raise MediaError(7, InstallationError._extra)
+        raise MediaError(7, InstallationError._extra)
 
         return super(Media, cls).__new__(cls)
 
@@ -51,11 +54,17 @@ class Media:
         else:
             return 0
 
-    def __init__(self, mixtape=None, **kwargs):
-        """ 
+    def __init__(self, mixtape=None, pre_selection=None, **kwargs):
+        """
         Initialize Media and load all mixtapes.
 
-        :param: mixtape - Datpiff.Mixtapes object
+        Keyword Arguments:
+            mixtape {instance class} -- pydatpiff.Mixtapes class instance (default: {None})
+            pre_selection {Integer,String} --  pre-selected mixtape's ablum,artist,or mixtapes.
+                    See media.SetMedia for more info (default: None - Optional)
+
+        Raises:
+            MediaError: Raises MediaError if mixtapes is not an subclass of pydatpiff.Mixtapes.
         """
         if not self.__isMixtapesObject(mixtape):
             raise MediaError(2, "must pass a mixtape object to Media class")
@@ -63,7 +72,17 @@ class Media:
         Verbose("Media initialized")
         if not mixtape:
             raise MediaError(1)
+        self.setup()
 
+        super(Media, self).__init__()
+
+        if pre_selection:  # Run setMedia with argument here
+            # This step is optional for users, but can save an extra setp
+            # when selecting an album in setMedia.
+            self.SetMedia(pre_selection)
+
+    def setup(self):
+        """ Initial and setup class variables """
         self._session = Session()
         self._Mixtapes = mixtape
         self._artist_name = None
@@ -71,11 +90,18 @@ class Media:
         self._current_index = None
         self._selected_song = None
         self.__downloaded_song = None
-        super(Media, self).__init__()
 
-    def __isMixtapesObject(self, obj):
+    def __isMixtapesObject(self, instance):
+        """Verify subclass is an instance of mixtapes' class
+
+        Arguments:
+            instance {instance class} -- pydatpiff's Mixtapes instance
+
+        Returns:
+            Boolean -- True or False if instance is subclass of pydatpiff Mixtape class
+        """
         try:
-            if issubclass(obj.__class__, Mixtapes):
+            if issubclass(instance.__class__, Mixtapes):
                 return True
         except:
             pass
@@ -83,10 +109,14 @@ class Media:
 
     def findSong(self, songname):
         """
-        Search through all mixtapes songs and return all songs 
-        with songname
+         Search through all mixtapes songs and return all songs
+         with songname
 
-        :param: songname - name of the song to search for
+        Arguments:
+            songname {Str} -- song to search for.
+
+        Returns:
+            tuple -- returns a tuple containing mixtapes data (index,artist,album) from search.
         """
 
         # TODO:look this video with James Powell
@@ -128,9 +158,9 @@ class Media:
         :param: selection - pydatpiff.Mixtapes album's name or artist's name.
             int - will return the Datpiff.Mixtape artist at that index.
             str - will search for an artist from Mixtapes.artists (default)
-                  or album from Mixtapes.ablum. 
+                  or album from Mixtapes.ablum.
 
-            note: see pydatpiff.mixtape.Mixtapes for album or artist selection 
+            note: see pydatpiff.mixtape.Mixtapes for album or artist selection
         """
 
         result = self._Mixtapes._select(selection)
@@ -154,7 +184,7 @@ class Media:
     def __setupMedia(self, link):
         """
         Initial an Album and sets all Mp3 songs'tags
-        
+
         param: link - Album's mixtape link
         """
         album = Album(link)
@@ -168,7 +198,7 @@ class Media:
     def __index_of_song(self, select):
         """
         Parse all user input and return the correct song index.
-        :param select: -  Media.songs name or index of Media.songs 
+        :param select: -  Media.songs name or index of Media.songs
                datatype: int: must be numerical
                          str: artist,mixtape, or song name
         """
@@ -233,7 +263,7 @@ class Media:
 
     @song.setter
     def song(self, name):
-        """ 
+        """
         Set current song
         :param: name - name of song or song's index
         """
@@ -248,11 +278,11 @@ class Media:
     def _cacheSong(self, song, content):
         """
          Preserve the data from song and store it for future calls.
-         This prevents calling the requests function again for the same song. 
+         This prevents calling the requests function again for the same song.
          Each data from a song will be stored in __cache_storage for future access.
 
         :param: song - name of the song
-        :param: content - song content 
+        :param: content - song content
         """
         name = "-".join((self.artist, song))
         try:
@@ -264,8 +294,8 @@ class Media:
         """
         Check whether song has been download already.
 
-        :param: 
-            
+        :param:
+
         """
         requested_song = "-".join((self.artist, songname))
         if hasattr(self, "__cache_storage"):
@@ -311,12 +341,12 @@ class Media:
 
     @autoplay.setter
     def autoplay(self, auto=False):
-        """ 
-        Sets the autoplay function.
-       
-       :param: auto - disable or enable autoplay
-                datatype: boolean
-                default: False
+        """
+         Sets the autoplay function.
+
+        :param: auto - disable or enable autoplay
+                 datatype: boolean
+                 default: False
         """
         self._auto_play = auto
         self._continousPlay()
@@ -327,7 +357,7 @@ class Media:
 
     @Threader
     def _continousPlay(self):
-        """ 
+        """
         Automatically play each song from Album when autoplay is enable.
         """
         if self.autoplay:
@@ -360,12 +390,12 @@ class Media:
                         pass
 
     def play(self, track=None, demo=False):
-        """ 
-        Play song (uses vlc media player) 
+        """
+        Play song (uses vlc media player)
 
          :param: track - name or index of song type(str or int)
          :param: demo  - True: demo sample of song
-                              False: play full song 
+                              False: play full song
                               *default: False
         """
         if self.player is None:
@@ -402,7 +432,7 @@ class Media:
         Path.writeFile(self.__tmpfile.name, chunk, mode="wb")
 
         # display message to user
-        Show.mediaPlayMsg(self.artist,self.album,songname, size, demo)
+        Show.mediaPlayMsg(self.artist, self.album, songname, size, demo)
 
         song = " - ".join((self.artist, songname))
         self.player.setTrack(song, self.__tmpfile.name)
@@ -415,7 +445,7 @@ class Media:
         :param: track - name or index of song type(str or int)
         :param: output - location to save the song (optional)
         :param: rename - rename the song (optional)
-                default will be song's name 
+                default will be song's name
         """
         selection = self.__index_of_song(track)
         if selection is None:
@@ -456,7 +486,7 @@ class Media:
         """
         Download the full ablum.
 
-        :param: output - directory to save album 
+        :param: output - directory to save album
                 :default - current directory
         """
         if not output:

@@ -27,11 +27,13 @@ class Mixtapes(object):
         self._session = Session()
         self._selected_category = category or "hot"
         self._selected_search = search
-        self._session.clear_cache()
-
-        self._getMixtapeResponse(str(category), str(search))
         self._max_mixtapes = limit
+        self._session.clear_cache
         self._setup()
+
+    def _setup(self):
+        self._selectMixtape(str(self._selected_category), str(self._selected_search))
+        self._setMixtapesAttributes()
 
     def __str__(self):
         category = "'new','hot','top','celebrated'"
@@ -53,31 +55,32 @@ class Mixtapes(object):
 
     @staticmethod
     def _clean(data, expected=str, min_character=3):
-        """ Clean and force constraints on incoming data 
+        """Clean and force constraints on incoming data
         Args:
-            data (str): user input  
+            data (str): user input
             expected (datatype), optional): datatype expected from user. Defaults to str.
             min_character (int, optional): miniumun character accept . Defaults to 3.
         """
         try:
             data = expected(data)
         except:
-            raise MixtapeError(4, extend_msg="Expected datatype: {}.".format(expected))
+            raise MixtapesError(4, "Expected datatype: {}.".format(expected))
         if len(data) < min_character:
-            raise MixtapeError(
+            raise MixtapesError(
                 5,
-                extend_msg="""Not enough character: {}.\
+                """Not enough character: {}.\
                  Minimum characters limit is {}.""".format(
-                    data, min_character
+                    data, str(min_character)
                 ),
             )
-        return data
 
-    def search(self, name):
+        return data.strip() if expected == str else data
+
+    def _search_for(self, name):
         """
         Search for an artist or mixtape's name.
 
-        :param: name - name of an artist or mixtapes name 
+        :param: name - name of an artist or mixtapes name
         """
         name = str(name).strip()
         if not name:
@@ -87,28 +90,27 @@ class Mixtapes(object):
         url = Urls.url["search"]
         return self._session.method("POST", url, data=Urls.payload(name))
 
-    def _getMixtapeResponse(self, category="hot", search=None):
+    def _selectMixtape(self, category="hot", search=None):
         """
         Initial setup. Gets all available mixtapes.
-        
+
         :param: category - name of the category to search from.
                             (self Mixtapes.category)
         :param: search - search for an artist or mixtape's name
         """
         if search:  # Search for an artist
-            body = self.search(self._clean(search))
+            body = self._search_for(self._clean(search))
             if not body or body is None:  # on failure return response from a category
-                return self._getMixtapeResponse("hot")
+                return self._selectMixtape("hot")
         else:  # Select from category instead of searching
             select = User.choice_is_str
             choice = select(category, Urls.category) or select("hot", Urls.category)
             body = self._session.method("GET", choice)
-        self._responses = body
+        self._mixtape_resp = body
         return body
 
-    def _setup(self):
-        """Initial class variable and set theirattributes on page load up.
-        """
+    def _setMixtapesAttributes(self):
+        """Initial class variable and set their attributes on page load up."""
         # all method below are property setter method
         # each "re string" get pass to the corresponding html response text
 
@@ -122,10 +124,10 @@ class Mixtapes(object):
     def _searchTree(f):
         """
         Wrapper function that parse and filter all requests response content.
-        After parsing and filtering the responses text, it then creates a 
-        dunder variable from the parent function name. 
-        
-        :param: f  (wrapper function) 
+        After parsing and filtering the responses text, it then creates a
+        dunder variable from the parent function name.
+
+        :param: f  (wrapper function)
          #----------------------------------------------------------
          example: "function()" will create an attribute "_function"
          #----------------------------------------------------------
@@ -136,7 +138,7 @@ class Mixtapes(object):
             name = f.__name__
             path = f(self, *args, **kwargs)
             pattern = re.compile(path)
-            data = DOMProcessor(self._responses, limit=self._max_mixtapes).findRegex(
+            data = DOMProcessor(self._mixtape_resp, limit=self._max_mixtapes).findRegex(
                 pattern
             )
             if hasattr(self, "_artists"):
@@ -205,8 +207,7 @@ class Mixtapes(object):
         return path
 
     def display(self):
-        """ Prettify all Mixtapes information and display it to screen 
-        """
+        """Prettify all Mixtapes information and display it to screen"""
         links = self._links
         data = zip(self._artists, self._mixtapes, links, self._views)
         for count, (a, t, l, v) in list(enumerate(data, start=1)):
@@ -219,7 +220,7 @@ class Mixtapes(object):
         """
         Queue and load  a mixtape to media player.
                             (See pydatpiff.media.Media.setMedia)
-        
+
         :param: select - (int) user selection by indexing an artist name or album name
                             (str)
         """

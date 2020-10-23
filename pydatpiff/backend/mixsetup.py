@@ -24,12 +24,12 @@ class DOMProcessor:
     def countMixtapes(url):
         """Count the number of mixtapes available per page.
 
-      Args:
-          url (str): mixtapes' page link url
+        Args:
+            url (str): mixtapes' page link url
 
-      Returns:
-          [int]: total number of mixtape's on page
-      """
+        Returns:
+            [int]: total number of mixtape's on page
+        """
         content = self._session.method("GET", url=url).text
         try:
             filtered_content = re.search(
@@ -44,13 +44,13 @@ class DOMProcessor:
     @property
     def get_page_links(self):
         """
-        Return a list of html page links from mixtapes.Mixtapes._getMixtapeResponse method.
+        Return a list of html page links from mixtapes.Mixtapes._selectMixtape method.
         """
         try:
             """
                 What we are trying to accomplish.
                 ---------------------------------
-            On pydatpiff.Mixtape startup, once a user select a category or 
+            On pydatpiff.Mixtape startup, once a user select a category or
             search for an artist. We then grab the content from that reponse.
             The initial request should return the FIRST page of the website.
             DAMN IT,we are greedy and we want them all!! So we parse through
@@ -117,12 +117,12 @@ class DOMProcessor:
     def findRegex(self, re_string, bypass=False):
         """
         Uses Regex pattern to return the matching html data from each mixtapes
-        :params: re_string - Regex pattern 
+        :params: re_string - Regex pattern
         :return: list object
 
         :EXAMPLE:
             re_string = '<div class\="artist">(.*[.\w\s]*)</div>'
-            This re_string will return all of the artist names from 
+            This re_string will return all of the artist names from
             the Mixtapes web page (see _getHtmlResponse for Mixtapes web page link).
         """
         data = []
