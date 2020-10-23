@@ -5,6 +5,26 @@ from unittest.mock import Mock, MagicMock, PropertyMock, patch
 from pydatpiff.mixtapes import Mixtapes
 from pydatpiff.media import Media
 from pydatpiff.utils import request
+from pydatpiff.utils.request import Session
+
+
+class MySession(Session):
+    pass
+
+
+# credit: robru - https://stackoverflow.com/questions/19817511/python-mock-mocking-base-class-for-inheritance
+class Fake(object):
+    """Create Mock()ed methods that match another class's methods."""
+
+    @classmethod
+    def imitate(cls, *others):
+        for other in others:
+            for name in other.__dict__:
+                try:
+                    setattr(cls, name, Mock())
+                except (TypeError, AttributeError):
+                    pass
+        return cls
 
 
 def run_mix(category="hot", search=None):
