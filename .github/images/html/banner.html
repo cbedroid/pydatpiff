@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Cbedroid - cbedroid1614@gmail.com"/>
+  <meta name="title" content="Pydatpiff - Listen and download your favorite Hip-hop and RnB songs "/>
+  <link href="https://fonts.googleapis.com/css2?family=Sansita+Swashed:wght@600;900&family=Shrikhand&family=Ultra&display=swap" rel="stylesheet">
+    <title>Pydatpiff</title>
+  <style>
+    .banner-container{
+      display: grid;
+      margin-top: 200px ;
+      place-items: center;
+      height:  600px;
+      border: 2px solid #000;
+      text-align: left;
+      //background-image: url('https://transom.org/wp-content/uploads/2001/03/Sound-Waves-800x440.jpg');
+      background-image: url('https://image.shutterstock.com/image-vector/abstract-vector-element-music-design-260nw-1031659504.jpg');
+      background-image: url('https://wallpaperose.com/wp-content/uploads/2013/06/Music-Background4.jpg');
+      background-position: 50% 50%;
+      background-repeat: norepeat;
+      background-size:cover;
+      position: relative;
+      overflow:hidden;
+    }
+   
+    .banner-container .header{
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      margin: 0 auto;
+      box-shadow: 0 0  20px rgba(0,0,0,.9);
+      border-radius: 7px;
+      background:linear-gradient(20deg,transparent,rgba(0,0,255,.3),rgba(0,0,255,.8));
+    }
+    .header .circle{
+      display: block;
+      text-align: center;
+      width: 30%;
+      height: 30%;
+
+      border-radius: 50%;
+      background:linear-gradient(20deg,transparent,rgba(0,0,255,.3),rgba(255,255,255,.5),rgba(0,0,255,.8));
+      box-shadow: 5px 2px 6px rgba(255,255,255,.2);
+      position: absolute;
+      top: -5%;
+      left: -5%;
+
+    }
+    .header .circle:first-child{
+      mix-blend-mode: lighten;
+    }
+    .header .circle.small{
+      top: 15%;
+      left: 10%;
+      width: 20%;
+      height: 25%;
+      mix-blend-mode: exclusion;
+    }
+    .header .circle.smaller{
+      top: 35%;
+      left: 20%;
+      width: 15%;
+      height: 20%;
+      mix-blend-mode: soft-light;
+    }
+    .banner-container .logo{
+      font-family: 'Shrikhand', cursive;
+      font-weight: 400;
+      font-size: 222px;
+      color: #fff;
+      text-shadow: 0 0 32px rgba(0,0,255,.8);
+      letter-spacing: 5px;
+      position: relative;
+    }
+
+    .banner-container .logo::after{
+      content: "Pydatpiff";
+      position: absolute;
+      width: 100%;
+      top: 2px;
+      left: -6px;
+      color:rgba(0,0, 20,.92);
+      text-align: left;
+      text-shadow: 0 0 10px rgba(255,0,0,.3)
+    }
+
+
+  </style>
+</head>
+
+<body>
+  <!-- Designing Pydatpiff Logo banner for ReadME -->
+  <div class="banner-container">
+    <div class="header">
+    <div class="circle"></div>
+    <div class="circle small"></div>
+    <div class="circle smaller"></div>
+      <h1 class="logo">Pydatpiff</h1>
+    </div>
+  </div>
+  
+</body>
+</html>
