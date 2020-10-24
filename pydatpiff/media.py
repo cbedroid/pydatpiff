@@ -38,7 +38,8 @@ class Media:
             except Exception as e:
                 cls.player = None
 
-        raise MediaError(7, InstallationError._extra)
+        if cls.player is None:
+            raise MediaError(7, InstallationError._extra)
 
         return super(Media, cls).__new__(cls)
 
@@ -72,16 +73,16 @@ class Media:
         Verbose("Media initialized")
         if not mixtape:
             raise MediaError(1)
-        self.setup()
+        self.setup(mixtape)
 
         super(Media, self).__init__()
 
         if pre_selection:  # Run setMedia with argument here
             # This step is optional for users, but can save an extra setp
             # when selecting an album in setMedia.
-            self.SetMedia(pre_selection)
+            self.setMedia(pre_selection)
 
-    def setup(self):
+    def setup(self, mixtape):
         """ Initial and setup class variables """
         self._session = Session()
         self._Mixtapes = mixtape
