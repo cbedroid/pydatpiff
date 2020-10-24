@@ -151,7 +151,10 @@ Here are somethings you can do with **`Pydtapiff Media`**
 
 --- --- 
 
-&nbsp; &nbsp; &nbsp; <a><img src="https://raw.githubusercontent.com/cbedroid/pydatpiff/master/github/gif/gif_media.gif" align=center width=550 height=400/></a>
+&nbsp; &nbsp; &nbsp; <a>
+<img src="https://i.ibb.co/dPVhwXr/gif-mixtapes.gif" alt="gif-mixtapes" border="0" align="center" min-width="300px" width="80%" height="100%"/>
+</a>
+
 
 
 ## PLAYING A SONG
@@ -177,11 +180,13 @@ Song's name __do not__ have to be an exact match.
   Size:  1.91 MB
 
 
-&nbsp; &nbsp; &nbsp; <a><img src ="https://raw.githubusercontent.com/cbedroid/pydatpiff/master/github/gif/gif_media.gif" align=center width=550 height=400/></a>
+&nbsp; &nbsp; &nbsp; <a>
+<img src="https://i.ibb.co/mX1x250/gif-media.gif" alt="gif-media" border="0" align="center" min-width="300px" width="80%" height="100%"/>
+</a>
 --- ---
 # Find A Song 
 
-<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/EmojiThinking.png" width="100" height="100"> 
+<img src="https://user-images.githubusercontent.com/54720725/97070237-dbb7ae80-15a4-11eb-9ab1-c27b0a2a64dc.png" width="100" height="100"> 
 
 **. . . Can't find that song you been looking for??**
 
