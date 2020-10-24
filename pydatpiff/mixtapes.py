@@ -224,11 +224,10 @@ class Mixtapes(object):
         :param: select - (int) user selection by indexing an artist name or album name
                             (str)
         """
-        try:
-            # Return the user select by either integer or str
-            # we map the integer to artists and str to mixtapes
-            return User.selection(select, self.artists, self.mixtapes)
-
-        except MixtapesError as e:
-            Print(e)
+        # Return the user select by either integer or str
+        # we map the integer to artists and str to mixtapes
+        selection = User.selection(select, self.artists, self.mixtapes)
+        if not selection:
             raise MixtapesError(1)
+
+        return selection

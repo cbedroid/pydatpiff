@@ -29,8 +29,6 @@ class TestMixtapes(unittest.TestCase):
     @patch.object(Mixtapes, "_selectMixtape")
     def test_start_function(self, start):
         start(start="lil wayne")
-        # mix = self.mix
-        # start.assert_called_once()
         start.assert_called_once_with(start="lil wayne")
 
     def test_if_mixtapes_has_attributes(self):
@@ -71,9 +69,13 @@ class TestMixtapes(unittest.TestCase):
 
 
 class TestMixtapes2(unittest.TestCase):
-    mt.Session.method = Mock(return_value=mockSessionResponse())
-    mocked_mix = mt.Mixtapes
-    mocked_mix._setup = Mock()
+    REAL_MIX = mt.Mixtapes("hot", limit=1)
+
+    def setUp(self):
+        mt.Session.method = Mock(return_value=mockSessionResponse())
+        self.mocked_mix = mt.Mixtapes
+        self.mocked_mix._setup = Mock()
+        self.attrs = ["mixtapes", "artists", "links", "views", "album_covers"]
 
     def get_Mixtapes(self, category, **kwargs):
         if kwargs:
@@ -88,6 +90,30 @@ class TestMixtapes2(unittest.TestCase):
     def Mixtapes(self, obj):
         self.mocked_mix = obj
 
+    def populate_Mixtapes(self, mix, total):
+        with patch.object(mt.DOMProcessor, "findRegex") as find_regex:
+            mix._mixtape_resp = mockSessionResponse()
+
+            data = ["artist_%s" % x for x in range(total)]
+            find_regex.return_value = data
+            mix._setMixtapesAttributes()
+            return mix
+
+    def test_Mixtapes__str__(self):
+        mix = mt.Mixtapes("hot")
+        classname = mix.__class__.__name__
+        self.assertTrue(classname in str(mix))
+
+    def test_Mixtapes__repr__(self):
+        # test by category
+        by_category_mix = mt.Mixtapes("popular")
+        self.assertTrue("popular" in repr(by_category_mix))
+        self.assertFalse("search" in repr(by_category_mix))
+
+        by_search_mix = mt.Mixtapes(search="Tupac")
+        self.assertTrue(all(x in repr(by_search_mix) for x in ["Tupac", "search"]))
+        self.assertFalse("popular" in repr(by_search_mix))
+
     def test_mixtapes_response_equal_200(self):
         mixtapes = self.get_Mixtapes("hot")
         # self.Mixtapes = mixtapes
@@ -96,6 +122,30 @@ class TestMixtapes2(unittest.TestCase):
 
         self.assertEqual(search.status_code, 200)
         self.assertEqual(search.text, "content here")
+
+    def test_Mixtapes__len__(self):
+
+        mix = self.get_Mixtapes("exclusive")
+        # test if there are no artists, len return 0
+        self.assertTrue(len(mix) == 0)
+
+        # test if there are artists, len return the numbers of artists
+        mix = self.populate_Mixtapes(mix, 20)
+        self.assertTrue(len(mix) != 0)
+
+        # test if all attribute length are the same as artist length
+        for attr in self.attrs:
+            attr = getattr(mix, attr, [])
+            self.assertTrue(len(attr) == 20)
+
+    def test_Mixtapes_attribute_return_correct_value(self):
+        mix = self.get_Mixtapes("exclusive")
+        mix = self.populate_Mixtapes(mix, 20)
+        self.assertEqual(mix.artists[0], "artist_0")
+
+        # test if links are vaild url links
+        real_links = self.REAL_MIX.links
+        self.assertTrue(all(link.endswith(".html") for link in real_links))
 
     def test_mixtapes_clean(self):
         mix = self.Mixtapes
@@ -115,8 +165,7 @@ class TestMixtapes2(unittest.TestCase):
 
     def test_mixtapes_setMixtapesAttributes(self):
         mix = mt.Mixtapes("hot")
-        attrs = ["mixtapes", "artists", "links", "views", "album_covers"]
-        for attr in attrs:
+        for attr in self.attrs:
             var = getattr(mix, attr, None)
             self.assertEqual(var, None)
 
@@ -136,26 +185,39 @@ class TestMixtapes2(unittest.TestCase):
             mix._setMixtapesAttributes()
             artists = mix.artists
 
-            for attr in attrs:
-
+            for attr in self.attrs:
                 var = getattr(mix, attr, None)
                 self.assertEqual(var, "successful")
 
-    # def test_searchTree_was_called(self):
-    #     mix = mt.Mixtapes("hot")
-    #     with patch.object(
-    #         mt,'Mixtapes'
-    #     ) as search_tree:
-    #         with patch.object(mt.DOMProcessor, "findRegex") as find_regex:
-    #             mix._mixtape_resp = mockSessionResponse()
-    #             find_regex.return_value = "successful"
-    #             mix._setMixtapesAttributes()
-    #             artists = mix.artists
+    def test_Mixtapes_selection_return_correct_mixtape(self):
+        mix = mt.Mixtapes("new")
 
-    #             mix._mixtape_resp = mockSessionResponse()
-    #             find_regex.return_value = "successful"
-    #             mix._setMixtapesAttributes()
+        # test if exception is thrown when Mixtapes attribute is not set or is None
+        with patch.object(mt.User, "selection") as user_select:
+            # user_select.side_effect = MixtapesError(1)
+            user_select.return_value = None
+            with self.assertRaises(MixtapesError):
+                mix._select(3)
+                user_select.assert_called_with(1)
 
-    #             # test searchTree was called
-    #             mix.artists = "Lil Wayne"
-    #             search_tree.assert_called()
+        mix = self.populate_Mixtapes(mix, 50)
+        selection = mix._select(3)
+
+        # NOTE: by default Mixtapes._selection returns selection - 1
+        # zero (0) is skipped by default
+
+        # test by inputting a numerical(int) value
+        self.assertEqual(selection, 2)
+
+        # test by inputting a String (str) value
+        """NOTE That populate_Mixtapes method return an list.
+             Its first string is 'artist_0' although zero when using a numerical parameter,
+             using string (str) will discard this behavior and follow python's traditional 
+             list indexing 
+             Ex: populated_Mixtapes --> [artist_0, artist_1...etc]
+         """
+        selection = mix._select("artist_2")
+        self.assertEqual(selection, 2)
+
+        # testing Mixtapes.display method passes
+        mix.display()
