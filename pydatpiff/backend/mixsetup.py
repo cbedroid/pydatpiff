@@ -152,7 +152,8 @@ class DOMProcessor:
                 self.trys += 1
                 return self.findRegex(re_string)
             else:
-                raise MixtapesError(3)
+                return 
+                #raise MixtapesError(3)
         elif len(data) < self.MAX_MIXTAPES and not bypass:
             # Try to get the maximum amount of mixtapes
             # Since the first time this function is called, the data weirdly return None

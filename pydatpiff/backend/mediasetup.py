@@ -4,6 +4,7 @@ from .webhandler import MediaScrape
 from ..urls import Urls
 from ..utils.request import Session
 from ..errors import Mp3Error, DatpiffError
+from .config import Datatype
 
 SERVER_DOWN_MSG = (
     "\n\t--- UNOFFICIAL DATPIFF MESSAGE --"
@@ -152,6 +153,23 @@ class Album(DatpiffPlayer):
     @property
     def uploader(self):
         return MediaScrape.getUploader(self.album_html)
+
+    @classmethod
+    def searchFor(cls, links, song, *args, **kwargs):
+        """
+        Search through all Albums and return all Albums
+        that contains similiar songs' title.
+
+        :param: song - title of the song to search for
+        :param: links - all mixtapes links
+        """
+        index, link = links
+        album = cls(link)
+        name = cls.name
+        tracks = Mp3(album.datpiff_player_response).songs
+        for track in tracks:
+            if song in Datatype.strip_lowered(track):
+                return {"ablumNo": index, "album": name, "song": track}
 
 
 class Mp3:

@@ -49,9 +49,9 @@ class Mixtapes(object):
 
     def __len__(self):
         if hasattr(self, "_artists"):
-            return len(self._artists)
-        else:
-            return 0
+            if self._artists is not None:
+                return len(self._artists)
+        return 0
 
     @staticmethod
     def _clean(data, expected=str, min_character=3):
@@ -119,7 +119,10 @@ class Mixtapes(object):
         self.links = 'title"><a href\="(.*[\w\s]*\.html)"'
         self.views = '<div class\="text">Listens: <span>([\d,]*)</span>'
         self.album_covers = 'icon\\smixtape.*src="(.*)"\\salt'
-        Verbose("Found %s Mixtapes" % len(self))
+        if len(self) == 0:
+            Verbose("No Mixtapes Found")
+        else:
+            Verbose("Found %s Mixtapes" % len(self))
 
     def _searchTree(f):
         """
@@ -141,9 +144,13 @@ class Mixtapes(object):
             data = DOMProcessor(self._mixtape_resp, limit=self._max_mixtapes).findRegex(
                 pattern
             )
-            if hasattr(self, "_artists"):
+            if hasattr(self, "_artists") and len(self) != 0:
                 # we map all attributes length to _artists length
-                data = data[: len(self._artists)]
+                try:
+                    data = data[: len(self)]
+                except:
+                    print("Error Data", data)
+
             dunder = "_" + name
             setattr(self, dunder, data)
             return data

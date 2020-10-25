@@ -16,7 +16,7 @@ class Media:
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "__tmpfile"):
-            Tmp.removeTmpOnstart()
+            Tmp.removeTmpOnStart()
             cls.__tmpfile = Tmp.create()
 
         player = kwargs.get("player", None)
@@ -38,7 +38,7 @@ class Media:
             except Exception as e:
                 cls.player = None
 
-        if cls.player is None:
+        if cls.player is None or not hasattr(cls, "player"):
             raise MediaError(7, InstallationError._extra)
 
         return super(Media, cls).__new__(cls)
@@ -67,12 +67,11 @@ class Media:
         Raises:
             MediaError: Raises MediaError if mixtapes is not an subclass of pydatpiff.Mixtapes.
         """
-        if not self.__isMixtapesObject(mixtape):
-            raise MediaError(2, "must pass a mixtape object to Media class")
+        # Check mixtape is valid 
+        self.__isMixtapesObject(mixtape)
 
         Verbose("Media initialized")
-        if not mixtape:
-            raise MediaError(1)
+        
         self.setup(mixtape)
 
         super(Media, self).__init__()
@@ -101,12 +100,11 @@ class Media:
         Returns:
             Boolean -- True or False if instance is subclass of pydatpiff Mixtape class
         """
-        try:
-            if issubclass(instance.__class__, Mixtapes):
-                return True
-        except:
-            pass
-        return False
+        if not instance:
+            raise MediaError(1)
+
+        if not  issubclass(instance.__class__, Mixtapes):
+            raise MediaError(2, "must pass a mixtape object to Media class")
 
     def findSong(self, songname):
         """
@@ -129,27 +127,11 @@ class Media:
         Print("\nSearching for song: %s ..." % songname)
         links = self._Mixtapes.links
         links = list(enumerate(links, start=1))
-        results = Queued(self.__searchAlbumFor, links).run(songname)
+        results = Queued(Album.searchFor, links).run(songname)
         if not results:
             Print("No song was found with the name: %s " % songname)
         results = Datatype.removeNone(results)
         return results
-
-    def __searchAlbumFor(self, links, song, *args, **kwargs):
-        """
-        Search through all Albums and return all Albums
-        that contains similiar songs' title.
-
-        :param: song - title of the song to search for
-        :param: links - all mixtapes links
-        """
-        index, link = links
-        album = Album(link)
-        name = album.name
-        tracks = Mp3(album.datpiff_player_response).songs
-        for track in tracks:
-            if song in Datatype.strip_lowered(track):
-                return {"ablumNo": index, "album": name, "song": track}
 
     def setMedia(self, selection):
         """
@@ -164,11 +146,12 @@ class Media:
             note: see pydatpiff.mixtape.Mixtapes for album or artist selection
         """
 
+        #Mixtapes Class will handle errors and None value
         result = self._Mixtapes._select(selection)
-        if result is None:
-            Verbose("SELECTION:", selection)
-            e_msg = '\n--> Mixtape "%s" was not found' % selection
-            raise MediaError(1)
+        # if result is None:
+        #     Verbose("SELECTION:", selection)
+        #     e_msg = '\n--> Mixtape "%s" was not found' % selection
+        #     raise MediaError(1)
 
         # set up all Album's Info
         max_result = len(self._Mixtapes) - 1

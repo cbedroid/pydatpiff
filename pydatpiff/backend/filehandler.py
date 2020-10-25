@@ -21,12 +21,12 @@ class Tmp(object):
     Handle all temporary files created by Media player.
 
     It removes the hanging temparary files that are not destroyed.
-    Since we are creating temporary files to store mp3 content, we need 
+    Since we are creating temporary files to store mp3 content, we need
     to remove these files manually after being used.
-    python3 module 'signal' sometimes fail to catch  signal 
+    python3 module 'signal' sometimes fail to catch  signal
     on certain platform like Windows IDLE.
-    We create our own, in case user close window or program dies before 
-    being able to remove these files. 
+    We create our own, in case user close window or program dies before
+    being able to remove these files.
     """
 
     """
@@ -41,7 +41,7 @@ class Tmp(object):
         return tempfile.NamedTemporaryFile(suffix="_datpiff", delete=False)
 
     @staticmethod
-    def removeTmpOnstart():
+    def removeTmpOnStart():
         """remove all temporary file created by Datpiff on start up"""
         # every tmpfile using media player will have this suffix
         suffix = "_datpiff"
@@ -64,9 +64,9 @@ class Path:
 
     @staticmethod
     def isFile(path):
-        """ 
-        Check if file path exists 
-        :params: path - path of song 
+        """
+        Check if file path exists
+        :params: path - path of song
         """
         return os.path.isfile(path)
 
