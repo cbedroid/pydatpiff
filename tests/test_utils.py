@@ -14,7 +14,7 @@ class MySession(Session):
 
 # credit: robru - https://stackoverflow.com/questions/19817511/python-mock-mocking-base-class-for-inheritance
 class Fake(object):
-    """Create Mock()ed methods that match another class's methods."""
+    """Create Mock() methods that match another class's methods."""
 
     @classmethod
     def imitate(cls, *others):

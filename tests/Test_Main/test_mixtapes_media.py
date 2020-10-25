@@ -1,27 +1,21 @@
-import os
-
-import sys
 import unittest
-import json
 from unittest.mock import Mock, MagicMock, patch, PropertyMock
 from tests.test_utils import mockSessionResponse, Fake_Session_Mock
 from tests.test_utils import run_mix
 from pydatpiff.mixtapes import Mixtapes, Session
 from pydatpiff.utils import request
-from pydatpiff.errors import MixtapesError
+from pydatpiff.errors import MixtapesError, MediaError
 from pydatpiff import mixtapes as mt
+from pydatpiff import media as md
 
 Session = request.Session
 Session.TIMEOUT = 180
 
 mix = run_mix("hot")
-# search_mix = run_mix(search="jay-z")
 
 
 class TestMixtapes(unittest.TestCase):
-    # Mixtapes._session = PropertyMock(return_value=mockSessionResponse)
-
-    def test_category_set_correct(self):
+    def test_category_is_set_correct(self):
         # testing category
         results = mix.artists
         self.assertIsNotNone(results)
@@ -31,7 +25,7 @@ class TestMixtapes(unittest.TestCase):
         start(start="lil wayne")
         start.assert_called_once_with(start="lil wayne")
 
-    def test_if_mixtapes_has_attributes(self):
+    def test_mixtapes_attributes_length(self):
         assert hasattr(mix, "artist") == False
         self.assertEqual(len(mix.artists), 12)
         self.assertEqual(len(mix.links), 12)
@@ -99,6 +93,8 @@ class TestMixtapes2(unittest.TestCase):
             mix._setMixtapesAttributes()
             return mix
 
+    # Setup End
+
     def test_Mixtapes__str__(self):
         mix = mt.Mixtapes("hot")
         classname = mix.__class__.__name__
@@ -114,7 +110,7 @@ class TestMixtapes2(unittest.TestCase):
         self.assertTrue(all(x in repr(by_search_mix) for x in ["Tupac", "search"]))
         self.assertFalse("popular" in repr(by_search_mix))
 
-    def test_mixtapes_response_equal_200(self):
+    def test_mixtapes_response_status_equal_200(self):
         mixtapes = self.get_Mixtapes("hot")
         # self.Mixtapes = mixtapes
         search = mixtapes._selectMixtape("blah")
@@ -124,7 +120,6 @@ class TestMixtapes2(unittest.TestCase):
         self.assertEqual(search.text, "content here")
 
     def test_Mixtapes__len__(self):
-
         mix = self.get_Mixtapes("exclusive")
         # test if there are no artists, len return 0
         self.assertTrue(len(mix) == 0)
@@ -138,7 +133,7 @@ class TestMixtapes2(unittest.TestCase):
             attr = getattr(mix, attr, [])
             self.assertTrue(len(attr) == 20)
 
-    def test_Mixtapes_attribute_return_correct_value(self):
+    def test_Mixtapes_attributes_return_correct_value(self):
         mix = self.get_Mixtapes("exclusive")
         mix = self.populate_Mixtapes(mix, 20)
         self.assertEqual(mix.artists[0], "artist_0")
@@ -147,7 +142,7 @@ class TestMixtapes2(unittest.TestCase):
         real_links = self.REAL_MIX.links
         self.assertTrue(all(link.endswith(".html") for link in real_links))
 
-    def test_mixtapes_clean(self):
+    def test_mixtapes_clean_method_filter_datatypes_correctly(self):
         mix = self.Mixtapes
         data = "Jay-z       "
         resp = mix._clean(data, expected=str)
@@ -163,7 +158,7 @@ class TestMixtapes2(unittest.TestCase):
         with self.assertRaises(MixtapesError):
             mix._clean("this is a string", expected=dict)
 
-    def test_mixtapes_setMixtapesAttributes(self):
+    def test_mixtapes_setMixtapesAttributes_method_set_attributes_correctly(self):
         mix = mt.Mixtapes("hot")
         for attr in self.attrs:
             var = getattr(mix, attr, None)
@@ -171,11 +166,6 @@ class TestMixtapes2(unittest.TestCase):
 
         resp = mix = mt.Mixtapes("hot")
         resp._mixtape_resp = mockSessionResponse()
-
-        # test Exception raised when regex not found in request reponse
-        with self.assertRaises(MixtapesError):
-            resp._setMixtapesAttributes()
-            resp.artists = "blah"
 
         # test if all attributes are set correctly using regexwhen
         # check if attributes now have values
@@ -221,3 +211,130 @@ class TestMixtapes2(unittest.TestCase):
 
         # testing Mixtapes.display method passes
         mix.display()
+
+
+md.Session.method = Mock(return_value=mockSessionResponse())
+md.Tmp = Mock(autospec=True)
+md.Tmp.removeTmpOnStart = Mock(return_value=True)
+md.Tmp.create = Mock(return_value="dummy file")
+
+
+def populate_Mixtapes(mix, total):
+    with patch.object(mt.DOMProcessor, "findRegex") as find_regex:
+        mix._mixtape_resp = mockSessionResponse()
+
+        data = ["artist_%s" % x for x in range(total)]
+        find_regex.return_value = data
+        mix._setMixtapesAttributes()
+        return mix
+
+
+######################
+####  MEDIA  TEST ####
+######################
+
+
+class TestMedia(unittest.TestCase):
+    def setUp(self):
+        mt.Session.method = Mock(return_value=mockSessionResponse())
+        mocked_mix = mt.Mixtapes
+        mocked_mix._setup = Mock()
+
+        # Unpopulated Mixtapes
+        category_mix = mocked_mix(category="hot")
+        search_mix = mocked_mix(search="Tupac")
+
+        # Populating attributes for both search and category Mixtape
+        self.cp_mix = populate_Mixtapes(category_mix, 10)
+        self.cp_mix = populate_Mixtapes(search_mix, 10)
+
+        self.MEDIA = md.Media(self.cp_mix)
+
+    def populate_Mixtapes(self, mix, total):
+        with patch.object(md.Mixtapes.DOMProcessor, "findRegex") as find_regex:
+            mix._mixtape_resp = mockSessionResponse()
+
+            data = ["artist_%s" % x for x in range(total)]
+            find_regex.return_value = data
+            mix._setMixtapesAttributes()
+            return mix
+
+    def test_TMP_is_patched(self):
+        self.assertTrue(md.Tmp.create() == "dummy file")
+
+    def test_Media_str_method_is_correct(self):
+        self.assertIn(self.cp_mix.__class__.__name__, str(self.MEDIA))
+        self.assertIn("Media", str(self.MEDIA))
+
+    def test_Media_repr_method_is_correct(self):
+        self.assertIn(self.cp_mix.__class__.__name__, repr(self.MEDIA))
+
+    def test_Media_len_method(self):
+        pass
+        # self.assertEqual(len(self.MEDIA), 10)
+
+    def test_if_media_player_is_created(self):
+        media = md.Media(self.cp_mix)
+        self.assertIsNotNone(media.player)
+
+        # test if player is updated when reinitializing Media
+        old_player = media.player
+        new_media = md.Media(self.cp_mix, player="MPV")
+        new_player = new_media.player
+        self.assertFalse(old_player == new_player)
+
+    def test_Media_initialization(self):
+        # "__downloaded_song" is not tested because it is private variable
+        # It will be tested in backend
+
+        # test MediaError is thrown when mixtapes is not passed in init
+        with self.assertRaises(MediaError):
+            md.Media()
+            # test if error is thrown if "mixtapes" parameter is not an object of Mixtapes class
+            md.media(mixtape="blah")
+
+        # test whether setMedia is called when "pre_selection" keyword is passed
+        with patch.object(md.Media, "setMedia") as SM:
+            md.Media(self.cp_mix, 3)
+            SM.assert_called_once_with(3)
+
+        # test setup method set attributes on init
+        attrs = [
+            "_session",
+            "_Mixtapes",
+            "_artist_name",
+            "_album_name",
+            "_current_index",
+            "_selected_song",
+        ]
+        media = md.Media(self.cp_mix)
+        with patch.object(md.Media, "setup") as setup:
+            media.setup(self.cp_mix)
+            for attr in attrs:
+                self.assertTrue(hasattr(media, attr))
+        setup.assert_called_once_with(self.cp_mix)
+
+    def test_setMedia_method(self):
+        # test if MixtapesError is thrown when invalid argument is passed
+        with self.assertRaises(MixtapesError):
+            media = self.MEDIA
+            media.setMedia('testing')
+
+    def test_findSong_returns_correct_data(self):
+        media = md.Media(self.cp_mix)
+        with patch.object(md, "Queued") as Q:
+            ret = (
+                (1, "mixtape_1", "album_1"),
+                (2, "mixtape_2", "album_2"),
+                (3, "mixtape_3", "album_3"),
+            )
+            Q.run = Mock(return_value=ret)
+
+            # patch Datatype helper class and methods
+            md.Datatype = Mock()
+            md.Datatype.removeNone = Mock(return_value=ret)
+
+            song_found = media.findSong("blah")
+            self.assertTrue(len(song_found) == 3)
+
+        self.assertTrue(len(media._Mixtapes.links) > 2)
