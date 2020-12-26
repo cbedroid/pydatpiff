@@ -22,12 +22,12 @@ To have the best experience while contributing, Contributers are urge to follow 
 
 
   
-All code is reviewed before acceptance and changes may be requested to better
+All codes are reviewed before acceptance and changes may be requested to better
 follow the conventions of the existing Repo.
 
 This build system currently uses **`tox`** for testing on all supported Python versions.
 
-All tests are will run automatically for all **`push`** and **`PR`** via GitHub Actions.  
+All tests will run automatically for all **`push`** and **`PR`** via GitHub Actions.  
 You should ensure your build will pass by running `tox` tests locally before submitting PR.
 
 ---
