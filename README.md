@@ -1,6 +1,7 @@
   
   
-<img src="https://raw.github.com/cbedroid/pydatpiff/master/github/Logo.png" width="800" height="200">
+<img src="https://user-images.githubusercontent.com/54720725/96840060-f872ab80-1417-11eb-93ac-c964217b98b1.png" width="800" height="200">
+
 
 [![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
 # Introduction
