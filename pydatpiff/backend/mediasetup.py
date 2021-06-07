@@ -1,10 +1,12 @@
 import re
 import warnings
+
+from pydatpiff.errors import DatpiffError, Mp3Error
+from pydatpiff.urls import Urls
+from pydatpiff.utils.request import Session
+
+from .utils import Object
 from .webhandler import MediaScrape
-from ..urls import Urls
-from ..utils.request import Session
-from ..errors import Mp3Error, DatpiffError
-from .config import Datatype
 
 SERVER_DOWN_MSG = (
     "\n\t--- UNOFFICIAL DATPIFF MESSAGE --"
@@ -12,8 +14,10 @@ SERVER_DOWN_MSG = (
     " Please check back later "
 )
 # warnings.
+
+
 class DatpiffPlayer:
-    """ Datpiff's frontend media player object"""
+    """Datpiff's frontend media player object"""
 
     # Flag for mobile version.
     # Fallback if desktop version is not working ('website issue')
@@ -86,12 +90,12 @@ class DatpiffPlayer:
 
     @property
     def album_ID(self):
-        """Album ID Number  """
+        """Album ID Number"""
         return MediaScrape.get_suffix_number(self._album_link)
 
     @property
     def datpiff_player_response(self):
-        """ return Datpiff player html contents """
+        """return Datpiff player html contents"""
         # Note: caching will be done on Session side .. no worries
         self.dpp_link = self.album_ID
         try:
@@ -113,7 +117,9 @@ class DatpiffPlayer:
             ).group(1)
         else:
             # desktop only
-            name = re.search(r'title">(.*[\w\s]*)\</div', self.dpp_html).group(1)
+            name = re.search(r'title">(.*[\w\s]*)\</div', self.dpp_html).group(
+                1
+            )
         return name
 
 
@@ -165,11 +171,10 @@ class Album(DatpiffPlayer):
         """
         index, link = links
         album = cls(link)
-        name = cls.name
         tracks = Mp3(album.datpiff_player_response).songs
         for track in tracks:
-            if song in Datatype.strip_lowered(track):
-                return {"ablumNo": index, "album": name, "song": track}
+            if song in Object.strip_and_lower(track):
+                return {"ablumNo": index, "album": album.name, "song": track}
 
 
 class Mp3:
@@ -240,7 +245,6 @@ class Mp3:
 
     @property
     def mp3Urls(self):
-        mp3 = []
         prefix = "https://hw-mp3.datpiff.com/mixtapes/"
         for track in self.urlencode_track:
             endpoint = "{}{}".format(self.AlbumID, track)

@@ -1,15 +1,17 @@
+import atexit
 import os
 import subprocess
-import atexit
+
 from mutagen.mp3 import MP3
-from ..config import Threader
+
+from pydatpiff.backend.utils import Threader
 
 
 class Popen(subprocess.Popen):
     registered_popen = []
 
     def __init__(self, *args, **kwargs):
-        """ build subprocess Popen object"""
+        """build subprocess Popen object"""
 
         kwargs["stdin"] = subprocess.PIPE
         kwargs["stdout"] = subprocess.PIPE
@@ -52,7 +54,7 @@ class Popen(subprocess.Popen):
     @Threader
     def register(self, callback=None, *args, **kwargs):
         """
-        Kills subprocess Popen when error occur or when 
+        Kills subprocess Popen when error occur or when
         process job finish"""
         self.registered_popen.append(self)
         while True:
@@ -81,7 +83,7 @@ class Popen(subprocess.Popen):
 
     @classmethod
     def kill_on_start(cls):
-        for process in self.registered_popen:
+        for process in cls.registered_popen:
             process.kill()
 
 

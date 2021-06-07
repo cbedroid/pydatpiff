@@ -1,7 +1,10 @@
-import requests
 import warnings
+
+import requests
+
+from pydatpiff.errors import RequestError
+
 from .helper import String
-from ..errors import RequestError
 
 
 class Session(object):
@@ -18,7 +21,9 @@ class Session(object):
     def __init__(self):
         self.session = requests.Session()
         # Learn more about this
-        adapter = requests.adapters.HTTPAdapter(pool_connections=600, pool_maxsize=600)
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=600, pool_maxsize=600
+        )
         self.session.mount("https://", adapter)
 
     @classmethod
@@ -28,7 +33,7 @@ class Session(object):
 
     @classmethod
     def clear_cache(cls):
-        """ clear cache to prevent memory error"""
+        """clear cache to prevent memory error"""
         del cls.cache
         cls.cache = {}
 
@@ -49,7 +54,7 @@ class Session(object):
             pass
 
     def method(self, method, url, bypass=None, **kwargs):
-        """ urllib requests method """
+        """urllib requests method"""
         method = String.lower(method)
         cache = self.check_cache(url)
         if cache and method != "post":
@@ -69,22 +74,23 @@ class Session(object):
             if method == "head":
                 web = self.session.head(url, timeout=self.TIMEOUT)
 
-        except requests.exceptions.InvalidURL as e:
+        except requests.exceptions.InvalidURL:
             raise RequestError(1)
 
         except requests.exceptions.Timeout:
             self.TIMEOUT_COUNT += 1
             if self.TIMEOUT_COUNT >= 3:
                 print("\n")  # need for spacing
-                warn_msg = "\nWarning: Please check your internet connection ! "
+                warn_msg = (
+                    "\nWarning: Please check your internet connection ! "
+                )
                 warnings.warn(warn_msg)
                 self.TIMEOUT_COUNT = 0
             raise RequestError(2)
 
-        except Exception as e:
+        except:
             raise RequestError(3)
 
-        status = web.status_code
         try:
             web.raise_for_status()
         except:

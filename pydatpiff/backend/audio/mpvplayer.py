@@ -1,18 +1,25 @@
 import re
-from time import time
 from functools import wraps
-from .audio_engine import Popen, MetaData
+from time import time
+
+from pydatpiff.backend.filehandler import Path
+from pydatpiff.backend.utils import Threader
+from pydatpiff.errors import MvpError
+from pydatpiff.frontend.display import Print
+
+from .audio_engine import MetaData, Popen
 from .baseplayer import BasePlayer
-from ..filehandler import Path
-from ..config import Threader
-from ...errors import MvpError
-from ...frontend.display import Print
 
 
 class MPV(BasePlayer):
     def __init__(self):
         self._popen = None
-        self._state = {"playing": False, "pause": False, "stop": False, "load": False}
+        self._state = {
+            "playing": False,
+            "pause": False,
+            "stop": False,
+            "load": False,
+        }
         self._default_volume = 100
 
     def _pre_popen(self, song):
@@ -27,7 +34,7 @@ class MPV(BasePlayer):
         ]
 
     def _format_time(self, pos=None):
-        """Format current song time to clock format """
+        """Format current song time to clock format"""
         pos = self.duration if not pos else pos
         mins = int(pos / 60)
         secs = int(pos % 60)
@@ -139,7 +146,6 @@ class MPV(BasePlayer):
             pause = "set pause {} \n".format(state)
             self._write_cmd(pause)
             last_pause_state = self.state["pause"]
-            current_pos = self.current_position
 
             self._isTrackPlaying = last_pause_state
             if self._isTrackPaused:
@@ -159,7 +165,7 @@ class MPV(BasePlayer):
         self.__previous_time += -constrains
 
     def constrain_seek(self, seek):
-        """ Force range constraints on setting seek time,
+        """Force range constraints on setting seek time,
         when rewinding and fast-fowarding.
         Time that is set out of range will be set to its nearest position.
         """
@@ -233,12 +239,12 @@ class MPV(BasePlayer):
         if self.current_position < len(self):
             # user manaully stop track
             userstop = True
-        self._resetState(stop=True,userstop=userstop)
+        self._resetState(stop=True, userstop=userstop)
         Popen.unregister()
 
     @property
     def _volumeLevel(self):
-        """ Current media player volume"""
+        """Current media player volume"""
         return self._default_volume
 
     @_volumeLevel.setter

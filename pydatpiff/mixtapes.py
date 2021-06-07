@@ -1,11 +1,12 @@
 import re
 from functools import wraps
-from .urls import Urls
-from .utils.request import Session
+
+from .backend.mixsetup import DOMProcessor
+from .backend.utils import Selector
 from .errors import MixtapesError
 from .frontend.display import Print, Verbose
-from .backend.config import User, Datatype
-from .backend.mixsetup import DOMProcessor
+from .urls import Urls
+from .utils.request import Session
 
 
 class Mixtapes(object):
@@ -32,7 +33,9 @@ class Mixtapes(object):
         self._setup()
 
     def _setup(self):
-        self._selectMixtape(str(self._selected_category), str(self._selected_search))
+        self._selectMixtape(
+            str(self._selected_category), str(self._selected_search)
+        )
         self._setMixtapesAttributes()
 
     def __str__(self):
@@ -44,7 +47,10 @@ class Mixtapes(object):
 
     def __repr__(self):
         if self._selected_search:
-            return "%s(search='%s')" % (self.__class__.__name__, self._selected_search)
+            return "%s(search='%s')" % (
+                self.__class__.__name__,
+                self._selected_search,
+            )
         return "%s('%s')" % (self.__class__.__name__, self._selected_category)
 
     def __len__(self):
@@ -100,11 +106,15 @@ class Mixtapes(object):
         """
         if search:  # Search for an artist
             body = self._search_for(self._clean(search))
-            if not body or body is None:  # on failure return response from a category
+            if (
+                not body or body is None
+            ):  # on failure return response from a category
                 return self._selectMixtape("hot")
         else:  # Select from category instead of searching
-            select = User.choice_is_str
-            choice = select(category, Urls.category) or select("hot", Urls.category)
+            selector = Selector.filter_choices
+            choice = selector(category, Urls.category) or selector(
+                "hot", Urls.category
+            )
             body = self._session.method("GET", choice)
         self._mixtape_resp = body
         return body
@@ -141,9 +151,9 @@ class Mixtapes(object):
             name = f.__name__
             path = f(self, *args, **kwargs)
             pattern = re.compile(path)
-            data = DOMProcessor(self._mixtape_resp, limit=self._max_mixtapes).findRegex(
-                pattern
-            )
+            data = DOMProcessor(
+                self._mixtape_resp, limit=self._max_mixtapes
+            ).findRegex(pattern)
             if hasattr(self, "_artists") and len(self) != 0:
                 # we map all attributes length to _artists length
                 try:
@@ -159,7 +169,7 @@ class Mixtapes(object):
 
     @property
     def artists(self):
-        """ return all Mixtapes artists' name"""
+        """return all Mixtapes artists' name"""
         if hasattr(self, "_artists"):
             return self._artists
 
@@ -176,19 +186,19 @@ class Mixtapes(object):
     @album_covers.setter
     @_searchTree
     def album_covers(self, path):
-        """ Returns mixtapes album cover image"""
+        """Returns mixtapes album cover image"""
         return path
 
     @property
     def mixtapes(self):
-        """ Return all mixtapes name"""
+        """Return all mixtapes name"""
         if hasattr(self, "_mixtapes"):
             return self._mixtapes
 
     @mixtapes.setter
     @_searchTree
     def mixtapes(self, path):
-        """ return all the mixtapes titles from web page"""
+        """return all the mixtapes titles from web page"""
         return path
 
     @property
@@ -223,18 +233,24 @@ class Mixtapes(object):
                 % (count, a, t, "https://datpiff.com" + l, v, "-" * 60)
             )
 
-    def _select(self, select):
+    def _select(self, choice):
         """
         Queue and load  a mixtape to media player.
                             (See pydatpiff.media.Media.setMedia)
 
-        :param: select - (int) user selection by indexing an artist name or album name
+        :param: choice - (int) user selection by indexing an artist name or album name
                             (str)
         """
-        # Return the user select by either integer or str
+        # Return the user selection by either integer or str
         # we map the integer to artists and str to mixtapes
-        selection = User.selection(select, self.artists, self.mixtapes)
-        if not selection:
+        if isinstance(choice, int):
+            selector = Selector.select_from_index
+        else:
+            selector = Selector.select_from_choices
+
+        selection = selector(choice, self.artists, self.mixtapes)
+        if selection is None:
+            Print(f"\nSelection not found\n{selector}")
             raise MixtapesError(1)
 
         return selection

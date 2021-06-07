@@ -1,9 +1,9 @@
 """
-   Custom printing function using logger. 
+   Custom printing function using logger.
 """
+import logging
 import os
 import sys
-import logging
 
 rootLogger = logging.getLogger()
 rootLogger.setLevel(logging.INFO)
@@ -21,7 +21,9 @@ except:
 
 
 def handlespace(w):  # for correcting joined args
-    return w if any(w.endswith(x) for x in ["\n", "\t", "\r", " "]) else w + " "
+    return (
+        w if any(w.endswith(x) for x in ["\n", "\t", "\r", " "]) else w + " "
+    )
 
 
 def Print(*args):
@@ -33,7 +35,7 @@ def Print(*args):
             args = list(args)
             args.extend(["\n"])
             for out in args:
-                dummy_call = str(color_text.write(handlespace(out), "stdout"))
+                color_text.write(handlespace(out), "stdout")
 
 
 def Verbose(*args):
@@ -42,7 +44,8 @@ def Verbose(*args):
 
 class Show:
     """Flashes media info message to user"""
-    def mediaPlayMsg(artist, albumname,songname, size, demo=False):
+
+    def mediaPlayMsg(artist, albumname, songname, size, demo=False):
         if demo:
             Verbose("\n%s %s %s" % ("-" * 20, "DEMO", "-" * 20))
         Verbose("\nAlbum: %s" % albumname)

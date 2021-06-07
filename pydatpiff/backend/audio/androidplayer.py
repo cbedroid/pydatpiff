@@ -1,12 +1,17 @@
-import os
 import re
-import sys
-from time import time
 from subprocess import PIPE, Popen, check_call
-from mutagen.mp3 import MP3
-from ..filehandler import Path
-from ..config import Threader
+from time import time
+
+from pydatpiff.backend.filehandler import Path
+from pydatpiff.backend.utils import Threader
+
 from .baseplayer import BasePlayer
+
+try:
+    from mutagen.mp3 import MP3
+except:
+    # TODO: Raise Support Error
+    pass
 
 
 class AndroidError(Exception):
@@ -19,14 +24,13 @@ class Android(BasePlayer):
     # we will move the tempfile (see backend.filehandler)
     # to the device storage system ('/sdcard' or '/storage/')
     DROID_TMP = "/sdcard/.pydatpiff_tmp.mp3"
-    __Mutagen = MP3
 
     def __init__(self, *args, **kwargs):
-        """ Initialize BasePlayer from Android class"""
+        """Initialize BasePlayer from Android class"""
         try:
             self._test_android()
         except:
-            raise AndroidError("IncompatableAndroidDevice")
+            raise AndroidError("IncompatibleAndroidDevice")
         super(Android, self).__init__(*args, **kwargs)
 
     def __len__(self):
@@ -34,11 +38,11 @@ class Android(BasePlayer):
 
     @staticmethod
     def _test_android():
-        check_call("am start", shell=True,stderr=PIPE,stdout=PIPE)
+        check_call("am start", shell=True, stderr=PIPE, stdout=PIPE)
 
     @property
     def elapse(self):
-        """ 
+        """
         Elapse is the last time since a track has been loaded (self.__load).
         Elaspe capture when player is playing track
         It records the time from the latest state in seconds
@@ -63,7 +67,6 @@ class Android(BasePlayer):
 
         while True:
             start = time()
-            test = time()
             while self._isTrackPaused:
                 if time() - start >= 1:
                     self._start_time += time() - start
@@ -102,7 +105,7 @@ class Android(BasePlayer):
             raise AndroidError(error)
 
     def _format_time(self, pos=None):
-        """Format current song time to clock format """
+        """Format current song time to clock format"""
         pos = self.duration if not pos else pos
         mins = int(pos / 60)
         secs = int(pos % 60)
@@ -110,8 +113,13 @@ class Android(BasePlayer):
 
     def __preloadTrack(self):
         """Open file path  and return its content"""
+        try:
+            self.__Mutagen = MP3(self.__meta_data_path)
+        except NameError:
+            raise AndroidError(
+                'UnsupportedDeviceError "Mutagen" is not supported by your device.'
+            )
 
-        self.__Mutagen = MP3(self.__meta_data_path)
         with open(self._song_path, "rb") as f:
             self.__content = f.read()
         self._isTrackLoaded = True
@@ -157,21 +165,25 @@ class Android(BasePlayer):
     def __load(self, position):
         """
         Write media content to file
-        
-        :param: position  - postion to start song (second(s)) 
+
+        :param: position  - postion to start song (second(s))
         """
         # spot in seconds
         with open(self.DROID_TMP, "wb") as mp3:
             self.current_position = position
             spot = int(self.current_position + position)
-            topos = spot * self.bytes_per_sec if spot > 0 else 1 * self.bytes_per_sec
+            topos = (
+                spot * self.bytes_per_sec
+                if spot > 0
+                else 1 * self.bytes_per_sec
+            )
             topos = int(topos)
 
             self._load_time = time()
             mp3.write(self.__content[topos:])
 
     def setTrack(self, name, path):
-        """ 
+        """
         Prepares the media tracks and set its attributes and current state
 
         :param: name - name of the of the media track
@@ -209,7 +221,11 @@ class Android(BasePlayer):
 
         self.__load(position)
         self._player = Popen(
-            self.__am_start_Intent, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE
+            self.__am_start_Intent,
+            shell=True,
+            stdin=PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
         )
         self._isTrackPaused = False
         self._isTrackPlaying = True
@@ -227,7 +243,6 @@ class Android(BasePlayer):
         level = int(level)
 
         max_level = 15
-        min_level = 0
         percentage = level / max_level
         if percentage > 1:
             percentage = 1
@@ -240,7 +255,7 @@ class Android(BasePlayer):
     def volume(self, vol=15):
         """
         Android volume controls
-        :param: vol - set the media volume range 0 - 100 
+        :param: vol - set the media volume range 0 - 100
         """
         try:
             vol = self.__constrain_volume(vol)
@@ -272,7 +287,6 @@ class Android(BasePlayer):
 
         :param: pos - time to rewind or fast-forward (in seconds)
         """
-        spot = pos
         if self._isTrackPaused:
             self._isTrackPaused = False
 
@@ -296,7 +310,7 @@ class Android(BasePlayer):
 
     @property
     def stop(self):
-        """ Stop track"""
+        """Stop track"""
         service = "am stopservice "
         cmd = service + "org.videolan.vlc/org.videolan.vlc.PlaybackService"
-        results = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+        Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)

@@ -1,8 +1,8 @@
-import threading
 from time import time
-from ..config import Threader
-from ...errors import PlayerError
-from ...frontend.display import Print
+
+from pydatpiff.backend.utils import Threader
+from pydatpiff.errors import PlayerError
+from pydatpiff.frontend.display import Print
 
 
 class DerivedError(Exception):
@@ -110,11 +110,13 @@ class BasePlayer(metaclass=BaseMeta):
         """
 
         if boolean is not None:  # update state if boolean param True or False
-            self.state.update(dict(playing=bool(boolean), pause=not bool(boolean)))
+            self.state.update(
+                dict(playing=bool(boolean), pause=not bool(boolean))
+            )
 
     @property
     def _isTrackLoaded(self):
-        """ Return player loaded state"""
+        """Return player loaded state"""
         return self.state["load"]
 
     @_isTrackLoaded.setter
@@ -133,7 +135,7 @@ class BasePlayer(metaclass=BaseMeta):
         """
             Give a moment to allow track time to fully end.
             Critical  while autoplay feature is enabled.
-            (see pydatpiff.media.autoplay) 
+            (see pydatpiff.media.autoplay)
         """
         # WAIT = 2
         WAIT = 1
@@ -219,7 +221,9 @@ class BasePlayer(metaclass=BaseMeta):
         else:
             mode = chr(9209) or "[]"
         Print("\n%s TRACK: %s" % (chr(9836), self.name))
-        pos = "{0}  {1}:{2} - {3}:{4}\n".format(mode, c_min, c_sec, l_min, l_sec)
+        pos = "{0}  {1}:{2} - {3}:{4}\n".format(
+            mode, c_min, c_sec, l_min, l_sec
+        )
         if hasattr(self, "_media_autoplay"):
             if self._media_autoplay:
                 Print(" " * 2, chr(9850), pos)
@@ -229,7 +233,7 @@ class BasePlayer(metaclass=BaseMeta):
 
     @property
     def _volumeLevel(self):
-        """ Current media player volume"""
+        """Current media player volume"""
         # TODO implement method to monitor the volume
         return -1
 
@@ -250,7 +254,7 @@ class BasePlayer(metaclass=BaseMeta):
 
     @property
     def play(self):
-        """ Play media song"""
+        """Play media song"""
         raise NotImplementedError
 
     @play.setter
@@ -263,7 +267,7 @@ class BasePlayer(metaclass=BaseMeta):
         raise NotImplementedError
 
     def _seeker(self, pos=10, rew=True):
-        """ Rewind and ffwd base controls"""
+        """Rewind and ffwd base controls"""
         raise NotImplementedError
 
     def rewind(self, pos=10):
@@ -283,5 +287,5 @@ class BasePlayer(metaclass=BaseMeta):
 
     @property
     def stop(self):
-        """ Stops the song """
+        """Stops the song"""
         raise NotImplementedError

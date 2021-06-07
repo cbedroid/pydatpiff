@@ -1,7 +1,12 @@
-import vlc
 import re
-from ...errors import PlayerError
+
+import vlc
+
+from pydatpiff.errors import PlayerError
+from pydatpiff.frontend.display import Print
+
 from .baseplayer import BasePlayer
+
 
 class VLCPlayer(BasePlayer):
     def __init__(self, *args, **kwargs):
@@ -16,7 +21,9 @@ class VLCPlayer(BasePlayer):
     @property
     def _stateof(self):
         """Current state of the song being played"""
-        state = re.match(r"[\w.]*\.(\w*)", str(self._player.get_state())).group(1)
+        state = re.match(
+            r"[\w.]*\.(\w*)", str(self._player.get_state())
+        ).group(1)
         if state == "NothingSpecial":
             # set all player value to False
             for k, v in self._state.items():
@@ -68,7 +75,7 @@ class VLCPlayer(BasePlayer):
 
     @property
     def _volumeLevel(self):
-        """ Current media _player volume"""
+        """Current media _player volume"""
         return self._player.audio_get_volume()
 
     def volumeUp(self, vol=5):
@@ -101,14 +108,14 @@ class VLCPlayer(BasePlayer):
 
     @property
     def play(self):
-        """ Play media song"""
+        """Play media song"""
         if not self.state["stop"]:
             if self._isTrackPaused:
                 # unpause if track is already playing but paused
                 self.pause
             else:
                 self._player.play()
-                
+
             self._resetState(False, playing=True, load=True)
             return
         else:
@@ -146,14 +153,14 @@ class VLCPlayer(BasePlayer):
 
     def rewind(self, pos=10):
         """Rewind track
-          @params: pos:: time(second) to rewind media. default:10(sec)
+        @params: pos:: time(second) to rewind media. default:10(sec)
         """
         self._seeker(pos, True)
 
     def ffwd(self, pos=10):
         """Fast forward track
-          vlc time is in milliseconds
-          @params: pos:: time(second) to rewind media. default:10(sec)
+        vlc time is in milliseconds
+        @params: pos:: time(second) to rewind media. default:10(sec)
         """
         self._seeker(pos, False)
 

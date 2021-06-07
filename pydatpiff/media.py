@@ -1,18 +1,18 @@
-import os
 import io
-from .urls import Urls
-from .errors import MediaError, InstallationError
-from .utils.request import Session
+import os
+
 from .backend.audio.player import Player
+from .backend.filehandler import Path, Tmp, file_size
 from .backend.mediasetup import Album, Mp3
-from .frontend.display import Print, Verbose, Show
-from .backend.filehandler import file_size, Tmp, Path
-from .backend.config import User, Datatype, Queued, Threader
+from .backend.utils import Object, Queued, Selector, Threader
+from .errors import InstallationError, MediaError
+from .frontend.display import Print, Show, Verbose
 from .mixtapes import Mixtapes
+from .utils.request import Session
 
 
 class Media:
-    """ Media player that control the songs selected from Mixtapes """
+    """Media player that control the songs selected from Mixtapes"""
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "__tmpfile"):
@@ -35,10 +35,10 @@ class Media:
         elif not hasattr(cls, "player"):
             try:
                 cls.player = Player.getPlayer(**kwargs)
-            except Exception as e:
+            except:  # noqa: E722
                 cls.player = None
 
-        if cls.player is None or not hasattr(cls, "player"):
+        if cls.player is None and not hasattr(cls, "player"):
             raise MediaError(7, InstallationError._extra)
 
         return super(Media, cls).__new__(cls)
@@ -67,11 +67,11 @@ class Media:
         Raises:
             MediaError: Raises MediaError if mixtapes is not an subclass of pydatpiff.Mixtapes.
         """
-        # Check mixtape is valid 
+        # Check mixtape is valid
         self.__isMixtapesObject(mixtape)
 
         Verbose("Media initialized")
-        
+
         self.setup(mixtape)
 
         super(Media, self).__init__()
@@ -82,7 +82,7 @@ class Media:
             self.setMedia(pre_selection)
 
     def setup(self, mixtape):
-        """ Initial and setup class variables """
+        """Initial and setup class variables"""
         self._session = Session()
         self._Mixtapes = mixtape
         self._artist_name = None
@@ -103,7 +103,7 @@ class Media:
         if not instance:
             raise MediaError(1)
 
-        if not  issubclass(instance.__class__, Mixtapes):
+        if not issubclass(instance.__class__, Mixtapes):
             raise MediaError(2, "must pass a mixtape object to Media class")
 
     def findSong(self, songname):
@@ -123,14 +123,14 @@ class Media:
         # Implement a generator function , so user dont have to wait on all the results at once
         # Also thread this main function, to unblock user from still using program while
         # it wait for result to be finished.
-        songname = Datatype.strip_lowered(songname)
+        songname = Object.strip_and_lower(songname)
         Print("\nSearching for song: %s ..." % songname)
         links = self._Mixtapes.links
         links = list(enumerate(links, start=1))
         results = Queued(Album.searchFor, links).run(songname)
         if not results:
             Print("No song was found with the name: %s " % songname)
-        results = Datatype.removeNone(results)
+        results = Object.removeNone(results)
         return results
 
     def setMedia(self, selection):
@@ -146,7 +146,7 @@ class Media:
             note: see pydatpiff.mixtape.Mixtapes for album or artist selection
         """
 
-        #Mixtapes Class will handle errors and None value
+        # Mixtapes Class will handle errors and None value
         result = self._Mixtapes._select(selection)
         # if result is None:
         #     Verbose("SELECTION:", selection)
@@ -187,8 +187,10 @@ class Media:
                          str: artist,mixtape, or song name
         """
         try:
-            return User.selection(select, self.songs, [x.lower() for x in self.songs])
-        except MediaError as e:
+            if isinstance(select, int):
+                return Selector.select_from_index(select, self.songs)
+            return Selector.select_from_choices(select, self.songs)
+        except MediaError:
             raise MediaError(5)
 
     @property
@@ -221,7 +223,7 @@ class Media:
 
     @property
     def songs(self):
-        """ Return all songs from album."""
+        """Return all songs from album."""
         if not hasattr(self, "_Mp3"):
             e_msg = '\nSet media by calling -->  Media.setMedia("Album name")'
             raise MediaError(3, e_msg)
@@ -453,9 +455,7 @@ class Media:
 
         try:
             response = self._checkCache(song)
-            if response:
-                content = response.content
-            else:
+            if response is None:
                 response = self._session.method("GET", link)
                 response.raise_for_status()
 
@@ -463,7 +463,7 @@ class Media:
             Path.writeFile(songname, response.content, mode="wb")
             Show.mediaDownloadMsg(title, size)
             self._cacheSong(songname, response)
-        except:
+        except:  # noqa: E722
             Print("Cannot download song %s" % songname)
 
     def downloadAlbum(self, output=None):

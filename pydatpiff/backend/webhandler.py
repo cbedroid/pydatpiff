@@ -90,7 +90,7 @@ class MediaScrape:
         """Return the name of the person whom upload the mixtape"""
         try:
             return re.search('.*profile/(.*\w*.*)"', string).group(1)
-        except Exception as e:
+        except:
             return " "
 
     @staticmethod
@@ -100,7 +100,7 @@ class MediaScrape:
             if desc:
                 return Html.remove_ampersands(desc[-1])[0].strip()
             return " "
-        except Exception as e:
+        except:
             return " "
 
     @staticmethod

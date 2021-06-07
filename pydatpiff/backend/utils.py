@@ -7,8 +7,8 @@ import sys
 import concurrent.futures as cf
 import threading
 from functools import wraps
-from ..utils.request import Session
-from ..errors import BuildError
+from pydatpiff.utils.request import Session
+from pydatpiff.errors import BuildError
 
 
 def Threader(f):
@@ -64,7 +64,7 @@ class Queued:
                 t.terminate()
 
     def set_queue(self):
-        if Datatype.isList(self.input):
+        if Object.isList(self.input):
             # setting the queue from ^
             for obj in self.input:  # |
                 self.q.put(obj)
@@ -102,7 +102,7 @@ class Queued:
         return self.results
 
 
-class Datatype:
+class Object:
     @staticmethod
     def isDict(_type):
         return isinstance(_type, dict)
@@ -117,9 +117,7 @@ class Datatype:
 
     @classmethod
     def removeNone(cls, _list):
-        if not cls.isList(_list):
-            msg = "Can not remove None value. ..datatype must be a list "
-            raise NotImplementedError(msg)
+        print(f'\n\n List: {type(_list)}')
         return list(filter(None, _list))
 
     @classmethod
@@ -132,7 +130,7 @@ class Datatype:
         raise NotImplementedError("datatype is not a dictionary or list ")
 
     @staticmethod
-    def strip_lowered(string):
+    def strip_and_lower(string):
         """Return strip and lower value"""
         return str(string).lower().strip()
 
@@ -144,7 +142,7 @@ class Datatype:
 
         item = {}
         for key, val in data.items():
-            item[cls.strip_lowered(key)] = val
+            item[cls.strip_and_lower(key)] = val
         return item
 
     @classmethod
@@ -152,24 +150,27 @@ class Datatype:
         """Strip and lower string in list"""
         if not cls.isList(data):
             raise NotImplementedError("datatype is not a List")
-        return [cls.strip_lowered(x) for x in data]
+        return [cls.strip_and_lower(x) for x in data]
 
 
-class User:
+class Selector:
+
     @staticmethod
-    def choice_is_str(choice, data):
+    def filter_choices(choice, data):
         """
         Parse user string choice and return the corresponding data
-        :params:: choice,data 
+        :params:: choice,data
             choice - user choice. datatype: str
             data - list or dict object
         """
-        choice = Datatype.strip_lowered(choice)
-        if Datatype.isDict(data):
-            data = Datatype.lowered_dict(data)
+        choice = Object.strip_and_lower(choice)
+        if Object.isDict(data):
+            data = Object.lowered_dict(data)
             val = [val for key, val in data.items() if choice in key]
         else:
-            val = [val for val in data if choice in Datatype.strip_lowered(val)]
+            val = [
+                val for val in data if choice in Object.strip_and_lower(val)
+            ]
 
         if val:
             return min(val)
@@ -178,48 +179,36 @@ class User:
     def choice_is_int(choice, data):
         """
         Parse user int choice and return the corresponding data
-        :params:: choice,data 
+        :params:: choice,data
             choice - user choice. datatype: str
             data - list or dict object
         """
         try:
             choice = int(choice)
-            results = Datatype.enumerate_it(data)
+            results = Object.enumerate_it(data)
             length = len(data)
-            if Datatype.isDict(data):
+            if Object.isDict(data):
                 return results[choice][1][1]
             return results[choice][1]
         except Exception as e:
             return
 
     @classmethod
-    def selection(cls, select, byint=None, bystr=None):
-        """ select ablums_link by artist name, album name ('title')
-         or by index number of title or artist
+    def select_from_index(cls, select, data, *args):
+        """select ablums_link by artist name, album name ('title')
+        or by index number of title or artist
         """
-        try:
-            # checking from index
-            if isinstance(select, int):
-                select -= 1
-                length = len(byint) + 1
-                # catch index errors if user choose a mixtape out of range
-                select = 0 if (0 >= select or select > len(byint)) else select
-                return select
+        data_size = len(data)
+        # checking from index
+        select -= 1
+        length = data_size + 1
+        # catch index errors if user choose a mixtape out of range
+        select = 0 if (0 >= select or select > data_size) else select
+        return select
 
-            else:
-                # checking from artists
-                choosen = cls.choice_is_str
-                choice = choosen(select, byint)
-                if choice:
-                    return byint.index(choice)
-
-                # check by mixtapes
-                choice = choosen(select, bystr)
-                if choice:
-                    return bystr.index(choice)
-
-                if not choice:  # will catch None value in Media
-                    return
-
-        except BuildError as e:
-            raise BuildError(1)
+    @classmethod
+    def select_from_choices(cls, select, *args):
+        for choice in args:
+            value = cls.filter_choices(select, choice)
+            if value:
+                return choice.index(value)

@@ -1,8 +1,9 @@
+from pydatpiff.backend.utils import Object
+from pydatpiff.errors import InstallationError, PlayerError
+
+from .androidplayer import Android
 from .mpvplayer import MPV
 from .vlcplayer import VLCPlayer
-from ...errors import PlayerError, InstallationError
-from .androidplayer import Android, AndroidError
-from ..config import Datatype
 
 
 class Player:
@@ -14,13 +15,14 @@ class Player:
 
         try:
             if player:
-                player = Datatype.strip_lowered(player)
+                player = Object.strip_and_lower(player)
                 chosen = players_selection.get(player)
                 if chosen:
                     return chosen()
-        except Exception as e:
+        except:
             extended_msg = (
-                "\nThe player you choosen" " is not compatible with your device.\n"
+                "\nThe player you choosen"
+                " is not compatible with your device.\n"
             )
             raise PlayerError(5, extended_msg)
 
@@ -31,7 +33,7 @@ class Player:
 
         try:
             return MPV()
-        except Exception as e:
+        except:
             pass
 
         try:
@@ -39,4 +41,4 @@ class Player:
         except:
             pass
 
-        raise InstallationError(1, MediaError, _extra)
+        raise InstallationError(1)

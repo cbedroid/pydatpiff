@@ -1,7 +1,7 @@
+import math
 import os
 import re
 import tempfile
-import math
 
 
 def file_size(buf_size):
@@ -32,7 +32,7 @@ class Tmp(object):
     """
     def __init__(self):
         pass
-        
+
     """
 
     @staticmethod
@@ -52,7 +52,7 @@ class Tmp(object):
                     try:
                         lf = "/".join((tmp_dir, lf))
                         os.remove(lf)
-                    except Exception as e:
+                    except:
                         pass
 
 

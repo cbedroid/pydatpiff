@@ -1,9 +1,10 @@
 import re
-from ..urls import Urls
-from ..utils.request import Session
+
+from pydatpiff.urls import Urls
+from pydatpiff.utils.request import Session
+
+from .utils import Object, Queued
 from .webhandler import Html
-from .config import User, Datatype, Queued
-from ..errors import MixtapesError
 
 TIME_RAN = 0
 
@@ -20,8 +21,7 @@ class DOMProcessor:
         self.MAX_MIXTAPES = limit if isinstance(limit, int) else 600
         self.trys = 1
 
-    @staticmethod
-    def countMixtapes(url):
+    def __get_mixtapes_total(self, url):
         """Count the number of mixtapes available per page.
 
         Args:
@@ -30,13 +30,15 @@ class DOMProcessor:
         Returns:
             [int]: total number of mixtape's on page
         """
-        content = self._session.method("GET", url=url).text
+        text = self._session.method("GET", url=url).text
         try:
             filtered_content = re.search(
                 "(.*)rightColumnNarrow", text, re.DOTALL
             ).group(1)
 
-            total = re.findall('icon\\smixtape.*src="(.*)"\\salt', filtered_content)
+            total = re.findall(
+                'icon\\smixtape.*src="(.*)"\\salt', filtered_content
+            )
             return len(total)
         except:
             return 0
@@ -70,13 +72,13 @@ class DOMProcessor:
 
             """
                 # OPTIMIZE SPEED WHEN LIMITING MIXTAPES SEARCHES
-               NOTE: The website maximum mixtapes per page is 16 columns * 4rows 
+               NOTE: The website maximum mixtapes per page is 16 columns * 4rows
                      Since each album will have a cover image, we can use this as
-                     a map to get the max album per page. This will help guide us 
+                     a map to get the max album per page. This will help guide us
                      and give us an accurate break point to return data sooner.
-                     #So we can break out of the search once we reach the user's 
-                     #maximum mixtapes requested. 
-                     #Dividing User max mixtapes requested by the website maximum 
+                     #So we can break out of the search once we reach the user's
+                     #maximum mixtapes requested.
+                     #Dividing Selector max mixtapes requested by the website maximum
                      #mixtapes per page should give us an accurate break point.
             """
             MAX_PER_PAGE = 64
@@ -84,17 +86,15 @@ class DOMProcessor:
             page_limit = page_limit if page_limit > 1 else 1
 
             # map the page_link_urls to the base_url
-            from time import time
 
             global TIME_RAN
             TIME_RAN += 1
-            start = time()
             pagelinks = []
-            mixtapes_founded = 0  # record the number of mixtapes found
+            mixtapes_found = 0  # record the number of mixtapes found
             for page_number, link in enumerate(page_link_urls, start=1):
                 plu = "".join((self.base_url, link))
                 pagelinks.append(plu)
-                mixtapes_founded += self.countMixtapes(plu)
+                mixtapes_found += self.__get_mixtapes_total(plu)
 
                 if mixtapes_found >= page_limit:
                     return pagelinks
@@ -131,7 +131,7 @@ class DOMProcessor:
         # Map each page links url to request.Session and
         # place Session in 'queue and thread'
         lrt = Queued(self._getHtmlResponse, self.get_page_links).run()
-        list_response_text = Datatype.removeNone(lrt)
+        list_response_text = Object.removeNone(lrt)
 
         # Remove all unwanted characters from Xpath
         [
@@ -152,8 +152,7 @@ class DOMProcessor:
                 self.trys += 1
                 return self.findRegex(re_string)
             else:
-                return 
-                #raise MixtapesError(3)
+                return
         elif len(data) < self.MAX_MIXTAPES and not bypass:
             # Try to get the maximum amount of mixtapes
             # Since the first time this function is called, the data weirdly return None

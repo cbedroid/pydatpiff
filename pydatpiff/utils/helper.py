@@ -4,7 +4,7 @@ import re
 class String:
     @classmethod
     def lower(cls, string):
-        """ return lowered and strip string"""
+        """return lowered and strip string"""
         return string.lower().strip()
 
     @classmethod

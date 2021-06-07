@@ -20,5 +20,8 @@ class Urls:
 
     @staticmethod
     def payload(artist):
-        data = {"submit": "MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx", "criteria": artist}
+        data = {
+            "submit": "MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx",
+            "criteria": artist,
+        }
         return data

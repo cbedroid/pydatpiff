@@ -1,9 +1,9 @@
-import os
-import sys
-import subprocess
-import platform
-import tempfile
 import logging
+import os
+import platform
+import subprocess
+import sys
+import tempfile
 
 
 def fixdate():
@@ -100,25 +100,32 @@ class Error(Exception):
                 if not isinstance(error, str):
                     return error
                 name = Error.makeError(error)
-                e = type(name, (cls,), {"code": code, "message": error,})
+                e = type(
+                    name,
+                    (cls,),
+                    {
+                        "code": code,
+                        "message": error,
+                    },
+                )
                 cls.__error__[code] = e
             return "".join((str(cls.__error__[export_to]), "\n" + long_msg))
 
 
 class MixtapesError(Error):
-    """ handle all the Mixtapes errors"""
+    """handle all the Mixtapes errors"""
 
     __error__ = {
         1: "No Mixtapes Found",
         2: "Invalid category selected",
         3: "Unable to process Data",
         4: "Invalid data type",
-        4: "TooFewCharacters",
+        5: "TooFewCharacters",
     }
 
 
 class MediaError(Error):
-    """ handle all the Media errors"""
+    """handle all the Media errors"""
 
     __error__ = {
         1: "no mixtapes found",
