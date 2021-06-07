@@ -309,7 +309,7 @@ Simply create a variable ` player = media.player`
 [exclusive]: https://www.datpiff.com/mixtapes-exclusive
 [popular]: https://www.datpiff.com/mixtapes-popular.php
 [highest-rating]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=rating
-[most-listen]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=litens
+[most-listen]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=listens
 [most-download]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=downloads
 [most-favorite]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=favorites
 
