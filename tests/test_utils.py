@@ -1,11 +1,10 @@
-import os
-import re
-import sys
-from unittest.mock import Mock, MagicMock, PropertyMock, patch
-from pydatpiff.mixtapes import Mixtapes
+from unittest.mock import MagicMock, Mock, patch
+
 from pydatpiff.media import Media
+from pydatpiff.mixtapes import Mixtapes
 from pydatpiff.utils import request
-from pydatpiff.utils.request import Session
+
+Session = request.Session
 
 
 class MySession(Session):
@@ -38,9 +37,7 @@ def run_media():
     return Media(Mixtapes())
 
 
-def mockSessionResponse(
-    status=200, text="content here", json=None, raise_for_status=None, *args, **kwargs
-):
+def mockSessionResponse(status=200, text="content here", json=None, raise_for_status=None, *args, **kwargs):
     response = MagicMock()
     response.raise_for_status = Mock()
     response.status_code = status
@@ -62,14 +59,7 @@ def mockSessionResponse(
 
 # Here we will create a dummy testing Regex using some bultin Regex functionality.
 # Builtin Regex WILL NOT be overwritten
-def mockRegex(
-    string="hello world",
-    array=[],
-    throw_exception=False,
-    exception_type=AttributeError,
-    *args,
-    **kwargs
-):
+def mockRegex(string="hello world", array=[], throw_exception=False, exception_type=AttributeError, *args, **kwargs):
     data = Mock()
     data.sub = Mock(*args, return_value=string)
 
@@ -89,9 +79,6 @@ class Fake_Session_Mock:
     TIMEOUT = 10
     TIMEOUT_COUNT = 0
     cache = {}
-
-    def __init___(self):
-        self.session = mocked_session
 
     @classmethod
     def put_in_cache(cls, *args, **kwargs):

@@ -1,18 +1,15 @@
-import os
-import re
 import math
-import sys
+import re
 import unittest
-from unittest.mock import Mock, patch, PropertyMock
-from pydatpiff.errors import AlbumError
+from unittest.mock import patch
+
 from pydatpiff.backend import filehandler
 
 
 class TestFileSize(unittest.TestCase):
     def test_file_size_return_correct_size_name(self):
         file_size = filehandler.file_size
-        byteCode = lambda value: re.sub(r"[\W\d]*", "", file_size(value))
-
+        byteCode = lambda value: re.sub(r"[\W\d]*", "", file_size(value))  # noqa: E731
         code_name = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
         buffer_size = 1
 

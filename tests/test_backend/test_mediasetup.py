@@ -1,20 +1,14 @@
-import os
-import sys
 import unittest
-from unittest.mock import Mock, patch, PropertyMock
-from pydatpiff.errors import AlbumError
-from pydatpiff.backend import mediasetup, webhandler
-from pydatpiff.utils import request
-from tests.test_utils import mockSessionResponse
+from unittest.mock import Mock, PropertyMock, patch
 
+from pydatpiff.backend import mediasetup
+from tests.test_utils import mockSessionResponse
 
 dp_real_link = "https://mobile.datpiff.com/mixtape/983402?trackid=1&platform=desktop"
 dummy_text = "<blah blah blah>"
 dummy_json_data = {"success": True, "data": "foo-bar"}
 
-mocked_session = mockSessionResponse(
-    status=200, text=dummy_text, json_data=dummy_json_data
-)
+mocked_session = mockSessionResponse(status=200, text=dummy_text, json_data=dummy_json_data)
 
 
 class TestDatpiffPlayerProperties(unittest.TestCase):
@@ -22,9 +16,7 @@ class TestDatpiffPlayerProperties(unittest.TestCase):
 
     def setUp(self):
         # PATCHES
-        self.session = patch.object(
-            mediasetup, "Session", return_value=mocked_session.text
-        )
+        self.session = patch.object(mediasetup, "Session", return_value=mocked_session.text)
         self.media_scrape = patch.object(mediasetup, "MediaScrape", autospec=True)
         self.album = patch.object(mediasetup, "Album", autospec=True)
 
@@ -39,7 +31,7 @@ class TestDatpiffPlayerProperties(unittest.TestCase):
         # - Cause: RE cannot find pattern in string
         # - Return: RE group(1)
 
-        with self.assertRaises(AttributeError) as error:
+        with self.assertRaises(AttributeError):
             album = self.album("blah")
             album.bio()
 
@@ -83,9 +75,7 @@ class TestAlbum(unittest.TestCase):
             dp.datpiff_player_response = PropertyMock(return_value=mocked_session.text)
             self.assertEqual(dummy_text, dp.datpiff_player_response.return_value)
 
-        with patch.object(
-            mediasetup.Album, "dpp_link", new_callable=PropertyMock
-        ) as link:
+        with patch.object(mediasetup.Album, "dpp_link", new_callable=PropertyMock) as link:
             # test DatpiffPlayer link is return correct value
             link.return_value = dp_real_link
             dp = self.dp

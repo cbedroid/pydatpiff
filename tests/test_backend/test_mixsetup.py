@@ -1,22 +1,21 @@
-import os
-import sys
 import unittest
-from unittest.mock import Mock, patch, PropertyMock
-from pydatpiff.backend import mixsetup
-from pydatpiff.urls import Urls
-from pydatpiff.errors import MixtapesError
-from tests.test_utils import mockSessionResponse, mockRegex
+from unittest.mock import Mock, patch
 
+from pydatpiff.backend import mixsetup
+from tests.test_utils import mockSessionResponse
 
 dp_real_link = "https://mobile.datpiff.com/mixtape/983402?trackid=1&platform=desktop"
 dummy_text = "<blah blah blah>"
 dummy_json_data = {"success": True, "data": "foo-bar"}
 
 mocked_session = mockSessionResponse(
-    status=200, text=dummy_text, json=dummy_json_data, url="https://datpiff.com"
+    status=200,
+    text=dummy_text,
+    json=dummy_json_data,
+    url="https://datpiff.com",
 )
 
-# mixsetup.Session = mocked_session
+
 class TestDOMProcessor(unittest.TestCase):
     def setUp(self):
         self.session = patch.object(mixsetup, "Session", spec=True)
@@ -41,7 +40,7 @@ class TestDOMProcessor(unittest.TestCase):
     def test_get_page_links(self):
         # test get_page_links returns a list containing the session.url when
         # it can not find regex pattern in session response  html content
-        url = [Urls().url["base"]]
+        # url = [Urls().url["base"]]
         MS = self.MS
         self.assertEqual([mocked_session.url], MS.get_page_links)
 

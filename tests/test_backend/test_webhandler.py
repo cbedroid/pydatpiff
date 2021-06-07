@@ -1,19 +1,13 @@
-import os
-import sys
 import unittest
-from unittest.mock import Mock, patch, PropertyMock
-from pydatpiff.backend import mediasetup, webhandler
-from pydatpiff.utils import request
-from tests.test_utils import mockSessionResponse
 
+from pydatpiff.backend import webhandler
+from tests.test_utils import mockSessionResponse
 
 dp_real_link = "https://mobile.datpiff.com/mixtape/983402?trackid=1&platform=desktop"
 dummy_text = "<blah blah blah>"
 dummy_json_data = {"success": True, "data": "foo-bar"}
 
-mocked_session = mockSessionResponse(
-    status=200, text=dummy_text, json_data=dummy_json_data
-)
+mocked_session = mockSessionResponse(status=200, text=dummy_text, json_data=dummy_json_data)
 
 
 class TestWebHandler(unittest.TestCase):

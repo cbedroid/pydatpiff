@@ -1,12 +1,12 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch, PropertyMock
-from tests.test_utils import mockSessionResponse, Fake_Session_Mock
-from tests.test_utils import run_mix
-from pydatpiff.mixtapes import Mixtapes, Session
-from pydatpiff.utils import request
-from pydatpiff.errors import MixtapesError, MediaError
-from pydatpiff import mixtapes as mt
+from unittest.mock import Mock, patch
+
 from pydatpiff import media as md
+from pydatpiff import mixtapes as mt
+from pydatpiff.errors import MediaError, MixtapesError
+from pydatpiff.mixtapes import Mixtapes
+from pydatpiff.utils import request
+from tests.test_utils import mockSessionResponse, run_mix
 
 Session = request.Session
 Session.TIMEOUT = 180
@@ -26,7 +26,6 @@ class TestMixtapes(unittest.TestCase):
         start.assert_called_once_with(start="lil wayne")
 
     def test_mixtapes_attributes_length(self):
-        assert hasattr(mix, "artist") == False
         self.assertEqual(len(mix.artists), 12)
         self.assertEqual(len(mix.links), 12)
         self.assertEqual(len(mix.views), 12)
@@ -158,7 +157,9 @@ class TestMixtapes2(unittest.TestCase):
         with self.assertRaises(MixtapesError):
             mix._clean("this is a string", expected=dict)
 
-    def test_mixtapes_setMixtapesAttributes_method_set_attributes_correctly(self):
+    def test_mixtapes_setMixtapesAttributes_method_set_attributes_correctly(
+        self,
+    ):
         mix = mt.Mixtapes("hot")
         for attr in self.attrs:
             var = getattr(mix, attr, None)
@@ -173,7 +174,6 @@ class TestMixtapes2(unittest.TestCase):
             mix._mixtape_resp = mockSessionResponse()
             find_regex.return_value = "successful"
             mix._setMixtapesAttributes()
-            artists = mix.artists
 
             for attr in self.attrs:
                 var = getattr(mix, attr, None)
@@ -183,12 +183,12 @@ class TestMixtapes2(unittest.TestCase):
         mix = mt.Mixtapes("new")
 
         # test if exception is thrown when Mixtapes attribute is not set or is None
-        with patch.object(mt.User, "selection") as user_select:
+        with patch.object(mt.Selector, "select_from_index") as user_selection:
             # user_select.side_effect = MixtapesError(1)
-            user_select.return_value = None
+            user_selection.return_value = None
             with self.assertRaises(MixtapesError):
                 mix._select(3)
-                user_select.assert_called_with(1)
+                user_selection.assert_called_with(1)
 
         mix = self.populate_Mixtapes(mix, 50)
         selection = mix._select(3)
@@ -202,8 +202,8 @@ class TestMixtapes2(unittest.TestCase):
         # test by inputting a String (str) value
         """NOTE That populate_Mixtapes method return an list.
              Its first string is 'artist_0' although zero when using a numerical parameter,
-             using string (str) will discard this behavior and follow python's traditional 
-             list indexing 
+             using string (str) will discard this behavior and follow python's traditional
+             list indexing
              Ex: populated_Mixtapes --> [artist_0, artist_1...etc]
          """
         selection = mix._select("artist_2")
@@ -314,27 +314,23 @@ class TestMedia(unittest.TestCase):
                 self.assertTrue(hasattr(media, attr))
         setup.assert_called_once_with(self.cp_mix)
 
-    def test_setMedia_method(self):
-        # test if MixtapesError is thrown when invalid argument is passed
-        with self.assertRaises(MixtapesError):
-            media = self.MEDIA
-            media.setMedia('testing')
-
     def test_findSong_returns_correct_data(self):
         media = md.Media(self.cp_mix)
         with patch.object(md, "Queued") as Q:
-            ret = (
-                (1, "mixtape_1", "album_1"),
-                (2, "mixtape_2", "album_2"),
-                (3, "mixtape_3", "album_3"),
-            )
+            ret = [
+                {"ablumNo": 1, "album": "mixtape_1", "song": "song_1"},
+                {"ablumNo": 2, "album": "mixtape_2", "song": "song_2"},
+                {"ablumNo": 3, "album": "mixtape_3", "song": "song_3"},
+            ]
+
             Q.run = Mock(return_value=ret)
 
             # patch Datatype helper class and methods
-            md.Datatype = Mock()
-            md.Datatype.removeNone = Mock(return_value=ret)
+            md.Object = Mock()
+            md.Object.removeNone = Mock(return_value=ret)
 
-            song_found = media.findSong("blah")
-            self.assertTrue(len(song_found) == 3)
+            songs_found = media.findSong("mixtape")
+            songs_len = len(songs_found)
+            self.assertEqual(songs_len, 3)
 
         self.assertTrue(len(media._Mixtapes.links) > 2)
