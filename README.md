@@ -2,19 +2,19 @@
 
 <img src="https://user-images.githubusercontent.com/54720725/96840060-f872ab80-1417-11eb-93ac-c964217b98b1.png" width="800" height="200">
 
-# Introduction
+# Pydatpiff
 
 **PyDatpiff**   -   🎶 Unofficial [Datpiff](https://www.datpiff.com) Music Application. Play and download the latest Hip-Hop and RnB songs.
   - supports windows, mac, and linux
   - python 3.6 - above
 
-# Dependencies
+## Dependencies
 
 **PyDatpiff requires:**
  - see requirements:  [requirements.txt](https://github.com/cbedroid/pydatpiff/blob/master/requirements.txt)
 - *python >= 3.6*
 
-# Installation
+## Installation
 
  The default media player uses VLC to play music.
  For systems that are incompatible with VLC,  MPV will be used as the fallback player.
@@ -42,9 +42,9 @@ pip3 install pydatpiff
 --- ---
 
 
-# Let's Get Started...
 
-### Pydatpiff Category & Description
+
+#### Pydatpiff Category & Description
 
 Category reference a mixtapes level or ratings. Visit [**Datapiff**](https://datpiff.com) for more info.
 
@@ -61,11 +61,11 @@ Category reference a mixtapes level or ratings. Visit [**Datapiff**](https://dat
 |[__most listen__][most-listen]       | Most listen mixtapes.
 |[__most favorite__][most-favorite]   | Favorite mixtapes.
 |[__highest rating__][highest-rating] | Mixtapes with the highest rating.
----
 
 --- ---
 
-# Mixtapes
+
+## Mixtapes
 
 **pydatpiff.Mixtapes** - PyDatpiff Mixtapes class is query for the latest music by either referencing a `category` or by searching for a particular `artist` or `mixtape`.
 
@@ -106,7 +106,8 @@ Either argument __category__ or __search__ should be used at a given time. If no
 ['Creative Control', 'Carter Collection (15th Anniversary)', 'Viva La Hova', 'The Best Of Jay-z                                                                                                : 25th Anniversary', 'Jay-z - If I Should Die Vol. 1 (the Best Of Jay-z)', 'Jay-Z: The Unheard C                                                                                                lassics', 'Jay-z Underground Mixes And Mashes Disk 2', 'Iceburgz Ent Dj Smokeshop Presents -big                                                                                                 Tingz-pt.1 Classic Beefs Nas,jay-z And More', 'The Best Of Jay-z Old Vs New', 'The Best Of Jay-z                                                                                                 & Biggie Smalls', 'Jay-z Live From Glastonbury ', 'Jay-z Underground Mixes And Mashes disk 1',                                                                                                 'Jay-z - Remixes',..etc ]
 
 --- ---
-# Media
+
+## Media
 
 **pydatpiff.Media** - PyDatpiff class that allow users to play and download songs
 
@@ -117,10 +118,10 @@ Here are somethings you can do with **`Pydtapiff Media`**
  - `download` - Download current song.
  - `downloadAlbum` - Download all songs from an mixtape.
 
-
- ## Setup and play song from a mixtape
+--- ---
+ #### Setup and play song from a mixtape
  Setting media player with a mixtape from above.
->`Albums`__:__ *['Creative Control', 'Carter Collection (15th Anniversary)', ..etc]*
+>`Mixtape`__:__ *['Creative Control', 'Carter Collection (15th Anniversary)', ..etc]*
 
  Mixtape can be reference either by __index__  or by its __album name__.
   Index starts at __one (1)__  not __~~zero (0)~~__ .
@@ -158,9 +159,9 @@ Here are somethings you can do with **`Pydtapiff Media`**
 <img src="https://i.ibb.co/dPVhwXr/gif-mixtapes.gif" alt="gif-mixtapes" border="0" align="center" min-width="300px" width="80%" height="100%"/>
 </a>
 
+--- ---
 
-
-## PLAYING A SONG
+### PLAYING A SONG
 Songs can be played either by referencing the song  **index** or   **name**.
 
 Song's name __do not__ have to be an exact match.
@@ -187,7 +188,8 @@ Song's name __do not__ have to be an exact match.
 <img src="https://i.ibb.co/mX1x250/gif-media.gif" alt="gif-media" border="0" align="center" min-width="300px" width="80%" height="100%"/>
 </a>
 --- ---
-# Find A Song
+
+### FIND A SONG
 
 <img src="https://user-images.githubusercontent.com/54720725/97070237-dbb7ae80-15a4-11eb-9ab1-c27b0a2a64dc.png" width="100" height="100">
 
@@ -212,9 +214,9 @@ Find any song made by an artist using the **`findSong`** method in **`media`**.
     (172, 'J3 Rocnation '),(254, "Bakin' Session")
    ]
 ```
----
+--- ---
 
- ## CONTROLLING MEDIA PLAYER
+ ### CONTROLLING MEDIA PLAYER
  Media player *can    `rewind` , `fast-forward` , `pause` ,  `stop` and control `volume`* of song.
 
 
@@ -307,7 +309,7 @@ Simply create a variable ` player = media.player`
 [exclusive]: https://www.datpiff.com/mixtapes-exclusive
 [popular]: https://www.datpiff.com/mixtapes-popular.php
 [highest-rating]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=rating
-[most-listen]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=litens
+[most-listen]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=listens
 [most-download]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=downloads
 [most-favorite]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=favorites
 
