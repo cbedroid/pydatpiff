@@ -23,7 +23,7 @@
 [**VLC**](https://www.videolan.org/vlc/index.html) - VideoLan Client media player and framework.
 
 [**MPV**](https://mpv.io/installation/) -  MPV Framework. ( Supports IOS, Android and Linux Systems )
-
+--- --- 
 For linux based systems,  &nbsp; use `apt-get` to  install required repos
 
 #### VLC
@@ -39,6 +39,8 @@ sudo apt-get install mpv
 ```bash
 pip3 install pydatpiff
 ```
+--- ---
+
 
 # Let's Get Started...
 
@@ -47,32 +49,33 @@ pip3 install pydatpiff
 Category reference a mixtapes level or ratings. Visit [**Datapiff**](https://datpiff.com) for more info.
 
 ---
- | Category                |               Description     |
-|-------------------|-------------------|
-|__"hot"__                      | Mixtapes that are hot for the week.
-|__"new"__                      | Mixtapes that are brand-new or just release.
-|__"top"__                      | Mixtapes that are top-ranking.
-|__"celebrated"__       | Top ranking celebrity mixtapes.
-|__"popular"__          | Popular mixtapes  available.
-|__"exclusive"__        | Exclusive mixtapes.
-|__"most download"__| Most downloaded mixtapes.
-|__"most listen"__      | Most listen mixtapes.
-|__"most favorite"__| Favorite mixtapes.
-|__"highest rating"__| Mixtapes with the highest rating.
+ | Category                           |      Description                           |
+|-------------------------------------|--------------------------------------------|
+|[__hot__][hot]                       | Mixtapes that are hot for the week.
+|[__new__][new]                       | Mixtapes that are brand-new or just release.
+|[__top__][top]                       | Mixtapes that are top-ranking.
+|[__celebrated__][celebrated]         | Top ranking celebrity mixtapes.
+|[__popular__][popular]               | Popular mixtapes  available.
+|[__exclusive__][exclusive]           | Exclusive mixtapes.
+|[__most download__][most-download]   | Most downloaded mixtapes.
+|[__most listen__][most-listen]       | Most listen mixtapes.
+|[__most favorite__][most-favorite]   | Favorite mixtapes.
+|[__highest rating__][highest-rating] | Mixtapes with the highest rating.
 ---
 
-
+--- ---
 
 # Mixtapes
 
-**pydatpiff.Mixtapes** - PyDatpiff class that find music by referencing a `category` or by searching for a particular `artist` or `mixtape`.
+**pydatpiff.Mixtapes** - PyDatpiff Mixtapes class is query for the latest music by either referencing a `category` or by searching for a particular `artist` or `mixtape`.
 
  __Import PyDatpiff module and Intialize Mixtapes class__
 
-There are two parameters that can be pass to Mixtapes Instance.
+Mixtapes can accept up to three arguments:  __category__ , __search__ and __limit__.
 
-Only one parameter should be called at a time. If no parameter is pass, **"category"** will be set to   __"hot"__ by default.
-- **params:** `category` and `search`:
+Either argument __category__ or __search__ should be used at a given time. If no arguments are pass,  **"category"** will be set to   __"hot"__ by default.
+
+- **params:**  __category__ ,  __search__, __limit__:
 	 - __*category*__ :
 
         - *'hot' , 'new', 'top',celebrated', 'popular', 'exclusive', 'most download', ' most listen', 'most favorite',' highest rating'*
@@ -102,7 +105,7 @@ Only one parameter should be called at a time. If no parameter is pass, **"categ
 
 ['Creative Control', 'Carter Collection (15th Anniversary)', 'Viva La Hova', 'The Best Of Jay-z                                                                                                : 25th Anniversary', 'Jay-z - If I Should Die Vol. 1 (the Best Of Jay-z)', 'Jay-Z: The Unheard C                                                                                                lassics', 'Jay-z Underground Mixes And Mashes Disk 2', 'Iceburgz Ent Dj Smokeshop Presents -big                                                                                                 Tingz-pt.1 Classic Beefs Nas,jay-z And More', 'The Best Of Jay-z Old Vs New', 'The Best Of Jay-z                                                                                                 & Biggie Smalls', 'Jay-z Live From Glastonbury ', 'Jay-z Underground Mixes And Mashes disk 1',                                                                                                 'Jay-z - Remixes',..etc ]
 
-
+--- ---
 # Media
 
 **pydatpiff.Media** - PyDatpiff class that allow users to play and download songs
@@ -110,25 +113,25 @@ Only one parameter should be called at a time. If no parameter is pass, **"categ
 
 Here are somethings you can do with **`Pydtapiff Media`**
  - `findSong` - Find any song made by an artist.
- - `play`  - Plays songs from  current album.
+ - `play`  - Plays songs from  current mixtape.
  - `download` - Download current song.
- - `downloadAlbum` - Download all songs from an album.
+ - `downloadAlbum` - Download all songs from an mixtape.
 
 
- ## Setup and play song from an album
- Setting media player with an album from above.
+ ## Setup and play song from a mixtape
+ Setting media player with a mixtape from above.
 >`Albums`__:__ *['Creative Control', 'Carter Collection (15th Anniversary)', ..etc]*
 
- Mixtape's ablum can be reference either by `index`  or by its  `album name`.
+ Mixtape can be reference either by __index__  or by its __album name__.
   Index starts at __one (1)__  not __~~zero (0)~~__ .
 
 ```python
 
-#We pass in the "mix" object from Mixtapes class
+#We initialized Media with a mixtape object from Mixtapes class
 >> from pydatpiff.media import Media
 >>> media = Media(mix)
 
-#Set the media player to an ablum.
+#Setup the media player to a particular mixtapes.
 >>> media.setMedia('Creative Control')
 #OR
 >>> media.setMedia(1) # set media by index.  1='Creative Control'
@@ -296,3 +299,17 @@ Simply create a variable ` player = media.player`
 - [Code](https://github.com/cbedroid/pydatpiff)
 - [PyPI](https://pypi.org/project/pydatpiff/)
 - [Issues & Bugs](https://github.com/cbedroid/pydatpiff/issues)
+
+[new]: https://www.datpiff.com/mixtapes
+[hot]: https://www.datpiff.com/mixtapes/hot
+[top]: https://www.datpiff.com/mixtapes-hot.php
+[celebrated]: https://www.datpiff.com/mixtapes/celebrated
+[exclusive]: https://www.datpiff.com/mixtapes-exclusive
+[popular]: https://www.datpiff.com/mixtapes-popular.php
+[highest-rating]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=rating
+[most-listen]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=litens
+[most-download]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=downloads
+[most-favorite]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=favorites
+
+
+
