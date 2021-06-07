@@ -1,14 +1,14 @@
 """
     This file will stored all dynamic class and methods.
-    These methods will be used throughout the whole program. 
-    
+    These methods will be used throughout the whole program.
+
 """
-import sys
 import concurrent.futures as cf
+import sys  # noqa: F401
 import threading
 from functools import wraps
+
 from pydatpiff.utils.request import Session
-from pydatpiff.errors import BuildError
 
 
 def Threader(f):
@@ -117,7 +117,6 @@ class Object:
 
     @classmethod
     def removeNone(cls, _list):
-        print(f'\n\n List: {type(_list)}')
         return list(filter(None, _list))
 
     @classmethod
@@ -154,7 +153,6 @@ class Object:
 
 
 class Selector:
-
     @staticmethod
     def filter_choices(choice, data):
         """
@@ -168,9 +166,7 @@ class Selector:
             data = Object.lowered_dict(data)
             val = [val for key, val in data.items() if choice in key]
         else:
-            val = [
-                val for val in data if choice in Object.strip_and_lower(val)
-            ]
+            val = [val for val in data if choice in Object.strip_and_lower(val)]
 
         if val:
             return min(val)
@@ -186,11 +182,10 @@ class Selector:
         try:
             choice = int(choice)
             results = Object.enumerate_it(data)
-            length = len(data)
             if Object.isDict(data):
                 return results[choice][1][1]
             return results[choice][1]
-        except Exception as e:
+        except:
             return
 
     @classmethod
@@ -201,7 +196,7 @@ class Selector:
         data_size = len(data)
         # checking from index
         select -= 1
-        length = data_size + 1
+
         # catch index errors if user choose a mixtape out of range
         select = 0 if (0 >= select or select > data_size) else select
         return select

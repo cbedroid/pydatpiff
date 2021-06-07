@@ -113,7 +113,6 @@ class TestMixtapes2(unittest.TestCase):
         mixtapes = self.get_Mixtapes("hot")
         # self.Mixtapes = mixtapes
         search = mixtapes._selectMixtape("blah")
-        print(search.status_code)
 
         self.assertEqual(search.status_code, 200)
         self.assertEqual(search.text, "content here")
