@@ -8,13 +8,13 @@
   - supports windows, mac, and linux
   - python 3.6 - above
 
-# Dependencies
+## Dependencies
 
 **PyDatpiff requires:**
  - see requirements:  [requirements.txt](https://github.com/cbedroid/pydatpiff/blob/master/requirements.txt)
 - *python >= 3.6*
 
-# Installation
+## Installation
 
  The default media player uses VLC to play music.
  For systems that are incompatible with VLC,  MPV will be used as the fallback player.
@@ -42,7 +42,7 @@ pip3 install pydatpiff
 --- ---
 
 
-# Let's Get Started...
+## Let's Get Started...
 
 ### Pydatpiff Category & Description
 
@@ -65,7 +65,7 @@ Category reference a mixtapes level or ratings. Visit [**Datapiff**](https://dat
 
 --- ---
 
-# Mixtapes
+## Mixtapes
 
 **pydatpiff.Mixtapes** - PyDatpiff Mixtapes class is query for the latest music by either referencing a `category` or by searching for a particular `artist` or `mixtape`.
 
@@ -106,7 +106,7 @@ Either argument __category__ or __search__ should be used at a given time. If no
 ['Creative Control', 'Carter Collection (15th Anniversary)', 'Viva La Hova', 'The Best Of Jay-z                                                                                                : 25th Anniversary', 'Jay-z - If I Should Die Vol. 1 (the Best Of Jay-z)', 'Jay-Z: The Unheard C                                                                                                lassics', 'Jay-z Underground Mixes And Mashes Disk 2', 'Iceburgz Ent Dj Smokeshop Presents -big                                                                                                 Tingz-pt.1 Classic Beefs Nas,jay-z And More', 'The Best Of Jay-z Old Vs New', 'The Best Of Jay-z                                                                                                 & Biggie Smalls', 'Jay-z Live From Glastonbury ', 'Jay-z Underground Mixes And Mashes disk 1',                                                                                                 'Jay-z - Remixes',..etc ]
 
 --- ---
-# Media
+## Media
 
 **pydatpiff.Media** - PyDatpiff class that allow users to play and download songs
 
@@ -187,7 +187,7 @@ Song's name __do not__ have to be an exact match.
 <img src="https://i.ibb.co/mX1x250/gif-media.gif" alt="gif-media" border="0" align="center" min-width="300px" width="80%" height="100%"/>
 </a>
 --- ---
-# Find A Song
+## Find A Song
 
 <img src="https://user-images.githubusercontent.com/54720725/97070237-dbb7ae80-15a4-11eb-9ab1-c27b0a2a64dc.png" width="100" height="100">
 
