@@ -112,14 +112,10 @@ class DatpiffPlayer:
     def name(self):
         # for desktop verison issue we will use the mobile version
         if self.USE_MOBILE:
-            name = re.search(
-                r'og:title"\s*content\="(.*[\w\s]*)"', self.dpp_html
-            ).group(1)
+            name = re.search(r'og:title"\s*content\="(.*[\w\s]*)"', self.dpp_html).group(1)
         else:
             # desktop only
-            name = re.search(r'title">(.*[\w\s]*)\</div', self.dpp_html).group(
-                1
-            )
+            name = re.search(r'title">(.*[\w\s]*)\</div', self.dpp_html).group(1)
         return name
 
 

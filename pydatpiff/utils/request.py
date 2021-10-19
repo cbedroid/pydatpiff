@@ -1,5 +1,7 @@
 import warnings
+
 import requests
+
 from pydatpiff.errors import RequestError
 
 from .helper import String

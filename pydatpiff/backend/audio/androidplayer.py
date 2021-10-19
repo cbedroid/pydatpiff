@@ -116,9 +116,7 @@ class Android(BasePlayer):
         try:
             self.__Mutagen = MP3(self.__meta_data_path)
         except NameError:
-            raise AndroidError(
-                'UnsupportedDeviceError "Mutagen" is not supported by your device.'
-            )
+            raise AndroidError('UnsupportedDeviceError "Mutagen" is not supported by your device.')
 
         with open(self._song_path, "rb") as f:
             self.__content = f.read()
@@ -172,11 +170,7 @@ class Android(BasePlayer):
         with open(self.DROID_TMP, "wb") as mp3:
             self.current_position = position
             spot = int(self.current_position + position)
-            topos = (
-                spot * self.bytes_per_sec
-                if spot > 0
-                else 1 * self.bytes_per_sec
-            )
+            topos = spot * self.bytes_per_sec if spot > 0 else 1 * self.bytes_per_sec
             topos = int(topos)
 
             self._load_time = time()

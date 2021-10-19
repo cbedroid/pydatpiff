@@ -23,7 +23,7 @@
 [**VLC**](https://www.videolan.org/vlc/index.html) - VideoLan Client media player and framework.
 
 [**MPV**](https://mpv.io/installation/) -  MPV Framework. ( Supports IOS, Android and Linux Systems )
---- --- 
+--- ---
 For linux based systems,  &nbsp; use `apt-get` to  install required repos
 
 #### VLC
@@ -312,6 +312,3 @@ Simply create a variable ` player = media.player`
 [most-listen]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=listens
 [most-download]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=downloads
 [most-favorite]: https://www.datpiff.com/mixtapes-popular.php?filter=month&sort=favorites
-
-
-

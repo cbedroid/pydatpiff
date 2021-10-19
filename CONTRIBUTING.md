@@ -6,7 +6,7 @@ If you would like to contribute to Pydatpiff please visit the project's
 ## How To Contribute
 
 To contribute to this repo, open a pull request with
-your changes. 
+your changes.
 
 To have the best experience while contributing, Contributers are urge to follow the guideline below:
 
@@ -18,19 +18,19 @@ To have the best experience while contributing, Contributers are urge to follow 
 * Update the readme/docstrings, if necessary
 * Follow the coding style of the current code-base
 * Ensure that your code is PEP8 compliant and is neatly written
-* Ensure that your changes work with the following Python versions: python >=3.5 
+* Ensure that your changes work with the following Python versions: python >=3.5
 
 
-  
+
 All codes are reviewed before acceptance and changes may be requested to better
 follow the conventions of the existing Repo.
 
 This build system currently uses **`tox`** for testing on all supported Python versions.
 
-All tests will run automatically for all **`push`** and **`PR`** via GitHub Actions.  
+All tests will run automatically for all **`push`** and **`PR`** via GitHub Actions.
 You should ensure your build will pass by running `tox` tests locally before submitting PR.
 
 ---
 
-## Thank You For Contributing 
+## Thank You For Contributing
 [pydatpiff_repo]:https://github.com/cbedroid/pydatpiff

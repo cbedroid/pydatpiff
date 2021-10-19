@@ -21,9 +21,7 @@ except:
 
 
 def handlespace(w):  # for correcting joined args
-    return (
-        w if any(w.endswith(x) for x in ["\n", "\t", "\r", " "]) else w + " "
-    )
+    return w if any(w.endswith(x) for x in ["\n", "\t", "\r", " "]) else w + " "
 
 
 def Print(*args):

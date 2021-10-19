@@ -33,9 +33,7 @@ class Mixtapes(object):
         self._setup()
 
     def _setup(self):
-        self._selectMixtape(
-            str(self._selected_category), str(self._selected_search)
-        )
+        self._selectMixtape(str(self._selected_category), str(self._selected_search))
         self._setMixtapesAttributes()
 
     def __str__(self):
@@ -106,15 +104,11 @@ class Mixtapes(object):
         """
         if search:  # Search for an artist
             body = self._search_for(self._clean(search))
-            if (
-                not body or body is None
-            ):  # on failure return response from a category
+            if not body or body is None:  # on failure return response from a category
                 return self._selectMixtape("hot")
         else:  # Select from category instead of searching
             selector = Selector.filter_choices
-            choice = selector(category, Urls.category) or selector(
-                "hot", Urls.category
-            )
+            choice = selector(category, Urls.category) or selector("hot", Urls.category)
             body = self._session.method("GET", choice)
         self._mixtape_resp = body
         return body
@@ -151,9 +145,7 @@ class Mixtapes(object):
             name = f.__name__
             path = f(self, *args, **kwargs)
             pattern = re.compile(path)
-            data = DOMProcessor(
-                self._mixtape_resp, limit=self._max_mixtapes
-            ).findRegex(pattern)
+            data = DOMProcessor(self._mixtape_resp, limit=self._max_mixtapes).findRegex(pattern)
             if hasattr(self, "_artists") and len(self) != 0:
                 # we map all attributes length to _artists length
                 try:

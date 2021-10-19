@@ -35,10 +35,7 @@ class BaseMeta(type):
 
         for method in methods:
             if method not in body:
-                error = (
-                    'Method: "%s.%s" must be implemented in derived class '
-                    "to use BasePlayer" % (name, method)
-                )
+                error = 'Method: "%s.%s" must be implemented in derived class ' "to use BasePlayer" % (name, method)
 
                 raise DerivedError(error)
         return super().__new__(cls, name, bases, body)
@@ -110,9 +107,7 @@ class BasePlayer(metaclass=BaseMeta):
         """
 
         if boolean is not None:  # update state if boolean param True or False
-            self.state.update(
-                dict(playing=bool(boolean), pause=not bool(boolean))
-            )
+            self.state.update(dict(playing=bool(boolean), pause=not bool(boolean)))
 
     @property
     def _isTrackLoaded(self):
@@ -221,9 +216,7 @@ class BasePlayer(metaclass=BaseMeta):
         else:
             mode = chr(9209) or "[]"
         Print("\n%s TRACK: %s" % (chr(9836), self.name))
-        pos = "{0}  {1}:{2} - {3}:{4}\n".format(
-            mode, c_min, c_sec, l_min, l_sec
-        )
+        pos = "{0}  {1}:{2} - {3}:{4}\n".format(mode, c_min, c_sec, l_min, l_sec)
         if hasattr(self, "_media_autoplay"):
             if self._media_autoplay:
                 Print(" " * 2, chr(9850), pos)

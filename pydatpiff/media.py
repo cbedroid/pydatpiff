@@ -225,9 +225,7 @@ class Media:
     def songs(self):
         """Return all songs from album."""
         if not hasattr(self, "_Mp3"):
-            extra_message = (
-                '\nSet media by calling -->  Media.setMedia("some_mixtape_name")'
-            )
+            extra_message = '\nSet media by calling -->  Media.setMedia("some_mixtape_name")'
             raise MediaError(3, extra_message)
         return self._Mp3.songs
 

@@ -1,6 +1,7 @@
 import re
 
 import vlc
+
 from pydatpiff.errors import PlayerError
 from pydatpiff.frontend.display import Print
 

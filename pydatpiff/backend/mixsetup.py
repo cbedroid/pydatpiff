@@ -32,13 +32,9 @@ class DOMProcessor:
         """
         text = self._session.method("GET", url=url).text
         try:
-            filtered_content = re.search(
-                "(.*)rightColumnNarrow", text, re.DOTALL
-            ).group(1)
+            filtered_content = re.search("(.*)rightColumnNarrow", text, re.DOTALL).group(1)
 
-            total = re.findall(
-                'icon\\smixtape.*src="(.*)"\\salt', filtered_content
-            )
+            total = re.findall('icon\\smixtape.*src="(.*)"\\salt', filtered_content)
             return len(total)
         except:
             return 0
@@ -60,14 +56,11 @@ class DOMProcessor:
             """
 
             # Get page links navigation DOM element from response
-            navigations_links = re.findall(
-                r'class\="links"(.*[\n\r]*.*\d)*</a>', self.base_response.text
-            )
+            navigations_links = re.findall(r'class\="links"(.*[\n\r]*.*\d)*</a>', self.base_response.text)
 
             # map navigation link's anchor tags to base urls
             page_link_urls = [
-                re.search('href\=.*/(.*=\d{1,2})"', x).group(1)
-                for x in navigations_links[0].split("</a>")
+                re.search('href\=.*/(.*=\d{1,2})"', x).group(1) for x in navigations_links[0].split("</a>")
             ]
 
             """
@@ -136,11 +129,7 @@ class DOMProcessor:
         # Remove all unwanted characters from Xpath
         [
             data.extend(
-                list(
-                    Html.remove_ampersands(pat.group(1))[0]
-                    for pat in re_Xpath.finditer(RT)
-                    if pat is not None
-                )
+                list(Html.remove_ampersands(pat.group(1))[0] for pat in re_Xpath.finditer(RT) if pat is not None)
             )
             for RT in list_response_text
         ]

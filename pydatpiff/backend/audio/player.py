@@ -22,9 +22,7 @@ class Player:
                     # return initialized player class
                     return selected_player_class.__call__()
         except:
-            extended_msg = (
-                "\nThe player you choosen is not compatible with your device.\n"
-            )
+            extended_msg = "\nThe player you choosen is not compatible with your device.\n"
             raise PlayerError(5, extended_msg)
 
         # if no player is specified by the user, then select a default player

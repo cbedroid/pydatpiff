@@ -45,9 +45,7 @@ class Popen(subprocess.Popen):
             pass
 
         try:  # For windows
-            return subprocess.check_call(
-                "taskkill /f /im mpv.exe", shell=True, stderr=subprocess.PIPE
-            )
+            return subprocess.check_call("taskkill /f /im mpv.exe", shell=True, stderr=subprocess.PIPE)
         except:
             pass
 
