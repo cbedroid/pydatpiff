@@ -1,7 +1,6 @@
 import re
 
 import vlc
-
 from pydatpiff.errors import PlayerError
 from pydatpiff.frontend.display import Print
 
@@ -21,9 +20,7 @@ class VLCPlayer(BasePlayer):
     @property
     def _stateof(self):
         """Current state of the song being played"""
-        state = re.match(
-            r"[\w.]*\.(\w*)", str(self._player.get_state())
-        ).group(1)
+        state = re.match(r"[\w.]*\.(\w*)", str(self._player.get_state())).group(1)
         if state == "NothingSpecial":
             # set all player value to False
             for k, v in self._state.items():
@@ -116,7 +113,7 @@ class VLCPlayer(BasePlayer):
             else:
                 self._player.play()
 
-            self._resetState(False, playing=True, load=True)
+            self._resetState(playing=True, load=True, stop=False)
             return
         else:
             try:

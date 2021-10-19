@@ -11,34 +11,33 @@ class Player:
     def getPlayer(cls, *args, **kwargs):
         player = kwargs.get("player", None)
 
-        players_selection = {"vlc": VLCPlayer, "mpv": MPV, "android": Android}
-
+        player_options = {"vlc": VLCPlayer, "mpv": MPV, "android": Android}
+        # return the player specified by the user
         try:
+
             if player:
                 player = Object.strip_and_lower(player)
-                chosen = players_selection.get(player)
-                if chosen:
-                    return chosen()
+                selected_player_class = player_options.get(player)
+                if selected_player_class:
+                    # return initialized player class
+                    return selected_player_class.__call__()
         except:
             extended_msg = (
-                "\nThe player you choosen"
-                " is not compatible with your device.\n"
+                "\nThe player you choosen is not compatible with your device.\n"
             )
             raise PlayerError(5, extended_msg)
 
-        try:
-            return VLCPlayer()
-        except:
-            pass
+        # if no player is specified by the user, then select a default player
+        return cls._getDefaultPlayer()
 
-        try:
-            return MPV()
-        except:
-            pass
-
-        try:
-            return Android()
-        except:
-            pass
+    @classmethod
+    def _getDefaultPlayer(cls):
+        # Note: Player order will be respected!
+        default_players = [MPV, VLCPlayer, Android]
+        for player in default_players:
+            try:
+                return player.__call__()
+            except:  # noqa
+                pass
 
         raise InstallationError(1)
