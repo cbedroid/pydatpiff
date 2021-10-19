@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Lato:ital,wght@0,100;0,300;0,400;0,700;1,100;1,300;1,400;1,700&family=Lobster&family=Roboto+Slab:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightslider/1.1.6/css/lightslider.css" integrity="sha512-+1GzNJIJQ0SwHimHEEDQ0jbyQuglxEdmQmKsu8KI7QkMPAnyDrL9TAnVyLPEttcTxlnLVzaQgxv2FpLCLtli0A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="./static/css/app.css">
+  <title>Pydatpiff Documentation</title>
+</head>
+
+<body>
+  <section id="main-section" class="grid">
+    <div id="navbar-wrapper">
+      <nav id="navbar" class="navbar navbar-expand-sm navbar-light bg-light">
+        <header id="nav-header" class="mb-sm-4">
+          <h2 class="title">Pydatpiff</h2>
+          <div class="form-wrapper input-group">
+            <input class="form-control form-control-sm" list="doc-datalist" name="search" id="doc-search" placeholder="search docs">
+            <datalist id="doc-datalist">
+            </datalist>
+            <button id="submit-btn" class="btn btn-sm btn-outline-secondary">search</button>
+          </div>
+        </header>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="container-fluid">
+          <div class="collapse navbar-collapse" id="navmenu">
+            <nav id="scrollspy-nav" class="nav nav-pills flex-sm-column  me-auto mb-2 mb-lg-0">
+              <li class="nav-item"><a class="nav-link active" href="#Getting_Started">Getting Started</a></li>
+              <li class="nav-item"><a class="nav-link" href="#How_To_Install">How To Install</a></li>
+              <li class="nav-item"><a class="nav-link" href="#Mixtape">Mixtape</a></li>
+              <li class="nav-item"><a class="nav-link" href="#Media">Media</a></li>
+              <li class="nav-item"><a class="nav-link" href="#Media_Controls">Media Controls</a></li>
+              <li class="nav-item"><a class="nav-link" href="#Search_for_Song">Search for Song</a></li>
+              <li class="nav-item"><a class="nav-link" href="#Download_Songs">Download Songs</a></li>
+            </nav>
+          </div>
+        </div>
+      </nav>
+    </div>
+    <main id="main-doc" role="main">
+      <!--section 1-->
+      <section id="Getting_Started" class="main-section">
+        <header>
+          <span class="link-icon">
+            <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+            </svg>
+          </span>
+          Getting Started
+        </header>
+        <div class="container">
+          <article>
+            <p class="mx-auto" style="max-width: 800px">PyDatpiff is a light weight <a class="p-link" href="https://www.python.org/" target="_blank">python</a> command line audio streaming and media service founded on Sep 29, 2020 by <a class="p-link" href="https://github.com/cbedroid/" target="_blank">CbeDroid</a>.
+              It comes with built-in support for multipl platform such as Windows, Mac, and also Linux. Pydatpiff allows users to stream music from a wide genre of music such as Hip-Hop, RnB, Pop, Jazz and more directly to their device on-demand.
+            </p>
+            <div class="card bg-secondary shadow mx-auto" style="max-width: 800px;--bs-bg-opacity: .15">
+              <div class="card-img-top">
+                <figure class="figure">
+                  <img class="figure-img img-fluid" src="https://user-images.githubusercontent.com/54720725/96840060-f872ab80-1417-11eb-93ac-c964217b98b1.png" alt="Pydatiff logo" style="min-height:300px">
+                  <figcaption class="figure-caption"></figcaption>
+                </figure>
+              </div>
+              <div class="card-title px-lg-3">
+                <h2 class="logo-title flex-grow-1 mb-3">Pydatpiff</h2>
+                <p class="logo-lead lead text-center"> The Unofficial Datpiff Music Application. Play and download the latest Hip-Hop and RnB songs.</p>
+              </div>
+              <div class="card-body">
+                <ul id="git-list" class="d-flex flex-row justify-content-around list-unstyled px-3 px-xl-5 ">
+
+                  <li class="git-pill"><span class="pill-left">
+                      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-star-fill mr-1">
+                        <path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path>
+                      </svg>stars</span>
+                    <span id="stars-total" class="git-total"></span>
+                  </li>
+                  <li class="git-pill">
+                    <span class="pill-left">
+                      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-issue-opened UnderlineNav-octicon d-none d-sm-inline">
+                        <path d="M8 9.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
+                        <path fill-rule="evenodd" d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"></path>
+                      </svg>issues
+                    </span>
+                    <span id="issues-total" class="git-total"></span></li>
+                  <li class="git-pill">
+                    <span class="pill-left">
+                      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-repo-forked">
+                        <path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path>
+                      </svg>forks
+                    </span>
+                    <span id="forks-total" class="git-total">
+                    </span>
+                  </li>
+                </ul>
+                <p class="text-center"><a href="https://github.com/cbedroid/pydatpiff">View on Github</a> - View Full Documentation and Codes </p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+      <!--section 2-->
+      <section id="How_To_Install" class="main-section">
+        <header>
+          <span class="link-icon">
+            <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+            </svg>
+          </span>
+          How To Install
+        </header>
+        <article id="Dependencies">
+          <h2 class="article-header">Dependencies</h2>
+          <ul id="dependencies-list">
+            <li><a href="https://www.python.org/downloads/">python</a> - Python version 3.3 or above.</li>
+            <li><a href="https://www.videolan.org/vlc/download-windows.html">VLC</a> - VideoLAN Client media player.</li>
+            <li><a href="https://mpv.io/installation/">MPV</a> - A free, open source adnd cross=platform media player.</li>
+            </li>
+          </ul>
+          <blockquote class="bd-callout bd-callout-warning">Note: Either VLC or MPV need to be installed</blockquote>
+        </article>
+        <article id="installation">
+          <h2 class="article-header">Installation</h2>
+          <p>The default media player uses <code>VLC</code>to play music. For systems that are incompatible with VLC, <code>MPV</code> will be used as the fallback player.</p>
+          <div id="linux-install">
+            <h6>Install on Linux</h6>
+            <code class="code-block go-dark">
+              <ul class="install-group list-unstyled">
+                <li class="bash-cmt"># install VLC</li>
+                <li class="bash-style">apt-get install vlc</li>
+                <li class="bash-cmt"># install MPV</li>
+                <li class="bash-style">apt-get install mpv</li>
+                <li class="bash-cmt"># install Pydatpiff</li>
+                <li class="bash-style">pip install pydatpiff</li>
+              </ul>
+            </code>
+          </div>
+        </article>
+      </section>
+      <!--section 3 -->
+      <section id="Mixtape" class="main-section">
+        <header>
+          <span class="link-icon">
+            <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+            </svg>
+          </span>
+          Mixtape
+        </header>
+        <article id="pydatpiff-mixtapes">
+          <p class="lead"> <span class="fw-bold">pydatpiff.Mixtapes</span> - Pydatpiff main class used to fetch an artist' mixtape.</p>
+          <p>Create an Mixtapes object:</p>
+          <code id="code-mixtapes" class="code-block go-dark">
+            <ul class="list-unstyled text-light">
+              <li class="py-style"><span class="py-kw">import</span> pydatiff</li>
+              <li></li>
+              <li class="py-style">mix <span class="py-hl">=</span> pydatiff.<span class="py-cl">Mixtapes</span>(category=<span class="py-hl">"hot"</span>)</li>
+              <li class="py-cmt"># Or Search for a particular artist or mixtape.</li>
+              <li class="py-style">mix <span class="py-hl">=</span> pydatiff.<span class="py-cl">Mixtapes</span>(search=<span class="py-hl">"Kendrick Lamar"</span>)</li>
+              <li></li>
+              <li class="py-style">mix.<span class="py-var">mixtapes</span></li>
+              <li class="py-cmt"># View all mixtapes.</li>
+              <li class="py-cmt"></span>['Kendrick Lamar (EP)', 'Kendrick Lamar', 'O.verly D.edicated', 'No Sleep Til NYC', 'K-Dot Training Day', 'C4', 'Black Hippy', 'Hub City Threat: Minor Of The Year', 'KENDRICK LAMAR BEATS (Instrumentals): Kendrick Lamar type beat s instrumentals for Kendrick Lamar', 'Kendrick Lamar Type Beat Instrumentals X Free Beats CD', 'The Best Of Kendri ck Lamar', 'Eargasm! 13.5 (YG, Kendrick Lamar, Kevin Gates, Nicki Minaj, Asap Rocky, 2 Chainz, Curren$y, Future)', 'Kendrick Lamar K.Dot Drops', 'Kendrick Lamar - The Vault Vol 1', 'Kendrick Lamar - The Vault Vol 2', 'Kendrick L amar - The Vault Vol 3', 'Kendrick Lamar - The Vault Vol 4', 'Kendrick Lamar - The Vault Vol 5', 'West Coast Princ e (Kendrick Lamar)', 'Best Of So Far Kendrick Lamar', ...more]
+                <details class="mt-3">
+                  <summary class="results text-light">view all results</summary><span>['Kendrick Lamar (EP)', 'Kendrick Lamar', 'O.verly D.edicated', 'No Sleep Til NYC', 'K-Dot Training Day', 'C4', ' lack Hippy', 'Hub City Threat: Minor Of The Year', 'KENDRICK LAMAR BEATS (Instrumentals): Kendrick Lamar type bea s instrumentals for Kendrick Lamar', 'Kendrick Lamar Type Beat Instrumentals X Free Beats CD', 'The Best Of Kendr ck Lamar', 'Eargasm! 13.5 (YG, Kendrick Lamar, Kevin Gates, Nicki Minaj, Asap Rocky, 2 Chainz, Curren$y, Future)' 'Kendrick Lamar K.Dot Drops', 'Kendrick Lamar - The Vault Vol 1', 'Kendrick Lamar - The Vault Vol 2', 'Kendrick amar - The Vault Vol 3', 'Kendrick Lamar - The Vault Vol 4', 'Kendrick Lamar - The Vault Vol 5', 'West Coast Prin e (Kendrick Lamar)', 'Best Of So Far Kendrick Lamar', 'Dj Femmie Mixtapes Presents Hip Hop Bangers Vol. 4 FEAT. K NDRICK LAMAR AND J.COLE Hosted By King Co', 'Kendrick Lamar Response', 'Kendrick Lamar - King Of The West', 'Earg sm! 16 hosted by Sy Ari (ft. Kevin Gates, Yo Gotti, Asap Rocky, Jeezy, Kendrick Lamar, More)', 'Eargasm! Classic dition 6 (Starring Future X 2 Chainz X Kendrick Lamar)', 'The Literal MIXTAPE: Kendrick Lamar J. Cole - J. Lamar / Good Kid, Cole World (Mixed Prod. by td', 'Eargasm! 7 (Asap Rocky, Yelawolf, Kendrick Lamar, 2 Chainz, Pusha T Nipsey Hussle, Trinidad James)', 'B.O.B pres. Eargasm! 10 (Asap Rocky, Kendrick Lamar, Juicy J, Rich Homie Quan, Yo Gotti, Logic, T.I)', 'J. Cole Vs Kendrick Lamar', 'Overdose Vol#5 Hosted By Tyler Will (Bryson Tiller,kendrick Lamar,Tory Lanez,Ty Dolla Sign, etc...)', 'Kendrick Lamar Humble Reply', 'Kendrick lamar must die', 'Con-troll - endrick Lamar Disses', 'Control Response ( Kendrick Lamar Response Mixtape )', 'Coffin Full Of Diamonds (inspired By Kendrick Lamar)', 'Beats 4 Kendrick Lamar', 'Back Pack (J. Cole x Kendrick Lamar x Drake x Lupe Fiasco Type In trumentals)', 'Smart Vs Kendrick Lamar', 'KONY - The Barrage of Kendrick Lamar', 'Control (remixes) Kendrick Lama Disses ', 'Kendrick Lamar (instrumentals)', 'Kendrick Lamar Man Down', 'So You Wanna Be Signed Vol. 1 Hosted By endrick Lamar', 'Blissful Chill [jcole/ Kendrick Lamar/ Flame]', 'King Kendrick', 'The Poems Of Kendrick', 'Kendr ck Meets Pac The Remixes', 'Kendrick Lamar-the Control Response', 'Music Fiend Presents: Kendrick Cole', 'K.Dot L mar', 'Beats For Kendrick, Beats For Future, Beats For Quavo, Bryson Tiller ', 'Coogi - Mayday ( New Hip Hop Like Lit In Ceylon Juicy J Dj Blak )']</span>
+                </details>
+              </li>
+            </ul>
+          </code>
+        </article>
+      </section>
+      <!--section 4-->
+      <section id="Media" class="main-section">
+        <header>
+          <span class="link-icon">
+            <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+            </svg>
+          </span>
+          Media
+        </header>
+        <article id="pydatpiff-media">
+          <p class="lead"><span class="fw-bold">pydatpiff.Media</span> - is class used to load and play an artist's mixtape.</p>
+          <div class="article-content">
+            <p class="content-lead">Here are some useful things you can do with <em>Media</em></p>
+            <ul>
+              <li><b class="py-fhl">findSong</b> - Find any song made by an artist.</li>
+              <li><b class="py-fhl">play</b> - Plays songs from current album.</li>
+              <li><b class="py-fhl">download</b> - Download current song.</li>
+              <li><b class="py-fhl">downloadAlbum</b> - Download all songs from an album.</li>
+            </ul>
+          </div>
+          <div class="article-content">
+            <h4 class="content-title">Set media player with a mixtape</h4>
+            <p>Mixtape's can be reference either by <em>index</em> or by its <em>album name</em>.
+              Index starts at <strong>one (1)</strong> not <strong><del>zero (0)</del></strong> .
+            </p>
+            <code class="code-block go-dark">
+              <ul class="list-unstyled text-light">
+                <li class="py-cmt"># We pass in the Mixtape object from <a class="link-light" href="#code-mixtapes">above</a></li>
+                <li class="py-style">media <span class="py-hl">=</span> pydatiff.<span class="py-cl">Media</span>(mix)</li>
+                <li class="py-cmt"># Set the media player to a mixtape.</li>
+                <li class="py-style">media.<span class="py-cl">setMedia</span>(<span class="py-hl">"Best Of So Far Kendrick Lamar"</span>)</li>
+                <li class="py-cmt"># View all available songs</li>
+                <li class="py-style">media.<span class="py-var">songs</span></li>
+                <li class="py-cmt"> ['Average Joe', 'Celebration', 'Michael Jordan Ft Schoolboy Q', 'Ignorance Is Bliss', 'Growing Apart', 'P**** And Patron Ft. Ab Soul', 'I Do This Ft. Jay Rock', 'The Relevant', "B**** I'm In The Club", 'Dumb It Down', 'Kendrick Lamar', 'Little Johnny', 'Beyonce', 'A Little Appalled', 'L.M.A.O', 'Today', 'Kurupted', 'World Negatives Prod by Sounwa', '150 Day Dreaming', 'Last Real Nigga Alive', "Compton's Finest Ft. H.O.P.E", 'For The Homies', 'Uptown81 Ft. Smoke DZA & Mara Hruby']</li>
+              </ul>
+            </code>
+          </div>
+        </article>
+        <article>
+          <h2 class="content-title">Playing Songs</h2>
+          <p>Songs can be played by referencing either a <em>index</em> or <em>title</em>.</p>
+          <blockquote class="bd-callout bd-callout-primary">Song's title <b>do not</b> have to be an exact match.</blockquote>
+          <code class="code-block go-dark">
+            <ul class="list-unstyled text-light">
+              <li class="py-cmt"># Play song by referencing mixtape's title.</li>
+              <li class="py-style">media.<span class="py-var">play</span>(<span class="py-cmt">"Kurupted"</span>)</li>
+              <li class="py-cmt"># Or by index.</li>
+              <li class="py-style">media.<span class="py-var">play</span>(<span class="py-cmt">17</span>)</li>
+              <li class="py-cmt text-white">
+                <div class="wrapper">
+                  <h4 class="fw-bold">♬♬ Playing Song ♬♬</h4>
+                  <p>Artist: Kendrick Lamar</p>
+                  <p>song: Kurupted</p>
+                  <p>Sixe: Size: 3.44 MB</p>
+                </div>
+              </li>
+            </ul>
+          </code>
+        </article>
+      </section>
+      <!--section 5-->
+      <section id="Media_Controls" class="main-section">
+        <header>
+          <span class="link-icon">
+            <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+            </svg>
+          </span>
+          Media Controls
+        </header>
+        <article id="pydatpiff-player">
+          <p class="lead"><span class="fw-bold">pydatpiff.Media.player</span> - is a media controller object used to control a loaded audio track. </p>
+          <p>Media player allows user to <code>rewind</code>, <code>fast-forward</code>, <code>pause</code>, <code>stop</code> and control <code>volume</code> of music.</p>
+          <code id="code-search" class="code-block go-dark">
+            <ul class="list-unstyled text-light">
+              <li class="py-cmt"># Create a player object</li>
+              <li class="py-style">player = media.player</li>
+              <li class="py-cmt"># Rewind ⏪</li>
+              <li class="py-style">player.<span class="py-var">rewind</span>()
+
+              </li>
+              <li class="py-style">player.<span class="py-var">rewind</span>(<span class="py-hl">10</span>) <span class="py-cmt"># Rewind 10 sec ago</span>
+
+              </li>
+              <li class="py-cmt"># Fast-Forward ⏩</li>
+              <li class="py-style">player.<span class="py-var">ffwd</span>()
+
+              </li>
+              <li class="py-style">player.<span class="py-var">ffwd</span>(<span class="py-hl">10</span>) <span class="py-cmt"># Fast-Forward 10 sec ahead</span>
+
+              </li>
+              <li class="py-cmt"># Pause ⏸</li>
+              <li class="py-style">player.pause
+
+              </li>
+              <div class="py-cmt"># Stop ⏹</div>
+              <li class="py-style">player.stop
+
+              </li>
+              <li class="py-cmt"># Volume 🔊</li>
+              <li class="py-style">player.<span class="py-var">volume</span>(<span class="py-hl">10</span>) <span class="py-cmt"># Set audio's volume to 50%</span>
+
+              </li>
+              <li class="py-style">player.<span class="py-var">volumeUp</span>(<span class="py-hl">5</span>) <span class="py-cmt"># Increase volume level by 5%</span>
+
+              </li>
+              <li class="py-style">player.<span class="py-var">volumeDown</span>(<span class="py-hl">5</span>) <span class="py-cmt"># Decrease volume level by 5%</span></li>
+            </ul>
+          </code>
+        </article>
+      </section>
+      <!--section 6-->
+      <section id="Search_for_Song" class="main-section">
+        <header>
+          <span class="link-icon">
+            <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+            </svg>
+          </span>
+          Search for Song
+        </header>
+        <article id="pydatpiff-search">
+          <p class="lead"><span class="fw-bold">pydatpiff.Media.findSong</span> - is a query method used to search for a mixtape.</p>
+          <blockquote class="bd-callout bd-callout-warning">
+            <div class="d-flex flex-wrap align-items-center">
+              <img class="img-fluid" src="https://www.dictionary.com/e/wp-content/uploads/2018/03/Thinking_Face_Emoji-Emoji-Island.png" alt="Thinking emoji" style="height:75px;width:75px">
+              <h4 class="fw-bold ms-3"> ....Can't Find A Song.. No Worries!</h4>
+            </div>
+          </blockquote>
+          <p>You can find any song easily by using Pydatpiff's song finder method. Just type in the <code>song's name</code> or <code>mixtape's name</code>.</p>
+          <code id="code-search" class="code-block go-dark">
+            <ul class="list-unstyled text-light">
+              <li class="py-cmt"># Search for a song</li>
+              <li class="py-style">media.<span class="py-var">findSong</span>(<span class="py-hl">"Humble"</span>)</li>
+              <li class="py-cmt">[{'ablumNo': 26, 'album': 'The Literal MIXTAPE: Kendrick Lamar & J. Cole - J. Lamar / Good Kid, Cole World (Mixed & Prod. by td', 'song': 'Quiet Kenny / Humble II (Prod. td202)'}, {'ablumNo': 31, 'album': 'Kendrick Lamar Humble Reply', 'song': 'Kendrick Lamar Humble Reply'}] </li>
+            </ul>
+          </code>
+        </article>
+      </section>
+      <!--section 7-->
+      <section id="Download_Songs" class="main-section">
+        <header>
+          <span class="link-icon">
+            <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+            </svg>
+          </span>
+          Download Songs
+        </header>
+        <article id="pydatpiff-download">
+          <p class="lead"><span class="fw-bold">pydatpiff.Media.download</span> - is a method used to download a song from a mixtape.</p>
+          <p> Here is a some useful <code>arguments</code> that can be passed to the download method.</p>
+          <ul>
+            <li><b>song</b> - index or name of song</li>
+            <li><b>output</b> - directory to save song <span class="py-cmt">*(default: current directory)</span></li>
+            <li><b>rename</b> - rename a song <span class="py-cmt">*(optional)</span> </li>
+          </ul>
+          <div class="article-content">
+            <p>Song can be reference either by <code>index</code> or by its <code>name</code>.</p>
+            <code id="code-search" class="code-block go-dark">
+              <ul class="list-unstyled text-light">
+                <li class="py-cmt"># Download a single song by index</li>
+                <li class="py-style">media.<span class="py-var">download</span>(<span class="py-hl">17</span>,output=<span class="py-hl">"directory_to_save_song"</span>)</li>
+                <li class="py-cmt"># Download a single song by name</li>
+                <li class="py-style">media.<span class="py-var">download</span>(<span class="py-hl">"humble"</span>,output=<span class="py-hl">"directory_to_save_song"</span>)</li>
+              </ul>
+            </code>
+          </div>
+        </article>
+        <article id="pydatpiff-downloadAlbum" class="mt-5">
+          <p class="lead"><span class="fw-bold">pydatpiff.Media.downloadAlbum</span> - is a method used to download a mixtape full album. </p>
+          <div class="article-content">
+            <code id="code-search" class="code-block go-dark">
+              <ul class="list-unstyled text-light">
+                <li class="py-cmt"># Download full album</li>
+                <li class="py-style">media.<span class="py-var">downloadAlbum</span>(output=<span class="py-hl">"directory_to_save_album"</span>)</li>
+              </ul>
+            </code>
+          </div>
+        </article>
+      </section>
+    </main>
+  </section>
+  <footer>
+    <div class="footer-grid">
+      <div id="projects" class="grid-one">
+        <h4 class="title text-center fw-bold"><span class="d-none d-sm-inline">More&nbsp;</span>Projects</h4>
+        <ul class="list-unstyled text-center">
+          <li><a class="list-link" href="https://cbedroid.github.io/LandingPage/" target="_blank"><b>Tru Tee's <span class="d-none d-sm-inline">Landing Page</span></b></a></li>
+          <li><a class="list-link" href="https://cbedroid.github.io/vue-weather-app/" target="_blank"><b>Vue Weather App</b></a></li>
+          <li><a class="list-link" href="https://cbedroid.github.io/Survey-Page/" target="_blank"><b>Survey Page</b></a></li>
+          <li><a class="list-link" href="https://cbedroid.github.io/Tribute-Page/" target="_blank"><b>Tribute Blog</b></a></li>
+        </ul>
+      </div>
+      <div class="grid-two mt-3 mt-sm-none">
+        <div id="creator" class="d-flex flex-column justify-item-around text-center mt-2">
+          <p>
+            <span>Made with <i class="fa fa-heart" style="color:red;"></i></span>
+            <span>by <a id="contact_link" href="mailto:martez0812@gmail.com?body=Hi Cornelius," target="_blank">Cbedroid</a></span>
+          </p>
+          <div class="wrapper d-none d-sm-flex justify-content-center w-100">
+            <a href="http://github.com/cbedroid" target="_blank">
+              <img class="avatar-image" src="https://avatars.githubusercontent.com/u/54720725?v=4" alt="Cbedroid image">
+            </a>
+          </div>
+        </div>
+        <div id="copyright" class="mt-sm-5">
+          <div class="text-center">
+            <small class="d-sm-none text-light align-self-start">Copyright © 2020 NoworNever LLC - All rights reserved.</small>
+            <p class="d-none d-sm-block text-light align-self-start">Copyright © 2020 NoworNever LLC - All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid-three">
+        <div class="social-media">
+          <h4 class=" title text-center fw-bold">Connect With Us</h4>
+          <ul class="social-group d-flex justify-content-center">
+            <li><a class="social-link social-link--github" href="https://github.com/cbedroid" target="_blank"><i class="fa-brands fa-github"></i></a></li>
+            <li><a class="social-link social-link--twitter" href="https://twitter.com/cbedroid" target="_blank"><i class="fa-brands fa-twitter"></i></a></li>
+            <li><a class="social-link social-link--youtube" href="https://www.youtube.com/channel/UCGPgoafyqSeEbYLkjvpFlDA" target="_blank"><i class="fa-brands fa-youtube"></i></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+<script src="./static/app.js"></script>
+
+</html>

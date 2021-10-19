@@ -1,0 +1,46 @@
+$display_list: ('flex','grid') !default
+=cross-browser($name,$style)
+  @if $style in $display_list
+    #{$name}: -ms-#{$style}
+    #{$name}: -webkit-#{$style}
+  @else
+    -ms-#{$name}: #{$style}
+    -webkit-#{$name}: #{$style}
+    -moz-#{$name}: #{$style}
+    -o-#{$name}: #{$style}
+    #{$name}: #{$style}
+
+=code-base($content:"",$system:"python")
+  $lpad: 0
+  $color: inherit
+  @if $system == "python"
+    $color: inherit
+    $lpad: 1.75rem
+  @else
+    $color: #2cca2c
+    $lpad: 7.25rem
+
+  &
+    padding-left: $lpad
+  &::before
+    content: $content
+    position: absolute
+    top: 0
+    left: 0
+    display: grid
+    align-items: center
+    color: $color
+    font-weight: bold
+    z-index: 50
+
+=code-style($ps1)
+  $system: ("bash":"$user@linux:","python":">>")
+  $sign: map-get($system,$ps1)
+  $sign-len: 8 * str-length($sign) / 16 + 1.50
+  &--#{$ps1}
+    padding-left: #{$sign-len}rem
+    &::before
+      content: $sign !important
+      min-height: 2.5rem
+      margin-left: .35rem
+      padding-left: .35rem

@@ -1,0 +1,416 @@
+@import 'vars'
+@import 'functions'
+@import 'mixins'
+
+/* Base End */
+html,body
+  width: 100vw
+  height: 100%
+  margin: 0
+  scroll-behavior: smooth
+  +cross-browser(font-smoothing, antialiase)
+  +cross-browser(text-rendering, optimizeLegibility)
+  overflow-x: hidden
+
+body
+  position: relative
+  font-size: 1rem
+  line-height: 1.5em
+  font-family: $ff-roboslab
+  color: #000
+  background: #fff
+
+section
+  padding: 1.5rem 0
+
+figure
+  display: block
+  width: 100%
+  text-align: center
+img
+  display: block
+  text-align: center
+/* Base End */
+
+/* Modules */
+.bd-callout+.bd-callout
+  margin-top: -.25rem
+
+.bd-callout
+  padding: 1.25rem
+  margin-top: 1.25rem
+  margin-bottom: 1.25rem
+  border: 1px solid #e5e7e9
+  border-left-width: .25rem
+  border-radius: .25rem
+  box-shadow: 2px 2px 8px rgba(0,0,0,.3)
+  h4
+    margin-bottom: .25rem
+  p:last-child
+    margin-bottom: 0
+  code
+    border-radius: .25rem
+
+  &-primary
+    border-left-color: #0d6efd
+  &-info
+    border-left-color: #5bc0de
+  &-warning
+    border-left-color: #f0ad4e
+  &-danger
+    border-left-color: #d9534f
+
+article
+  font-family: $ff-lato
+  margin: to-rem(24px) 0
+
+code
+  display: inline-block
+  text-align: left
+  white-space: pre-line
+  position: relative
+  padding: 0 .2rem
+  border: 1px solid #beb7b7c5
+  &.code-block
+    display: grid
+    align-items: center
+    background-color: #dededf
+    color: #333
+    padding: 1rem
+    margin: to-rem(16px) .625rem
+    font-weight: 600
+    word-break: normal
+    word-wrap: normal
+    line-height: 1.25
+    max-width: 1000px
+    width: auto
+    overflow: auto
+    li
+      margin: 0
+      line-height: 18px
+
+  *
+    margin: 0 !important
+
+  &.linux
+    +code-base()
+    +code-style("python")
+    +code-style("bash")
+  &.go-dark
+    background: #161b22
+    color: #fff
+
+.git-list
+  width: 100%
+
+.git-pill
+  margin: to-rem(3px)
+  background: #5f676f
+  color: #ddd
+  border-radius: to-rem(10px)
+  text-align: center
+  border: 1px solid #ccc
+  box-shadow: 2px 2px 4px rgba(0,0,0,.4)
+  svg
+    margin: 0 to-rem(6px)
+  .git-total
+    display: inline-block
+    padding: to-rem(4px) to-rem(16px)
+    background: #21262d
+    margin-left: to-rem(8px)
+    border-radius: 0 to-rem(10px) to-rem(10px) 0
+
+.bash
+  &-cmt
+    color: #8b949e
+  &-cmd
+    color: #79c0ff
+
+.bash-style
+  position: relative
+  line-height: .35rem
+  margin-top: -6px !important
+  +code-base("user@linux:~$ ","bash")
+
+.py
+  &-kw
+    color: #ff7b72
+  &-cl
+    color: #ffa657
+  &-var
+    color: #d2a8ff
+  &-hl
+    color: #a5d6ff
+  &-cmt
+    color: #8b949e
+
+.py-style
+  position: relative
+  line-height: .35rem
+  margin-top: -6px !important
+  +code-base(">>")
+
+.article-header
+  font-family: $ff-roboslab
+  font-size: to-rem(32px)
+
+  color: #333
+  margin-bottom: to-rem(20px)
+
+.content-title
+  font-weight: 600
+  color: #333
+  margin: to-rem(6px) 0
+
+.avatar-image
+  display: block
+  width: 85px
+  height: 75px
+  background-color: #fff
+  border-radius: 50%
+/* Modules End */
+
+/* Layout */
+section#main-section
+  display: grid
+  grid-template-columns: minmax(225px,300px) 2fr
+  grid-template-rows: 1
+  background: $theme-color
+  padding: 0 !important
+
+#navbar-wrapper
+  position: relative
+
+  #navbar
+    position: sticky
+    top: 0
+    left: 0
+    z-index: 10000
+    display: block
+    padding: to-rem(10px)
+    background: transparent !important
+    #nav-header
+      color: #fff
+
+      .title
+        font-size: to-rem(24px)
+        text-align: center
+        font-weight: 800
+      .form-wrapper
+        width: fit-content
+        overflow: hidden
+        font-weight: 700
+    #scrollspy-nav
+      border-left: 2px solid $color-accent
+      padding-left: to-rem(10px)
+      .nav-item .nav-link
+        color: #7d7e80
+        font-weight: 500
+        &.active
+          color: #fff
+
+// main section
+#main-doc
+  background: #fff
+  border-left: 1px solid #e2e2e2
+  .main-section
+    min-height: 75vh
+    padding: to-rem(60px) 0
+    margin: 0 to-rem(15px)
+    border-bottom: to-rem(1px) solid #cccfd1
+    &:first-child
+      padding-top: to-rem(40px)
+
+  header
+    font-size: 2.5rem
+    font-weight: 600
+    line-height: 2rem
+    margin-bottom: 2rem
+    .link-icon
+      +cross-browser(transition,.3s all ease-in-out)
+      svg
+        fill: #8b949e
+      &:hover
+        svg
+          fill: #73787e
+  .logo-title
+    font-family: 'Anton', sans-serif
+    font-size: 2.5rem
+    text-align: center
+    font-weight: 700
+    letter-spacing: .25ch
+    text-transform: uppercase
+    text-shadow: 2px 2px 2px white , 4px 4px 12px blue
+  .logo-lead
+    font-weight: 300
+
+  article
+    margin-left: to-rem(35px)
+
+footer
+  font-weight: 500
+  background: $theme-color
+  color: #fff
+  min-height: 40px
+  padding: 10px
+
+footer a
+  color: #ddd
+  font-weight: 600
+  vertical-align: center
+
+footer #creator
+  font-family: "Raleway", sans-serif
+
+footer #projects li
+  margin: 4px 0px
+
+footer #contact_link
+  color: grey
+  font-weight: 800
+  text-transform: uppercase
+  text-decoration: none
+  vertical-align: middle
+  transition: 0.3s ease-in-out
+
+footer #contact_link:hover
+  color: lightgrey
+
+footer
+  .title
+    font-size: 1.75rem
+    color: #ddd
+    font-family: $ff-roboslab
+    text-transform: uppercase
+    padding-bottom: 4px
+    border-bottom: 2px solid #ddd
+    text-shadow: 2px 2px 3px rgba(0,0,0,.2)
+
+footer .social-group
+  padding: 0
+
+footer .social-group li
+  display: grid
+  place-items: center
+  width: 60px
+  height: 50px
+  margin: 4px 4px
+  padding: 8px
+  list-style: none
+  box-shadow: 0 0 8px rgba(200, 200, 200, 0.15)
+  border-radius: 50%
+  box-sizing: border-box
+  transition: 0.7s ease-in-out
+
+footer .social-group li:hover
+  background: #fff
+  box-shadow: 0 0 16px rgba(156, 163, 175, 0.85)
+
+footer .social-link
+  color: #fff !important
+  transition: color 0.5s
+
+footer .social-link i
+  font-size: 2rem
+  padding: 2px
+
+footer .social-group li:hover .social-link--github
+  color: #000 !important
+
+footer .social-group li:hover .social-link--twitter
+  color: #1da1f2 !important
+
+footer .social-group li:hover .social-link--youtube
+  color: #f00 !important
+
+.footer-grid
+  display: grid
+  padding: to-rem(10px)
+  grid-template-columns: repeat (3, 1fr )
+  grid-template-rows: auto
+  grid-template-areas: "a b c"
+
+  .grid
+    &-one
+      grid-area: a
+    &-two
+      grid-area: b
+    &-three
+      grid-area: c
+
+@media screen and (max-width: 426px)
+  section#main-section
+    display: grid
+    grid-template-columns: 1fr
+    grid-template-rows: minmax(75px,15vh) 1fr
+
+  #navbar-wrapper
+    position: relative
+    width: 100%
+    grid-row: 1
+    #navbar
+      display: flex
+      justify-content: space-between
+      width: 100%
+      background: #fff !important
+
+      padding: to-rem(5px) to-rem(10px) to-rem(10px)
+      box-shadow: 2px 2px 10px rgba(0,0,0,.3)
+      header
+        padding-bottom: to-rem(5px)
+        background: #fff !important
+        .title
+          color: #000
+          margin-bottom: to-rem(7px)
+      .navbar-toggler
+        margin-right: to-rem(10px)
+        &:focus
+          box-shadow: 0 0 0 0.15rem
+        span.navbar-toggler-icon
+          font-size: 16px
+          height: 30px
+          width: 30px
+      #scrollspy-nav
+        display: flex
+        justify-content: space-between
+        flex-wrap: wrap
+        border-left: none
+        padding: to-rem(8px) 0
+        border-top: 2px solid $color-accent
+
+  #main-doc
+    width: 100vw
+    border: none
+    grid-column: 1
+    grid-row: 2 / 3
+
+  footer
+    font-size: .825rem
+    .footer-grid
+      display: grid
+      grid-template-areas: "a .c" "b b b"
+    .title
+      font-size: to-rem(16px)
+
+    .social-group li
+      display: grid
+      place-items: center
+      width: to-rem(40px)
+      height: to-rem(35px)
+      margin: 4px 4px
+      padding: 2px
+      list-style: none
+      box-shadow: 0 0 8px rgba(200, 200, 200, 0.15)
+      border-radius: 50%
+      box-sizing: border-box
+      transition: 0.7s ease-in-out
+      &:hover
+        background: #fff
+        box-shadow: 0 0 16px rgba(156, 163, 175, 0.85)
+
+    .social-link
+      color: #fff !important
+      transition: color 0.5s
+      i
+        font-size: 1.5rem
+        padding: 2px
