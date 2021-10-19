@@ -1,7 +1,5 @@
 import warnings
-
 import requests
-
 from pydatpiff.errors import RequestError
 
 from .helper import String
@@ -11,31 +9,20 @@ class Session(object):
     """Dynamic way to way to keep requests.Session through out whole programs."""
 
     TIMEOUT = 10
-    TIMEOUT_COUNT = 0
-
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "cache"):
-            cls.cache = {}
-        return super(Session, cls).__new__(cls)
-
-    def __init__(self):
-        self.session = requests.Session()
-        # Learn more about this
-        adapter = requests.adapters.HTTPAdapter(
-            pool_connections=600, pool_maxsize=600
-        )
-        self.session.mount("https://", adapter)
+    TOTAL_TIMEOUTs = 0
+    CACHE = {}
+    session = requests.Session()
 
     @classmethod
     def put_in_cache(cls, url, response):
         url = url.strip()
-        cls.cache[url] = dict(count=1, response=response)
+        cls.CACHE[url] = dict(count=1, response=response)
 
     @classmethod
     def clear_cache(cls):
         """clear cache to prevent memory error"""
-        del cls.cache
-        cls.cache = {}
+        del cls.CACHE
+        cls.CACHE = {}
 
     @classmethod
     def check_cache(cls, url):
@@ -45,9 +32,9 @@ class Session(object):
         """
         url = url.strip()
         try:
-            if url in cls.cache.keys():
-                cls.cache[url]["count"] += 1
-                return cls.cache[url]["response"]
+            if url in cls.CACHE.keys():
+                cls.CACHE[url]["count"] += 1
+                return cls.CACHE[url]["response"]
         except MemoryError:
             cls.clear_cache()
         except:
@@ -78,14 +65,12 @@ class Session(object):
             raise RequestError(1)
 
         except requests.exceptions.Timeout:
-            self.TIMEOUT_COUNT += 1
-            if self.TIMEOUT_COUNT >= 3:
+            self.TOTAL_TIMEOUTs += 1
+            if self.TOTAL_TIMEOUTs >= 3:
                 print("\n")  # need for spacing
-                warn_msg = (
-                    "\nWarning: Please check your internet connection ! "
-                )
+                warn_msg = "\nWarning: Please check your internet connection ! "
                 warnings.warn(warn_msg)
-                self.TIMEOUT_COUNT = 0
+                self.TOTAL_TIMEOUTs = 0
             raise RequestError(2)
 
         except:
@@ -98,6 +83,6 @@ class Session(object):
         else:
             url = url.strip()
             self.put_in_cache(url, web)
-            self.TIMEOUT_COUNT = 0
+            self.TOTAL_TIMEOUTs = 0
         finally:
             return web
