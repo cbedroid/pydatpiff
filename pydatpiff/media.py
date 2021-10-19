@@ -150,7 +150,7 @@ class Media:
         result = self._Mixtapes._select(selection)
         # if result is None:
         #     Verbose("SELECTION:", selection)
-        #     e_msg = '\n--> Mixtape "%s" was not found' % selection
+        #     extra_message = '\n--> Mixtape "%s" was not found' % selection
         #     raise MediaError(1)
 
         # set up all Album's Info
@@ -225,8 +225,10 @@ class Media:
     def songs(self):
         """Return all songs from album."""
         if not hasattr(self, "_Mp3"):
-            e_msg = '\nSet media by calling -->  Media.setMedia("Album name")'
-            raise MediaError(3, e_msg)
+            extra_message = (
+                '\nSet media by calling -->  Media.setMedia("some_mixtape_name")'
+            )
+            raise MediaError(3, extra_message)
         return self._Mp3.songs
 
     @property

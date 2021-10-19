@@ -81,35 +81,38 @@ class Error(Exception):
         return self.__error__.get(code)
 
     @staticmethod
-    def makeError(code):
-        # code = code or self.message
-        cont = []
-        for x in code.split(" "):
-            cont.append(x.capitalize())
-        cont = "".join(cont)
-        return cont
+    def makeErrorName(error_code):
+        # split and titlize each name in error code
+        error_name = "".join(list(map(lambda x: x.title(), error_code.split(" "))))
+
+        if not (error_name.lower()).endswith("error"):
+            error_name += "Error"
+        return error_name
 
     @classmethod
-    def create(cls, export_to, long_msg=""):
-        if isinstance(export_to, str):
-            max_e = max(cls.__error__)
-            cls.__error__[max_e + 1] = Error.makeError(export_to)
-            return Error.create(max_e + 1)
-        elif export_to in cls.__error__:
+    def create(cls, error_code, extra_message=""):
+        if isinstance(error_code, str):
+            max_errors = max(cls.__error__)
+            cls.__error__[max_errors + 1] = Error.makeErrorName(error_code)
+            return Error.create(max_errors + 1)
+
+        elif error_code in cls.__error__:
             for code, error in cls.__error__.items():
                 if not isinstance(error, str):
                     return error
-                name = Error.makeError(error)
-                e = type(
-                    name,
+
+                error_class_name = Error.makeErrorName(error)
+                error_class = type(
+                    error_class_name,
                     (cls,),
-                    {
-                        "code": code,
-                        "message": error,
-                    },
+                    {"code": code, "message": error},
                 )
-                cls.__error__[code] = e
-            return "".join((str(cls.__error__[export_to]), "\n" + long_msg))
+                # apply the new error to the base error class
+                # basically we are caching the new error
+                cls.__error__[code] = error_class
+
+            error_name = cls.__error__[error_code].__name__
+            return "\n".join((error_name, extra_message))
 
 
 class MixtapesError(Error):
