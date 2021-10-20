@@ -80,7 +80,7 @@ code.code-block {
   word-break: normal;
   word-wrap: normal;
   line-height: 1.25;
-  max-width: 1000px;
+  max-width: 800px;
   width: auto;
   overflow: auto; }
 code.code-block li {
@@ -127,9 +127,13 @@ code.go-dark {
   color: #ddd;
   border-radius: 0.625rem;
   text-align: center;
-  border: 1px solid #ccc;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); }
+  border: 2px solid #ccc;
+  cursor: pointer;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  transition: -ms-0.3s ease-in-out;
+  transition: -webkit-0.3s ease-in-out; }
 .git-pill svg {
+  display: inline-block;
   margin: 0 0.375rem; }
 .git-pill .git-total {
   display: inline-block;
@@ -137,6 +141,9 @@ code.go-dark {
   background: #21262d;
   margin-left: 0.5rem;
   border-radius: 0 0.625rem 0.625rem 0; }
+.git-pill:hover {
+  border-color: #fff;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4); }
 
 .bash-cmt {
   color: #8b949e; }
@@ -196,7 +203,7 @@ code.go-dark {
 
 .content-title {
   font-weight: 600;
-  color: #333;
+  color: #214464;
   margin: 0.375rem 0; }
 
 .avatar-image {
@@ -255,6 +262,8 @@ section#main-section {
 #main-doc .main-section:first-child {
   padding-top: 2.5rem; }
 #main-doc header {
+  display: inline-flex;
+  flex-wrap: wrap;
   font-size: 2.5rem;
   font-weight: 600;
   line-height: 2rem;
@@ -276,8 +285,6 @@ section#main-section {
   text-shadow: 2px 2px 2px white, 4px 4px 12px blue; }
 #main-doc .logo-lead {
   font-weight: 300; }
-#main-doc article {
-  margin-left: 2.1875rem; }
 
 footer {
   font-weight: 500;
@@ -378,11 +385,13 @@ footer .social-group li:hover .social-link--youtube {
     width: 100%;
     grid-row: 1; }
   #navbar-wrapper #navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
     display: flex;
     justify-content: space-between;
     width: 100%;
     background: #fff !important;
-    padding: 0.3125rem 0.625rem 0.625rem;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3); }
   #navbar-wrapper #navbar header {
     padding-bottom: 0.3125rem;
@@ -410,7 +419,39 @@ footer .social-group li:hover .social-link--youtube {
     width: 100vw;
     border: none;
     grid-column: 1;
-    grid-row: 2/3; }
+    grid-row: 1/3;
+    margin-top: 3.75rem; }
+  #main-doc .main-section {
+    min-height: 75vh;
+    padding: 3.75rem 0;
+    margin: 0;
+    border-bottom: 0.0625rem solid #cccfd1; }
+  #main-doc .main-section:first-child {
+    padding-top: 2.5rem; }
+
+  code {
+    display: inline-block;
+    text-align: left;
+    white-space: pre-line;
+    position: relative;
+    padding: 0 0.2rem;
+    border: 1px solid #beb7b7c5; }
+  code.code-block {
+    display: grid;
+    align-items: center;
+    color: #333;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-weight: 600;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.25;
+    width: 100%; }
+
+  article {
+    font-family: "Lato", sans-serif;
+    margin: 1.5rem 0;
+    padding: 0.375rem 0; }
 
   footer {
     font-size: 0.825rem; }

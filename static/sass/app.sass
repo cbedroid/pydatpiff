@@ -63,6 +63,7 @@ img
 article
   font-family: $ff-lato
   margin: to-rem(24px) 0
+  //margin-left: to-rem(35px)
 
 code
   display: inline-block
@@ -82,8 +83,9 @@ code
     word-break: normal
     word-wrap: normal
     line-height: 1.25
-    max-width: 1000px
+    max-width: 800px
     width: auto
+
     overflow: auto
     li
       margin: 0
@@ -109,9 +111,12 @@ code
   color: #ddd
   border-radius: to-rem(10px)
   text-align: center
-  border: 1px solid #ccc
+  border: 2px solid #ccc
+  cursor: pointer
   box-shadow: 2px 2px 4px rgba(0,0,0,.4)
+  +cross-browser(transition,.3s ease-in-out)
   svg
+    display: inline-block
     margin: 0 to-rem(6px)
   .git-total
     display: inline-block
@@ -119,6 +124,9 @@ code
     background: #21262d
     margin-left: to-rem(8px)
     border-radius: 0 to-rem(10px) to-rem(10px) 0
+  &:hover
+    border-color: #fff
+    box-shadow: 2px 2px 8px rgba(0,0,0,.4)
 
 .bash
   &-cmt
@@ -159,7 +167,7 @@ code
 
 .content-title
   font-weight: 600
-  color: #333
+  color: #214464
   margin: to-rem(6px) 0
 
 .avatar-image
@@ -222,6 +230,9 @@ section#main-section
       padding-top: to-rem(40px)
 
   header
+    display: inline-flex
+
+    flex-wrap: wrap
     font-size: 2.5rem
     font-weight: 600
     line-height: 2rem
@@ -243,9 +254,6 @@ section#main-section
     text-shadow: 2px 2px 2px white , 4px 4px 12px blue
   .logo-lead
     font-weight: 300
-
-  article
-    margin-left: to-rem(35px)
 
 footer
   font-weight: 500
@@ -349,12 +357,14 @@ footer .social-group li:hover .social-link--youtube
     width: 100%
     grid-row: 1
     #navbar
+      position: fixed
+      top: 0
+      left: 0
       display: flex
       justify-content: space-between
       width: 100%
       background: #fff !important
 
-      padding: to-rem(5px) to-rem(10px) to-rem(10px)
       box-shadow: 2px 2px 10px rgba(0,0,0,.3)
       header
         padding-bottom: to-rem(5px)
@@ -382,7 +392,40 @@ footer .social-group li:hover .social-link--youtube
     width: 100vw
     border: none
     grid-column: 1
-    grid-row: 2 / 3
+    grid-row: 1 / 3
+    margin-top: to-rem(60px)
+
+    .main-section
+      min-height: 75vh
+      padding: to-rem(60px) 0
+      margin: 0
+      border-bottom: to-rem(1px) solid #cccfd1
+      &:first-child
+        padding-top: to-rem(40px)
+
+  code
+    display: inline-block
+    text-align: left
+    white-space: pre-line
+    position: relative
+    padding: 0 .2rem
+    border: 1px solid #beb7b7c5
+    &.code-block
+      display: grid
+      align-items: center
+      color: #333
+      padding: 1rem
+      margin: to-rem(16px) 0
+      font-weight: 600
+      word-break: normal
+      word-wrap: normal
+      line-height: 1.25
+      width: 100%
+
+  article
+    font-family: $ff-lato
+    margin: to-rem(24px) 0
+    padding: to-rem(6px) 0
 
   footer
     font-size: .825rem
