@@ -35,16 +35,62 @@
         <div class="container-fluid">
           <div class="collapse navbar-collapse" id="navmenu">
             <nav id="scrollspy-nav" class="nav nav-pills flex-sm-column  me-auto mb-2 mb-lg-0">
-              <li class="nav-item"><a class="nav-link active" href="#Getting_Started">Getting Started</a></li>
-              <li class="nav-item"><a class="nav-link" href="#How_To_Install">How To Install</a></li>
-              <li class="nav-item"><a class="nav-link" href="#Mixtape">Mixtape</a></li>
-              <li class="nav-item"><a class="nav-link" href="#Media">Media</a></li>
-              <li class="nav-item"><a class="nav-link" href="#Media_Controls">Media Controls</a></li>
-              <li class="nav-item"><a class="nav-link" href="#Search_for_Song">Search for Song</a></li>
-              <li class="nav-item"><a class="nav-link" href="#Download_Songs">Download Songs</a></li>
+              <li class="nav-item"><a class="nav-link active" href="#Getting_Started">Getting Started</a>
+                <ul class="nav--subnav">
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-introduction">Introduction</a>
+                </ul>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#How_To_Install">How To Install</a>
+                <ul class="nav--subnav">
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-prerequisites">Prerequisites</a>
+
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-installation">Installation</a>
+                </ul>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#Mixtapes">Mixtapes</a>
+                <ul class="nav--subnav">
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-category">Category</a>
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-mixtapes">Creating Mixtapes</a>
+                </ul>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#Media">Media</a>
+                <ul class="nav--subnav">
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-playing">Playing Songs</a>
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-player">Media Controls</a>
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-search">Search for Song</a>
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-download">Download Song</a>
+                  <li class="nav-item"><a class="nav-link" href="#pydatpiff-downloadAlbum">Download Album</a>
+                </ul>
+              </li>
             </nav>
           </div>
         </div>
+        <ul id="gitnav" class="nav d-none d-md-flex flex-md-column justify-content-center border-top border-dark mt-4 pt-1">
+          <li class="nav-item">
+            <div class="nav-link dropdown">
+              <a class="nav-toggler dropdown-toggle" type="button" data-bs-toggle="collapse" href="#git_collapse_menu" role="button" aria-expanded="false" aria-controls="git_collapse_menu">
+                <i class="fa-brands fa-github me-1"></i>
+                GitHub Links
+              </a>
+              <div class="collapse" id="git_collapse_menu">
+                <div class="card card-body bg-dark">
+                  <a class="nav-link" href="https://github.com/cbedroid/pydatpiff" target="_blank">
+                    <i class="fa-solid fa-code me-1"></i>
+                    Code
+                  </a>
+                  <a class="nav-link" href="https://pypi.org/project/pydatpiff/" rel="nofollow" target="_blank">
+                    <i class="fa-solid fa-cloud-arrow-down me-1"></i>
+                    PyPI
+                  </a>
+                  <a class="nav-link" href="https://github.com/cbedroid/pydatpiff/issues" target"_blank">
+                    <i class="fa-solid fa-bug me-1"></i>
+                    Issues &amp; Bugs
+                  </a>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
       </nav>
     </div>
     <main id="main-doc" role="main">
@@ -52,16 +98,21 @@
       <section class="container">
         <section id="Getting_Started" class="main-section">
           <header>
-            <span class="link-icon">
-              <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
-              </svg>
-            </span>
-            Getting Started
+            <h1>
+              <span class="link-icon">
+                <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+                </svg>
+              </span>
+              Getting Started
+            </h1>
           </header>
           <div class="container">
-            <article>
-              <p class="mx-auto" style="max-width: 800px">PyDatpiff is a light weight <a class="p-link" href="https://www.python.org/" target="_blank">python</a> command line audio streaming and media service founded on Sep 29, 2020 by <a class="p-link" href="https://github.com/cbedroid/" target="_blank">CbeDroid</a>.
+            <article id="pydatpiff-introduction">
+              <h2 class="article-header">Introduction
+                <a class="anchor-ref" href="#pydatpiff-introduction">#</a>
+              </h2>
+              <p class="mx-auto" style="max-width: 800px"><b class="fw-bolder  fst-italic fs-5 me-1 ">PyDatpiff</b> &#9473; is a light weight <a class="p-link" href="https://www.python.org/" target="_blank">python</a> command line audio streaming and media service founded on Sep 29, 2020 by <a class="p-link" href="https://github.com/cbedroid/" target="_blank">CbeDroid</a>.
                 It comes with built-in support for multipl platform such as Windows, Mac, and also Linux. Pydatpiff allows users to stream music from a wide genre of music such as Hip-Hop, RnB, Pop, Jazz and more directly to their device on-demand.
               </p>
               <div class="card bg-secondary shadow mx-auto" style="max-width: 800px;--bs-bg-opacity: .15">
@@ -77,7 +128,6 @@
                 </div>
                 <div class="card-body">
                   <ul id="git-list" class="d-flex flex-row justify-content-around list-unstyled px-3 px-xl-5 ">
-
                     <li class="git-pill"><span class="pill-left">
                         <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-star-fill mr-1">
                           <path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path>
@@ -111,25 +161,32 @@
         <!--section 2-->
         <section id="How_To_Install" class="main-section">
           <header>
-            <span class="link-icon">
-              <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
-              </svg>
-            </span>
-            How To Install
+            <h1>
+              <span class="link-icon">
+                <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+                </svg>
+              </span>
+              How To Install
+            </h1>
           </header>
-          <article id="Dependencies">
-            <h2 class="article-header">Dependencies</h2>
+          <article id="pydatpiff-dependencies">
+            <h2 class="article-header">Prerequisites
+              <a class="anchor-ref" href="#pydatpiff-prerequisites">#</a>
+            </h2>
             <ul id="dependencies-list">
-              <li><a href="https://www.python.org/downloads/">python</a> - Python version 3.3 or above.</li>
-              <li><a href="https://www.videolan.org/vlc/download-windows.html">VLC</a> - VideoLAN Client media player.</li>
-              <li><a href="https://mpv.io/installation/">MPV</a> - A free, open source adnd cross=platform media player.</li>
+              <li><a href="https://www.python.org/downloads/"><b>python</b></a> - Python version 3.3 or above.</li>
+              <li><a href="https://www.videolan.org/vlc/download-windows.html"><b>VLC</b></a> - VideoLAN Client media player.</li>
+              <li><a href="https://mpv.io/installation/"><b>MPV</b></a> - A free, open source and cross-platform media player.</li>
               </li>
             </ul>
-            <blockquote class="bd-callout bd-callout-warning">Note: Either VLC or MPV must be installed</blockquote>
+            <blockquote class="bd-callout bd-callout-warning"><span class="fw-bold fs-5 me-2"><span class="me-1">Note:</span> <i class="fa-solid fa-circle-info fs-5"></i></span>Either <b>VLC</b> or <b>MPV</b> must be installed</blockquote>
+
           </article>
-          <article id="installation">
-            <h2 class="article-header">Installation</h2>
+          <article id="pydatpiff-installation">
+            <h2 class="article-header">Installation
+              <a class="anchor-ref" href="#pydatpiff-installation">#</a>
+            </h2>
             <p>The default media player uses <code>VLC</code>to play music. For systems that are incompatible with VLC, <code>MPV</code> will be used as the fallback player.</p>
             <div id="linux-install">
               <h6>Install on Linux</h6>
@@ -147,21 +204,26 @@
           </article>
         </section>
         <!--section 3 -->
-        <section id="Mixtape" class="main-section">
+        <section id="Mixtapes" class="main-section">
           <header>
-            <span class="link-icon">
-              <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
-              </svg>
-            </span>
-            Mixtape
+            <h1>
+              <span class="link-icon">
+                <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+                </svg>
+              </span>
+              Mixtapes
+            </h1>
+            <p class="lead"><span class="fw-bold">pydatpiff.Mixtapes</span> - Pydatpiff main class used to fetch an artist' mixtape.</p>
           </header>
           <article id="pydatpiff-category">
-            <p class="lead"> <span class="fw-bold">pydatpiff.Mixtapes</span> - Pydatpiff main class used to fetch an artist' mixtape.</p>
             <div class="article-content">
-              <h3 class="content-title py-3">Choosing a Category</h3>
-              <p><em><b>What is category ..??</b></em></p>
+              <h2 class="article-header">Category
+                <a class="anchor-ref" href="#pydatpiff-category">#</a>
+              </h2>
+              <p class="lead"><em><b>What are categories ..??</b></em></p>
               <p>&nbsp;&nbsp;Categories are list of mixtape's groups used to filter mixtapes based on ratings and release dates.</p>
+
               <div class="tables-responsive">
                 <table class="table table-dark table-bordered table-striped">
                   <thead>
@@ -218,7 +280,9 @@
           </article>
           <hr>
           <article id="pydatpiff-mixtapes">
-            <h3 class="content-title py-3">Creating Mixtapes</h3>
+            <h2 class="article-header">Creating Mixtapes
+              <a class="anchor-ref" href="#pydatpiff-mixtapes">#</a>
+            </h2>
             <div class="content-detail mb-5">
               <p>Getting started with Mixtapes</p>
               <p>There are two parameters that can be pass to Mixtapes class.</p>
@@ -271,15 +335,20 @@
         <!--section 4-->
         <section id="Media" class="main-section">
           <header>
-            <span class="link-icon">
-              <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
-              </svg>
-            </span>
-            Media
+            <h1>
+              <span class="link-icon">
+                <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
+                </svg>
+              </span>
+              Media
+            </h1>
+            <p class="lead"><span class="fw-bold">pydatpiff.Media</span> - is class used to load and play an artist's mixtape.</p>
           </header>
           <article id="pydatpiff-media">
-            <p class="lead"><span class="fw-bold">pydatpiff.Media</span> - is class used to load and play an artist's mixtape.</p>
+            <h2 class="article-header">Initializing Media
+              <a class="anchor-ref" href="#pydatpiff-media">#</a>
+            </h2>
             <div class="article-content">
               <p class="content-lead">Here are some useful things you can do with <em>Media</em></p>
               <ul>
@@ -289,26 +358,30 @@
                 <li><b class="py-fhl">downloadAlbum</b> - Download all songs from an album.</li>
               </ul>
             </div>
-            <div class="article-content">
-              <h4>Set media player with a mixtape</h4>
-              <p>Mixtape's can be reference either by <em>index</em> or by its <em>album name</em>.
-                Index starts at <strong>one (1)</strong> not <strong><del>zero (0)</del></strong> .
-              </p>
-              <code class="code-block go-dark">
-                <ul class="list-unstyled text-light">
-                  <li class="py-cmt"># We pass in the Mixtape object from <a class="link-light" href="#code-mixtapes">above</a></li>
-                  <li class="py-style">media <span class="py-hl">=</span> pydatiff.<span class="py-cl">Media</span>(mix)</li>
-                  <li class="py-cmt"># Set the media player to a mixtape.</li>
-                  <li class="py-style">media.<span class="py-cl">setMedia</span>(<span class="py-hl">"Best Of So Far Kendrick Lamar"</span>)</li>
-                  <li class="py-cmt"># View all available songs</li>
-                  <li class="py-style">media.<span class="py-var">songs</span></li>
-                  <li class="py-cmt"> ['Average Joe', 'Celebration', 'Michael Jordan Ft Schoolboy Q', 'Ignorance Is Bliss', 'Growing Apart', 'P**** And Patron Ft. Ab Soul', 'I Do This Ft. Jay Rock', 'The Relevant', "B**** I'm In The Club", 'Dumb It Down', 'Kendrick Lamar', 'Little Johnny', 'Beyonce', 'A Little Appalled', 'L.M.A.O', 'Today', 'Kurupted', 'World Negatives Prod by Sounwa', '150 Day Dreaming', 'Last Real Nigga Alive', "Compton's Finest Ft. H.O.P.E", 'For The Homies', 'Uptown81 Ft. Smoke DZA & Mara Hruby']</li>
-                </ul>
-              </code>
-            </div>
+            <h4>Set media player with a mixtape</h4>
+            <p>Mixtape's can be reference either by <em>index</em> or by its <em>album name</em>.
+              Index starts at <strong>one (1)</strong> not <strong><del>zero (0)</del></strong> .
+            </p>
+            <code class="code-block go-dark">
+              <ul class="list-unstyled text-light">
+                <li class="py-cmt"># We pass in the Mixtape object from <a class="link-light" href="#code-mixtapes">above</a></li>
+                <li class="py-style">media <span class="py-hl">=</span> pydatiff.<span class="py-cl">Media</span>(mix)</li>
+                <li class="py-cmt"># Set the media player to a mixtape.</li>
+                <li class="py-style">media.<span class="py-cl">setMedia</span>(<span class="py-hl">17</span>)</li>
+                <li class="py-cmt"># Or reference by name!</li>
+                <li class="py-style">media.<span class="py-cl">setMedia</span>(<span class="py-hl">"Best Of So Far Kendrick Lamar"</span>)</li>
+                <li class="py-cmt"># Partial naming is also recognized!</li>
+                <li class="py-style">media.<span class="py-cl">setMedia</span>(<span class="py-hl">"Best Of So"</span>)</li>
+                <li class="py-cmt"># View all available songs</li>
+                <li class="py-style">media.<span class="py-var">songs</span></li>
+                <li class="py-cmt"> ['Average Joe', 'Celebration', 'Michael Jordan Ft Schoolboy Q', 'Ignorance Is Bliss', 'Growing Apart', 'P**** And Patron Ft. Ab Soul', 'I Do This Ft. Jay Rock', 'The Relevant', "B**** I'm In The Club", 'Dumb It Down', 'Kendrick Lamar', 'Little Johnny', 'Beyonce', 'A Little Appalled', 'L.M.A.O', 'Today', 'Kurupted', 'World Negatives Prod by Sounwa', '150 Day Dreaming', 'Last Real Nigga Alive', "Compton's Finest Ft. H.O.P.E", 'For The Homies', 'Uptown81 Ft. Smoke DZA & Mara Hruby']</li>
+              </ul>
+            </code>
           </article>
-          <article>
-            <h3 class="content-title">Playing Songs</h3>
+          <article id="pydatpiff-playing">
+            <h2 class="article-header">Playing Songs
+              <a class="anchor-ref" href="#pydatpiff-playing">#</a>
+            </h2>
             <p>Songs can be played by referencing either a <em>index</em> or <em>title</em>.</p>
             <blockquote class="bd-callout bd-callout-primary">Song's title <b>do not</b> have to be an exact match.</blockquote>
             <code class="code-block go-dark">
@@ -328,18 +401,11 @@
               </ul>
             </code>
           </article>
-        </section>
-        <!--section 5-->
-        <section id="Media_Controls" class="main-section">
-          <header>
-            <span class="link-icon">
-              <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
-              </svg>
-            </span>
-            Media Controls
-          </header>
+          <!--section 5-->
           <article id="pydatpiff-player">
+            <h2 class="article-header">Media Controls
+              <a class="anchor-ref" href="#pydatpiff-player">#</a>
+            </h2>
             <p class="lead"><span class="fw-bold">pydatpiff.Media.player</span> - is a media controller object used to control a loaded audio track. </p>
             <p>Media player allows user to <code>rewind</code>, <code>fast-forward</code>, <code>pause</code>, <code>stop</code> and control <code>volume</code> of music.</p>
             <code id="code-search" class="code-block go-dark">
@@ -379,18 +445,11 @@
               </ul>
             </code>
           </article>
-        </section>
-        <!--section 6-->
-        <section id="Search_for_Song" class="main-section">
-          <header>
-            <span class="link-icon">
-              <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
-              </svg>
-            </span>
-            Search for Song
-          </header>
+          <!--section 6-->
           <article id="pydatpiff-search">
+            <h2 class="article-header">Media Search
+              <a class="anchor-ref" href="#pydatpiff-search">#</a>
+            </h2>
             <p class="lead"><span class="fw-bold">pydatpiff.Media.findSong</span> - is a query method used to search for a mixtape.</p>
             <blockquote class="bd-callout bd-callout-warning">
               <div class="d-flex flex-wrap align-items-center">
@@ -407,18 +466,11 @@
               </ul>
             </code>
           </article>
-        </section>
-        <!--section 7-->
-        <section id="Download_Songs" class="main-section">
-          <header>
-            <span class="link-icon">
-              <svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="32" height="32" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path>
-              </svg>
-            </span>
-            Download Songs
-          </header>
+          <!--section 7-->
           <article id="pydatpiff-download">
+            <h2 class="article-header">Download Song
+              <a class="anchor-ref" href="#pydatpiff-download">#</a>
+            </h2>
             <p class="lead"><span class="fw-bold">pydatpiff.Media.download</span> - is a method used to download a song from a mixtape.</p>
             <p> Here is a some useful <code>arguments</code> that can be passed to the download method.</p>
             <ul>
@@ -439,6 +491,9 @@
             </div>
           </article>
           <article id="pydatpiff-downloadAlbum" class="mt-5">
+            <h2 class="article-header">Download Album
+              <a class="anchor-ref" href="#pydatpiff-downloadAlbum">#</a>
+            </h2>
             <p class="lead"><span class="fw-bold">pydatpiff.Media.downloadAlbum</span> - is a method used to download a mixtape full album. </p>
             <div class="article-content">
               <code id="code-search" class="code-block go-dark">
@@ -450,18 +505,32 @@
             </div>
           </article>
         </section>
+
         <main>
       </section>
   </section>
   <footer>
     <div class="footer-grid">
-      <div id="projects" class="grid-one">
-        <h4 class="title text-center fw-bold"><span class="d-none d-sm-inline">More&nbsp;</span>Projects</h4>
+      <div id="gitlinks" class="grid-one">
+        <h4 class="title text-center fw-bold">Links</h4>
         <ul class="list-unstyled text-center">
-          <li><a class="list-link" href="https://cbedroid.github.io/LandingPage/" target="_blank"><b>Tru Tee's <span class="d-none d-sm-inline">Landing Page</span></b></a></li>
-          <li><a class="list-link" href="https://cbedroid.github.io/vue-weather-app/" target="_blank"><b>Vue Weather App</b></a></li>
-          <li><a class="list-link" href="https://cbedroid.github.io/Survey-Page/" target="_blank"><b>Survey Page</b></a></li>
-          <li><a class="list-link" href="https://cbedroid.github.io/Tribute-Page/" target="_blank"><b>Tribute Blog</b></a></li>
+          <li class="list-link">
+            <a href="https://github.com/cbedroid/pydatpiff">
+              <i class="fa solid fa-code me-3"></i>
+              Code
+            </a>
+          </li>
+          <li class="list-link"><a href="https://pypi.org/project/pydatpiff/" rel="nofollow">
+              <i class="fa-solid fa-cloud-arrow-down me-3"></i>
+              PyPI
+            </a>
+          </li>
+          <li class="list-link">
+            <a href="https://github.com/cbedroid/pydatpiff/issues">
+              <i class="fa-solid fa-bug me-3"></i>
+              Issues &amp; Bugs
+            </a>
+          </li>
         </ul>
       </div>
       <div class="grid-two mt-3 mt-sm-none">

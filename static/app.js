@@ -1,32 +1,37 @@
 $(document).ready(() => {
-  (function scrollSpyObserver() {
+    let documentation = document.querySelectorAll(".main-section");
+          const scrollspy_links = $("#scrollspy-nav .nav-link");
+  (function observerNav(container,elem_list) {
     let options = {
       root: null,
-      threshold: 0.2,
-      rootMargin: "250px",
+      threshold: 0.1,
+      rootMargin: "-20px",
+
     };
-    let documentation = document.querySelectorAll(".main-section");
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
-        // Toggle documentation links active
+        // Toggle container links active
         if (entry.isIntersecting) {
-          const scrollspy_targets = $("#scrollspy-nav .nav-link");
           const doc_id = entry.target.id;
-          const doc_link = $(scrollspy_targets).filter(function (i,e) {
+          const nav_link = $(elem_list).filter(function (i,e) {
             const link_len = doc_id.length
             const entry_len = e.text.length
             return this.href.includes(doc_id) && entry_len==link_len;
           });
-          $(scrollspy_targets).removeClass("active");
-          $(doc_link).addClass("active");
+          // toggle list-item active
+         $(elem_list).parent().removeClass("active");
+          $(nav_link).parent().addClass("active");
+          // toggle nav-link pill active
+          $(elem_list).removeClass("active");
+          $(nav_link).addClass("active");
         }
       });
     };
     let observer = new IntersectionObserver(callback, options);
-    documentation.forEach((doc) => {
+    container.forEach((doc) => {
       observer.observe(doc);
     });
-  })();
+  })(documentation,scrollspy_links);
 
   /* Handle documentation search bar*/
   (function handleDocSearch() {

@@ -1,6 +1,8 @@
 @import 'vars'
 @import 'functions'
 @import 'mixins'
+*,*::before,*::after
+  +cross-browser(box-sizing,border-box)
 
 /* Base End */
 html,body
@@ -20,9 +22,19 @@ body
   color: #000
   background: #fff
 
-section
-  padding: 1.5rem 0
+*::-webkit-scrollbar
+  width: 15px
 
+*::-webkit-scrollbar-track
+  background: $theme-color
+
+*::-webkit-scrollbar-thumb
+  background-color: #262b72
+  border-radius: 20px
+  border: 3px solid #ccc
+
+section
+  padding: 1rem 0
 figure
   display: block
   width: 100%
@@ -30,6 +42,11 @@ figure
 img
   display: block
   text-align: center
+
+a
+  font-weight: 600
+  +cross-browser(transition,.3s ease-in-out)
+
 /* Base End */
 
 /* Modules */
@@ -44,6 +61,9 @@ img
   border-left-width: .25rem
   border-radius: .25rem
   box-shadow: 2px 2px 8px rgba(0,0,0,.3)
+  max-width: 800px
+  width: auto
+
   h4
     margin-bottom: .25rem
   p:last-child
@@ -59,11 +79,6 @@ img
     border-left-color: #f0ad4e
   &-danger
     border-left-color: #d9534f
-
-article
-  font-family: $ff-lato
-  margin: to-rem(24px) 0
-  //margin-left: to-rem(35px)
 
 code
   display: inline-block
@@ -85,6 +100,7 @@ code
     line-height: 1.25
     max-width: 800px
     width: auto
+    border-radius: to-rem(4px)
 
     overflow: auto
     li
@@ -158,12 +174,29 @@ code
   margin-top: -6px !important
   +code-base(">>")
 
-.article-header
-  font-family: $ff-roboslab
-  font-size: to-rem(32px)
+article
+  font-family: $ff-lato
+  margin: to-rem(24px) 0
+  padding: to-rem(8px) 0
 
-  color: #333
-  margin-bottom: to-rem(20px)
+  //margin-left: to-rem(35px)
+
+  .article-header
+    font-family: $ff-roboslab
+    font-size: to-rem(32px)
+    color: #333
+    margin-bottom: to-rem(20px)
+    width: fit-content
+    +cross-browser("transition",.3s ease-in)
+    .anchor-ref
+      color: #3291d1
+      font-size: .9em
+      text-decoration: none
+      padding: to-rem(4px)
+      visibility: hidden
+    &:hover
+      .anchor-ref
+        visibility: visible
 
 .content-title
   font-weight: 600
@@ -179,6 +212,7 @@ code
 /* Modules End */
 
 /* Layout */
+
 section#main-section
   display: grid
   grid-template-columns: minmax(225px,300px) 2fr
@@ -211,13 +245,42 @@ section#main-section
     #scrollspy-nav
       border-left: 2px solid $color-accent
       padding-left: to-rem(10px)
-      .nav-item .nav-link
-        color: #7d7e80
-        font-weight: 500
-        &.active
-          color: #fff
+      .nav-item
+        list-style: none
+        .nav-link
+          color: #7d7e80
+          font-weight: 500
+        //scrollspy subnav
+        .nav--subnav
+          display: none
+          +cross-browser(animation, fadeOut .5s)
+          &.active
+            .nav-link
+              color: red !important
+          .nav-link.active
+            color: purple !important
 
-// main section
+        &:hover
+          .nav-link
+            color: #fff
+        &.active
+          .nav-link
+            color: #fff
+          .nav--subnav
+            display: block
+            +cross-browser(animation, fadeIn 3s)
+
+    #gitnav
+      a
+        color: #fff
+        &:hover
+          color: #ddd
+      .collapse .nav-link
+        &:hover
+          background: rgba(0,0,0,.3)
+          color: #ccc
+
+      // main section
 #main-doc
   background: #fff
   border-left: 1px solid #e2e2e2
@@ -231,12 +294,22 @@ section#main-section
 
   header
     display: inline-flex
-
     flex-wrap: wrap
     font-size: 2.5rem
     font-weight: 600
+
     line-height: 2rem
     margin-bottom: 2rem
+    width: 100%
+
+    h1
+      display: block
+      width: 100%
+      background: rgba(131, 139, 151, 0.245)
+      padding: .5rem
+      margin-bottom: to-rem(8px)
+      border-radius: 3px
+
     .link-icon
       +cross-browser(transition,.3s all ease-in-out)
       svg
@@ -251,7 +324,8 @@ section#main-section
     font-weight: 700
     letter-spacing: .25ch
     text-transform: uppercase
-    text-shadow: 2px 2px 2px white , 4px 4px 12px blue
+    text-shadow: 2px 2px 2px white , 4px 4px 3px #1e4294
+
   .logo-lead
     font-weight: 300
 
@@ -261,8 +335,10 @@ footer
   color: #fff
   min-height: 40px
   padding: 10px
+  border-top: 2px solid $color-primary
 
 footer a
+
   color: #ddd
   font-weight: 600
   vertical-align: center
@@ -270,8 +346,13 @@ footer a
 footer #creator
   font-family: "Raleway", sans-serif
 
-footer #projects li
-  margin: 4px 0px
+footer #gitlinks ul
+  padding: 4px 8px
+  a
+    display: flex
+    align-items: center
+    text-align: center
+    padding: 4px
 
 footer #contact_link
   color: grey
@@ -347,6 +428,9 @@ footer .social-group li:hover .social-link--youtube
       grid-area: c
 
 @media screen and (max-width: 426px)
+#gitnav
+  display: none
+
   section#main-section
     display: grid
     grid-template-columns: 1fr
@@ -413,6 +497,7 @@ footer .social-group li:hover .social-link--youtube
     &.code-block
       display: grid
       align-items: center
+      width: 100%
       color: #333
       padding: 1rem
       margin: to-rem(16px) 0
@@ -420,7 +505,6 @@ footer .social-group li:hover .social-link--youtube
       word-break: normal
       word-wrap: normal
       line-height: 1.25
-      width: 100%
 
   article
     font-family: $ff-lato
@@ -457,3 +541,20 @@ footer .social-group li:hover .social-link--youtube
       i
         font-size: 1.5rem
         padding: 2px
+
+@keyframes fadeIn
+  0%
+    height: 0
+    opacity: 0
+  100%
+    height: 100%
+    opacity: 1
+
+@keyframes  fadeOut
+  0%
+    height: 100%
+    opacity: 1
+
+  100%
+    height: 0
+    opacity: 0

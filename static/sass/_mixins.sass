@@ -1,8 +1,14 @@
 $display_list: ('flex','grid') !default
 =cross-browser($name,$style)
-  @if $style in $display_list
+  $special: null
+  @each $n in $display_list
+    $special: str-index(#{$style},$n)
+
+  @if $special != null
     #{$name}: -ms-#{$style}
     #{$name}: -webkit-#{$style}
+    #{$name}: -moz-#{$style}
+    #{$name}: #{$style}
   @else
     -ms-#{$name}: #{$style}
     -webkit-#{$name}: #{$style}
