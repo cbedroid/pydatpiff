@@ -8,6 +8,7 @@ from .backend.utils import Object, Queued, Selector, Threader
 from .errors import InstallationError, MediaError
 from .frontend.display import Print, Show, Verbose
 from .mixtapes import Mixtapes
+from .urls import Urls
 from .utils.request import Session
 
 
@@ -111,9 +112,9 @@ class Media:
         self.album = self._Mixtapes.mixtapes[mixtape_index]
         self.album_cover = self._Mixtapes.album_covers[mixtape_index]
 
-        self.url = self._Mixtapes._links[mixtape_index]
-
-        album = Album(self.url)
+        url = self._Mixtapes._links[mixtape_index]
+        self.url = "".join((Urls.url["base"], url))
+        album = Album(url)
         self._Mp3 = Mp3(album)
 
         # get the ablum's uploader
@@ -121,7 +122,6 @@ class Media:
         # get ablum bio
         self.bio = album.bio
         self.__cache_storage = {}
-        self.ios = self.__index_of_song
         Verbose("Setting Media to %s - %s" % (self.artist, self.album))
 
     def __isMixtapesObject(self, instance):
