@@ -44,7 +44,7 @@ class Media:
         return super(Media, cls).__new__(cls)
 
     def __str__(self):
-        return "%s(%s)" % (self.__class__.__name__, self._Mixtapes)
+        return self.album
 
     def __repr__(self):
         return "Media(%s)" % (self._Mixtapes)
@@ -67,22 +67,6 @@ class Media:
         Raises:
             MediaError: Raises MediaError if mixtapes is not an subclass of pydatpiff.Mixtapes.
         """
-        # Check mixtape is valid
-        self.__isMixtapesObject(mixtape)
-
-        Verbose("Media initialized")
-
-        self.setup(mixtape)
-
-        super(Media, self).__init__()
-
-        if pre_selection:  # Run setMedia with argument here
-            # This step is optional for users, but can save an extra setp
-            # when selecting an album in setMedia.
-            self.setMedia(pre_selection)
-
-    def setup(self, mixtape):
-        """Initial and setup class variables"""
         self._session = Session()
         self._Mixtapes = mixtape
         self._artist_name = None
@@ -90,6 +74,55 @@ class Media:
         self._current_index = None
         self._selected_song = None
         self.__downloaded_song = None
+
+        # Check if mixtape is valid
+        self.__isMixtapesObject(mixtape)
+
+        Verbose("Media initialized")
+
+        if pre_selection:  # Run setMedia with argument here
+            # This step is optional for users, but can save an extra setp
+            # when selecting an album in setMedia.
+            self.setMedia(pre_selection)
+
+    def setMedia(self, selection):
+        """
+        Initialize and set the an Album to Media Player.
+        A pydatpiff.mixtapes.Mixtape's ablum will be load to the media player.
+
+        :param: selection - pydatpiff.Mixtapes album's name or artist's name.
+            int - will return the Datpiff.Mixtape artist at that index.
+            str - will search for an artist from Mixtapes.artists (default)
+                  or album from Mixtapes.ablum.
+
+            note: see pydatpiff.mixtape.Mixtapes for album or artist selection
+        """
+
+        # Mixtape's class will handle errors and None value
+
+        mixtape_index = self._Mixtapes._select(selection)
+
+        # set up all Album's Info
+        total_mixtape = len(self._Mixtapes) - 1
+        if mixtape_index > total_mixtape:
+            mixtape_index = total_mixtape
+
+        self.artist = self._Mixtapes.artists[mixtape_index]
+        self.album = self._Mixtapes.mixtapes[mixtape_index]
+        self.album_cover = self._Mixtapes.album_covers[mixtape_index]
+
+        self.url = self._Mixtapes._links[mixtape_index]
+
+        album = Album(self.url)
+        self._Mp3 = Mp3(album)
+
+        # get the ablum's uploader
+        self.uploader = album.uploader
+        # get ablum bio
+        self.bio = album.bio
+        self.__cache_storage = {}
+        self.ios = self.__index_of_song
+        Verbose("Setting Media to %s - %s" % (self.artist, self.album))
 
     def __isMixtapesObject(self, instance):
         """Verify subclass is an instance of mixtapes' class
@@ -133,52 +166,6 @@ class Media:
         results = Object.removeNone(results)
         return results
 
-    def setMedia(self, selection):
-        """
-        Initialize and set the an Album to Media Player.
-        A pydatpiff.mixtapes.Mixtape's ablum will be load to the media player.
-
-        :param: selection - pydatpiff.Mixtapes album's name or artist's name.
-            int - will return the Datpiff.Mixtape artist at that index.
-            str - will search for an artist from Mixtapes.artists (default)
-                  or album from Mixtapes.ablum.
-
-            note: see pydatpiff.mixtape.Mixtapes for album or artist selection
-        """
-
-        # Mixtapes Class will handle errors and None value
-        result = self._Mixtapes._select(selection)
-        # if result is None:
-        #     Verbose("SELECTION:", selection)
-        #     extra_message = '\n--> Mixtape "%s" was not found' % selection
-        #     raise MediaError(1)
-
-        # set up all Album's Info
-        max_result = len(self._Mixtapes) - 1
-        result = result if result <= max_result else max_result
-        self._artist_name = self._Mixtapes.artists[result]
-        self._album_name = self._Mixtapes.mixtapes[result]
-        self._album_cover = self._Mixtapes.album_covers[result]
-
-        link = self._Mixtapes._links
-
-        self.__setupMedia(link[result])
-        Verbose("Setting Media to %s - %s" % (self.artist, self.album))
-
-    def __setupMedia(self, link):
-        """
-        Initial an Album and sets all Mp3 songs'tags
-
-        param: link - Album's mixtape link
-        """
-        album = Album(link)
-        self._Mp3 = Mp3(album.datpiff_player_response)
-        # get the ablum's uploader
-        self.uploader = album.uploader
-        # get ablum bio
-        self.bio = album.bio
-        self.__cache_storage = {}
-
     def __index_of_song(self, select):
         """
         Parse all user input and return the correct song index.
@@ -196,26 +183,30 @@ class Media:
     @property
     def artist(self):
         """Return the current artist name."""
+        if not hasattr(self, "_artist_name"):
+            self._artist_name = None
         return self._artist_name
 
     @artist.setter
     def artist(self, name):
-        self.setMedia(name)
+        self._artist_name = name
 
     @property
     def album(self):
         """Return the current album name."""
+        if not hasattr(self, "_album_name"):
+            self._album_name = None
         return self._album_name
 
     @album.setter
     def album(self, name):
-        self.setMedia(name)
+        self._album_name = name
 
     @property
     def album_cover(self):
         if hasattr(self, "_album_cover"):
-            return self._album_cover
-        return ""
+            self._album_cover = None
+        return self._album_cover
 
     @album_cover.setter
     def album_cover(self, url):
@@ -230,9 +221,9 @@ class Media:
         return self._Mp3.songs
 
     @property
-    def __mp3urls(self):
+    def mp3_urls(self):
         """Returns all parsed mp3 url"""
-        return list(self._Mp3.mp3Urls)
+        return list(self._Mp3.mp3_urls)
 
     def show_songs(self):
         """Pretty way to Print all song names"""
@@ -304,7 +295,7 @@ class Media:
             return
 
         self.__song_index = selection
-        link = self.__mp3urls[selection]
+        link = self.mp3_urls[selection]
         songname = self.songs[selection]
         self.song = selection + 1
 
@@ -442,7 +433,7 @@ class Media:
         if not Path.is_dir(output):
             Print("Invalid directory: %s" % output)
             return
-        link = self.__mp3urls[selection]
+        link = self.mp3_urls[selection]
         song = self.songs[selection]
 
         # Handles song's naming

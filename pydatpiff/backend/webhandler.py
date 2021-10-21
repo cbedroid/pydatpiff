@@ -86,15 +86,15 @@ class MediaScrape:
         return inner
 
     @staticmethod
-    def getUploader(string):
+    def get_uploader_name(string):
         """Return the name of the person whom upload the mixtape"""
         try:
-            return re.search('.*profile/(.*\w*.*)"', string).group(1)
+            return re.search(r'.*profile/(.*\w*.*)"', string).group(1)
         except:
             return " "
 
     @staticmethod
-    def getBio(string):
+    def get_uploader_bio(string):
         try:
             desc = re.findall('description"\scontent="(.*)"', string)
             if desc:
@@ -104,15 +104,15 @@ class MediaScrape:
             return " "
 
     @staticmethod
-    def get_suffix_number(string):
+    def get_album_suffix_number(string):
         return re.search(r"\.(\d*)\.html", string).group(1)
 
     @staticmethod
-    def embed_player_ID(text):
-        return re.search("/mixtapes/([\w\/]*)", text).group(1)
+    def get_embed_player_id(text):
+        return re.search(r"/mixtapes/([\w\/]*)", text).group(1)
 
     @classmethod
-    def find_song_names(cls, text):
+    def get_song_titles(cls, text):
         songs = re.findall(r'"title"\:"(.*\w*)",\s?"artist"', text)
         songs = list(Html.remove_ampersands(songs))
         return songs
@@ -121,7 +121,5 @@ class MediaScrape:
     def get_duration_from(cls, text):
         return re.findall(r'"duration"\>(.*\d*)\<', text)
 
-    def get_mp3_title(text):
-        songs = re.findall(r"fix.concat\(\s\'(.*\w*)\'", text)
-        if songs:
-            return [re.sub(" ", "%20", song) for song in songs]
+    def get_mp3_urls(text):
+        return re.findall(r"fix.concat\(\s\'(.*\w*)\'", text)
