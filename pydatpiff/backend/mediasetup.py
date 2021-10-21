@@ -201,12 +201,11 @@ class Album(DatpiffPlayer):
         return super(Album, cls).__new__(cls)
 
     def __init__(self, link):
-        self._name = link
         self.link = "".join((Urls.url["album"], link))
         super(Album, self).__init__(self.link)
 
     def __str__(self):
-        return self._name
+        return self.name
 
     @property
     def album_html(self):
