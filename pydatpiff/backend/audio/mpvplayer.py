@@ -221,7 +221,7 @@ class MPV(BasePlayer):
         sec = "-" + str(sec)
         self._seeker(sec)
 
-    def ffwd(self, sec):
+    def ffwd(self, sec=5):
         """
         Fast-forward track.
 

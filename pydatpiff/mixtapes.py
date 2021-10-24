@@ -151,7 +151,7 @@ class Mixtapes(object):
                 try:
                     data = data[: len(self)]
                 except:
-                    print("Error Data", data)
+                    pass
 
             dunder = "_" + name
             setattr(self, dunder, data)

@@ -58,7 +58,7 @@ class TestAlbum(unittest.TestCase):
         # return random html to throw error
 
         # should assert True became album name is not populated
-        self.assertTrue(self.dp.USE_MOBILE)
+        self.assertTrue(self.dp._USE_MOBILE)
 
     def test_datpiff_player_has_response_text(self):
         # since the mock Session return <blah blah blah>
@@ -74,13 +74,6 @@ class TestAlbum(unittest.TestCase):
             dp.dpp_link = link
             dp.datpiff_player_response = PropertyMock(return_value=mocked_session.text)
             self.assertEqual(dummy_text, dp.datpiff_player_response.return_value)
-
-        with patch.object(mediasetup.Album, "dpp_link", new_callable=PropertyMock) as link:
-            # test DatpiffPlayer link is return correct value
-            link.return_value = dp_real_link
-            dp = self.dp
-            dp.dpp_link = link
-            self.assertEqual(dp_real_link, self.dp.dpp_link)
 
 
 class TestMP3Class(unittest.TestCase):
@@ -107,5 +100,5 @@ class TestMP3Class(unittest.TestCase):
             MP3.urlencode_track = encoder
             MP3.AlbumId = ID
             mp3 = mediasetup.Mp3(mocked_session)
-            mp3.mp3Urls = PropertyMock(return_value="".join((prefix, *(values))))
-            self.assertIn(prefix, mp3.mp3Urls.return_value)
+            mp3.mp3_urls = PropertyMock(return_value="".join((prefix, *(values))))
+            self.assertIn(prefix, mp3.mp3_urls.return_value)

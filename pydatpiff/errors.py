@@ -151,7 +151,8 @@ class AlbumError(Error):
 
 class Mp3Error(Error):
     __error__ = {
-        1: "player id error",
+        1: "invalid player response",
+        2: "no album found",
     }
 
 
