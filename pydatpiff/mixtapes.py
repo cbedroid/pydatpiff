@@ -34,7 +34,7 @@ class Mixtapes(object):
 
     def _setup(self):
         self._selectMixtape(str(self._selected_category), str(self._selected_search))
-        self._setMixtapesAttributes()
+        self._setAttributeRegex()
 
     def __str__(self):
         category = "'new','hot','top','celebrated'"
@@ -58,29 +58,29 @@ class Mixtapes(object):
         return 0
 
     @staticmethod
-    def _clean(data, expected=str, min_character=3):
-        """Clean and force constraints on incoming data
+    def validate_search(user_input, expected=str, min_characters=3):
+        """Clean and force constraints on mixtape's search method.
         Args:
-            data (str): user input
-            expected (datatype), optional): datatype expected from user. Defaults to str.
+            user_input (str): user input
+            expected (user_inputtype), optional): user_inputtype expected from user. Defaults to str.
             min_character (int, optional): miniumun character accept . Defaults to 3.
         """
         try:
-            data = expected(data)
-        except:
+            user_input = expected(user_input)
+        except TypeError:
             raise MixtapesError(4, "Expected datatype: {}.".format(expected))
-        if len(data) < min_character:
+        if len(user_input) < min_characters:
             raise MixtapesError(
                 5,
                 """Not enough character: {}.\
                  Minimum characters limit is {}.""".format(
-                    data, str(min_character)
+                    user_input, str(min_characters)
                 ),
             )
 
-        return data.strip() if expected == str else data
+        return user_input.strip() if expected == str else user_input
 
-    def _search_for(self, name):
+    def _perform_search(self, name):
         """
         Search for an artist or mixtape's name.
 
@@ -91,7 +91,7 @@ class Mixtapes(object):
             return
 
         Verbose("\nSearching for %s mixtapes ..." % name.title())
-        url = Urls.url["search"]
+        url = Urls.datpiff["search"]
         return self._session.method("POST", url, data=Urls.payload(name))
 
     def _selectMixtape(self, category="hot", search=None):
@@ -103,25 +103,25 @@ class Mixtapes(object):
         :param: search - search for an artist or mixtape's name
         """
         if search:  # Search for an artist
-            body = self._search_for(self._clean(search))
+            body = self._perform_search(self.validate_search(search))
             if not body or body is None:  # on failure return response from a category
                 return self._selectMixtape("hot")
         else:  # Select from category instead of searching
             selector = Selector.filter_choices
             choice = selector(category, Urls.category) or selector("hot", Urls.category)
             body = self._session.method("GET", choice)
-        self._mixtape_resp = body
+        self._request_response = body
         return body
 
-    def _setMixtapesAttributes(self):
+    def _setAttributeRegex(self):
         """Initial class variable and set their attributes on page load up."""
         # all method below are property setter method
         # each "re string" get pass to the corresponding html response text
 
-        self.artists = '<div class\="artist">(.*[.\w\s]*)</div>'
-        self.mixtapes = '"\stitle\="listen to ([^"]*)">[\r\n\t\s]?.*img'
-        self.links = 'title"><a href\="(.*[\w\s]*\.html)"'
-        self.views = '<div class\="text">Listens: <span>([\d,]*)</span>'
+        self.artists = r'<div class\="artist">(.*[.\w\s]*)</div>'
+        self.mixtapes = r'"\stitle\="listen to ([^"]*)">[\r\n\t\s]?.*img'
+        self.links = r'title"><a href\="(.*[\w\s]*\.html)"'
+        self.views = r'<div class\="text">Listens: <span>([\d,]*)</span>'
         self.album_covers = 'icon\\smixtape.*src="(.*)"\\salt'
         if len(self) == 0:
             Verbose("No Mixtapes Found")
@@ -145,7 +145,7 @@ class Mixtapes(object):
             name = f.__name__
             path = f(self, *args, **kwargs)
             pattern = re.compile(path)
-            data = DOMProcessor(self._mixtape_resp, limit=self._max_mixtapes).findRegex(pattern)
+            data = DOMProcessor(self._request_response, limit=self._max_mixtapes).findRegex(pattern)
             if hasattr(self, "_artists") and len(self) != 0:
                 # we map all attributes length to _artists length
                 try:

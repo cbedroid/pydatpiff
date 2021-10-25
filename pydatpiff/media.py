@@ -113,13 +113,13 @@ class Media:
         self.album_cover = self._Mixtapes.album_covers[mixtape_index]
 
         url = self._Mixtapes._links[mixtape_index]
-        self.url = "".join((Urls.url["base"], url))
+        self.url = "".join((Urls.datpiff["base"], url))
         self.album = Album(url)
         self._Mp3 = Mp3(self.album)
 
-        # get the ablum's uploader
+        # get the album's uploader
         self.uploader = self.album.uploader
-        # get ablum bio
+        # get album bio
         self.bio = self.album.bio
         self.__cache_storage = {}
         Verbose("Setting Media to %s - %s" % (self.artist, self.album))

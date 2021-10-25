@@ -14,14 +14,14 @@ class DOMProcessor:
 
     def __init__(self, base_response, limit=600):
         self.base_response = base_response  # Session.response
-        self.base_url = Urls().url["base"]
+        self.base_url = Urls.datpiff["base"]
         self._session = Session()
 
         # maximum amount of available mixtapes possible
         self.MAX_MIXTAPES = limit if isinstance(limit, int) else 600
         self.trys = 1
 
-    def __get_mixtapes_total(self, url):
+    def _get_mixtapes_total(self, url):
         """Count the number of mixtapes available per page.
 
         Args:
@@ -60,7 +60,7 @@ class DOMProcessor:
 
             # map navigation link's anchor tags to base urls
             page_link_urls = [
-                re.search('href\=.*/(.*=\d{1,2})"', x).group(1) for x in navigations_links[0].split("</a>")
+                re.search(r'href\=.*/(.*=\d{1,2})"', x).group(1) for x in navigations_links[0].split("</a>")
             ]
 
             """
@@ -87,7 +87,7 @@ class DOMProcessor:
             for page_number, link in enumerate(page_link_urls, start=1):
                 plu = "".join((self.base_url, link))
                 pagelinks.append(plu)
-                mixtapes_found += self.__get_mixtapes_total(plu)
+                mixtapes_found += self._get_mixtapes_total(plu)
 
                 if mixtapes_found >= page_limit:
                     return pagelinks
@@ -109,8 +109,8 @@ class DOMProcessor:
 
     def findRegex(self, re_string, bypass=False):
         """
-        Uses Regex pattern to return the matching html data from each mixtapes
-        :params: re_string - Regex pattern
+        Uses Regex patterntern to return the matching html data from each mixtapes
+        :params: re_string - Regex patterntern
         :return: list object
 
         :EXAMPLE:
@@ -129,7 +129,7 @@ class DOMProcessor:
         # Remove all unwanted characters from Xpath
         [
             data.extend(
-                list(Html.remove_ampersands(pat.group(1))[0] for pat in re_Xpath.finditer(RT) if pat is not None)
+                list(Html.remove_ampersands(match.group(1))[0] for match in re_Xpath.finditer(RT) if match is not None)
             )
             for RT in list_response_text
         ]
