@@ -1,93 +1,38 @@
-from unittest.mock import MagicMock, Mock, patch
+import os
+from unittest.mock import Mock
 
-from pydatpiff.media import Media
-from pydatpiff.mixtapes import Mixtapes
-from pydatpiff.utils import request
-
-Session = request.Session
+PATH = os.path.dirname(os.path.abspath(__file__))
 
 
-class MySession(Session):
-    pass
+class BaseTest:
 
+    # mixtapes and artists that are included in "mixtape" fixtures. see fixture/mixtape.html
+    mixtape_list = ["A Gangsta's Pain: Reloaded", "Folarin II", "The Butterfly Effect"]
+    artist_list = ["Moneybagg Yo", "Wale", "Fetty Wap"]
 
-# credit: robru - https://stackoverflow.com/questions/19817511/python-mock-mocking-base-class-for-inheritance
-class Fake(object):
-    """Create Mock() methods that match another class's methods."""
+    # mixtape's search testing parameter
+    mixtape_search_parameter = {"search": "Jay-Z"}
 
-    @classmethod
-    def imitate(cls, *others):
-        for other in others:
-            for name in other.__dict__:
-                try:
-                    setattr(cls, name, Mock())
-                except (TypeError, AttributeError):
-                    pass
-        return cls
+    def get_request_content(self, namespace="mixtape"):
+        """Return testing web page content
 
+        Raises:
+            FileNotFound: test html file not found
+        Returns:
+            file content
+        """
+        file = os.path.join(PATH, "fixtures/{}.html".format(namespace))
+        if not os.path.isfile(file):
+            raise FileExistsError("{} test file not found".format(namespace))
 
-def run_mix(category="hot", search=None):
-    if search:
-        return Mixtapes(search=search)
-    else:
-        return Mixtapes(category)
+        with open(file, "r") as pf:
+            return pf.read()
 
-
-def run_media():
-    return Media(Mixtapes())
-
-
-def mockSessionResponse(status=200, text="content here", json=None, raise_for_status=None, *args, **kwargs):
-    response = MagicMock()
-    response.raise_for_status = Mock()
-    response.status_code = status
-    response.text = text
-    response.content = Mock(return_value=kwargs.get("content", text))
-    response.json = Mock(return_value=json or kwargs.get("json_data", {}))
-    response.url = Mock(return_value=kwargs.get("url", ""))
-
-    response.method = Mock(*args, **kwargs, return_value=response)
-    response.method.text = text
-    response.method.content = Mock(return_value=text)
-    response.clear_cache = Mock(return_value="cleared")
-
-    if raise_for_status:
-        response.status_code.side_effect = raise_for_status
-
-    return response
-
-
-# Here we will create a dummy testing Regex using some bultin Regex functionality.
-# Builtin Regex WILL NOT be overwritten
-def mockRegex(string="hello world", array=[], throw_exception=False, exception_type=AttributeError, *args, **kwargs):
-    data = Mock()
-    data.sub = Mock(*args, return_value=string)
-
-    if throw_exception:
-        data.search = Mock(*args, side_effect=exception_type)
-        data.findall = Mock(*args, side_effect=exception_type)
-        data.search.group = Mock(*args, side_effect=exception_type)
-    else:
-        data.search = Mock(args, return_value=string)
-        data.search.group = *args, Mock(return_value=string)
-        data.findall = Mock(*args, return_value=list(*array))
-    return data
-
-
-@patch.object(request, "Session", autospec=True)
-class Fake_Session_Mock:
-    TIMEOUT = 10
-    TIMEOUT_COUNT = 0
-    cache = {}
-
-    @classmethod
-    def put_in_cache(cls, *args, **kwargs):
-        pass
-
-    @classmethod
-    def clear_cache(cls):
-        cls.cache = {}
-
-    @classmethod
-    def method(cls, *args, **kwargs):
-        return mockSessionResponse()
+    def mocked_response(self, status=200, content="", json=None):
+        session = Mock()
+        session.raise_for_status = Mock()
+        session.status_code = status
+        session.text = content
+        session.content = content
+        session.json = json or {}
+        return session
