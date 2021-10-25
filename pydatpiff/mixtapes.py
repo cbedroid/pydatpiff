@@ -36,20 +36,12 @@ class Mixtapes(object):
         self._selectMixtape(str(self._selected_category), str(self._selected_search))
         self._setAttributeRegex()
 
-    def __str__(self):
-        category = "'new','hot','top','celebrated'"
-        return "%s(category)  argument: category --> %s" % (
-            self.__class__.__name__,
-            category,
-        )
-
     def __repr__(self):
-        if self._selected_search:
-            return "%s(search='%s')" % (
-                self.__class__.__name__,
-                self._selected_search,
-            )
-        return "%s('%s')" % (self.__class__.__name__, self._selected_category)
+        return "{}('hot')".format(self.__class__.__name__)
+
+    def __str__(self):
+        prefix = self._selected_search or self._selected_category
+        return "{} {}".format(prefix.title(), self.__class__.__name__)
 
     def __len__(self):
         if hasattr(self, "_artists"):
@@ -121,6 +113,7 @@ class Mixtapes(object):
         self.artists = r'<div class\="artist">(.*[.\w\s]*)</div>'
         self.mixtapes = r'"\stitle\="listen to ([^"]*)">[\r\n\t\s]?.*img'
         self.links = r'title"><a href\="(.*[\w\s]*\.html)"'
+        self.ratings = r'<div class\="text">Rating: <img.*alt=\"(\d)*.*"'
         self.views = r'<div class\="text">Listens: <span>([\d,]*)</span>'
         self.album_covers = 'icon\\smixtape.*src="(.*)"\\salt'
         if len(self) == 0:
@@ -203,6 +196,16 @@ class Mixtapes(object):
     @_searchTree
     def links(self, path):
         return path
+
+    @property
+    def ratings(self):
+        if hasattr(self, "_ratings"):
+            return self._ratings
+
+    @ratings.setter
+    @_searchTree
+    def ratings(self, rate):
+        return rate
 
     @property
     def views(self):

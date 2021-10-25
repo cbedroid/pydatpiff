@@ -45,10 +45,13 @@ class Media:
         return super(Media, cls).__new__(cls)
 
     def __str__(self):
-        return self.album
+        album_name = self._album_name
+        if album_name:
+            return "{} Mixtape".format(album_name)
+        return str(self._Mixtapes)
 
     def __repr__(self):
-        return "Media(%s)" % (self._Mixtapes)
+        return "{}({})".format(self.__class__.__name__, self._Mixtapes.__class__)
 
     def __len__(self):
         if hasattr(self, "songs"):
