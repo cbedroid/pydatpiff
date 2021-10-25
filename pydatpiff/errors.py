@@ -1,60 +1,3 @@
-import logging
-import os
-import platform
-import subprocess
-import sys
-import tempfile
-
-
-def fixdate():
-    date = None
-    _f = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    if platform.system() == "Linux":
-        try:
-            _f = 'date +"%m/%d/%y  %I:%M:%S %p"'
-            date = subprocess.check_output(_f).decode("utf-8").strip()
-            date += " %(name)s - %(levelname)s - %(message)s"
-        except:
-            pass
-    else:
-        date = _f
-    return date
-
-
-class Logger(object):
-    logit = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.WARNING, format="%(message)s")
-    logfile = os.path.join(tempfile.gettempdir(), "pydatpiff.log")
-    handler = logging.FileHandler(logfile)
-    handler.setLevel(logging.WARNING)
-    _format = logging.Formatter(fixdate(), datefmt="%m/%d/%Y %I:%M:%S %p %Z")
-    handler.setFormatter(_format)
-    logit.addHandler(handler)
-
-    @classmethod
-    def _parseLog(cls, *msg, level="info"):
-
-        msg = " ".join(msg)
-        if level == "info":
-            cls.logit.info(msg)
-        elif level == "warning":
-            cls.logit.warning(msg)
-        elif level == "critical":
-            cls.logit.critical(msg)
-
-    @classmethod
-    def display(cls, *msg):
-        cls._parseLog(*msg, level="info")
-
-    @classmethod
-    def warn(cls, *msg):
-        cls._parseLog(*msg, level="warning")
-
-    @classmethod
-    def failed(cls, *msg):
-        cls._parseLog(*msg, level="critical")
-
-
 class Error(Exception):
     __error__ = {
         1: "invalid mixtapes object",
@@ -68,14 +11,6 @@ class Error(Exception):
         self._code = code
         code = self.create(code, detail)
         super().__init__(code)
-
-    def logError(self, error, critical=False):
-        if error and error in self.__error__:
-            if not critical:
-                Logger.warn(self.__error__[error])
-            else:
-                Logger.failed(self.__error__[error])
-                sys.exit(1)
 
     def show(self, code):
         return self.__error__.get(code)
@@ -183,10 +118,10 @@ class PlayerError(Error):
 class RequestError(Error):
     # _type = self.__class__._qualname__
     __error__ = {
-        1: "invalid url scheme",
-        2: "web page timed out",
-        3: "request failed",
-        4: "requests status code error",
+        1: "datpiff server down",
+        2: "connection timed out",
+        3: "invalid url",
+        4: "request error",
     }
 
 
