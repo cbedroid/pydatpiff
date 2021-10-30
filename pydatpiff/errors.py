@@ -17,7 +17,7 @@ class Error(Exception):
 
     @staticmethod
     def makeErrorName(error_code):
-        # split and titlize each name in error code
+        # split and capitalize each name in error code
         error_name = "".join(list(map(lambda x: x.title(), error_code.split(" "))))
 
         if not (error_name.lower()).endswith("error"):
@@ -54,11 +54,9 @@ class MixtapesError(Error):
     """handle all the Mixtapes errors"""
 
     __error__ = {
-        1: "No Mixtapes Found",
-        2: "Invalid category selected",
-        3: "Unable to process Data",
-        4: "Invalid data type",
-        5: "TooFewCharacters",
+        1: "Invalid category selected",
+        2: "invalid input",
+        3: "too few characters",
     }
 
 
@@ -69,11 +67,10 @@ class MediaError(Error):
         1: "no mixtapes found",
         2: "invalid mixtapes object",
         3: "media album not set",
-        4: "invaild track index",
+        4: "invalid track index",
         5: "song selection error",
         6: "unsupported media player",
         7: "media player not found",
-        8: "song cache storage failed",
     }
 
 
@@ -93,7 +90,7 @@ class Mp3Error(Error):
 
 class DatpiffError(Error):
     __error__ = {
-        1: "Datpiff media server down",
+        1: "Datpiff server down",
         2: "Datpiff desktop version failed",
         3: "Datpiff mobile version failed",
     }
@@ -107,19 +104,20 @@ class MvpError(Error):
 
 class PlayerError(Error):
     __error__ = {
-        1: "Unsupport media object",
+        1: "Unsupported media object",
         2: "no song found",
         3: "derive class missing function",
         4: "call back method missing",
         5: "unsupported player",
+        6: "player not found",
     }
 
 
 class RequestError(Error):
     # _type = self.__class__._qualname__
     __error__ = {
-        1: "datpiff server down",
-        2: "connection timed out",
+        1: "datpiff server",
+        2: "connection time out",
         3: "invalid url",
         4: "request error",
     }
@@ -127,8 +125,7 @@ class RequestError(Error):
 
 class BuildError(Error):
     __error__ = {
-        1,
-        "user selection",
+        1: "user selection",
     }
 
 
@@ -141,6 +138,5 @@ class InstallationError(Error):
         ""
     )
     __error__ = {
-        1,
-        "Pydatpiff installion error",
+        1: "Pydatpiff installion error",
     }
