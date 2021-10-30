@@ -4,37 +4,41 @@
 
 """
 import concurrent.futures as cf
+import multiprocessing as mp
 import sys  # noqa: F401
-import threading
 from functools import wraps
 
-from pydatpiff.utils.request import Session
+
+class ThreadPool:
+    pool = []
 
 
 def Threader(f):
     @wraps(f)
     def inner(*a, **kw):
-        t = threading.Thread(target=f, args=(a), kwargs=dict(kw))
+        for p in ThreadPool.pool.copy():
+            if p[0] == f:
+                try:  # for multiprocessing
+                    p[1].terminate()
+                    ThreadPool.pool.remove(p)
+                except:
+                    pass
+        t = mp.Process(target=f, args=(a), kwargs=dict(kw))
         t.daemon = True
         t.start()
+        ThreadPool.pool.append([f, t])
         return t
 
     return inner
 
 
-class Queued:
-    THREAD_COUNT = 75
-
+class ThreadQueue:
     def __init__(self, main_job, input_work, *args, **kwargs):
         self.input = input_work  # work to put in queue
         self.main_job = main_job  # job to perform with work
-        # song to search for TODO: move this to main function
-        self.results = []
-        self.args = args
-        self.kwargs = kwargs
-        self.thread_pool = []
 
-    def run(self, *args, **kwargs):
+    def execute(self, *args, **kwargs):
+
         with cf.ThreadPoolExecutor() as ex:
             if args or kwargs:
                 args = tuple(args) * len(self.input)
@@ -43,63 +47,6 @@ class Queued:
             else:
                 data = ex.map(self.main_job, self.input)
         return [x for x in data]
-
-    @classmethod
-    def _setup(cls):
-        """Stops the requests session from timing out before queue is finish"""
-        cls._session_timeout = Session.TIMEOUT
-        Session.TIMEOUT = 60
-
-    @classmethod
-    def _teardown(cls):
-        """Sets the requests Session back to its original timeout"""
-        Session.TIMEOUT = cls._session_timeout
-
-    def capture_threads(self, threads):
-        self.thread_pool.append(threads)
-
-    def kill_all_threads(self):
-        for t in self.thread_pool:
-            if t.is_Alive():
-                t.terminate()
-
-    def set_queue(self):
-        if Object.isList(self.input):
-            # setting the queue from ^
-            for obj in self.input:  # |
-                self.q.put(obj)
-
-    def put_worker_to_work(self):
-        worker = self.q.get()
-        if self.search:
-            self.results.append(self.main_job(worker, self.search))
-        else:
-            self.results.append(self.main_job(worker))
-        self.q.task_done()
-
-    def start_thread(self):
-        try:
-            for _ in range(self.THREAD_COUNT):
-                t = self.mp.map(self.put_worker_to_work)
-                self.capture_threads(t)
-                t.daemon = True
-                t.start()
-        except:
-            self.kill_all_threads()
-            self.start_thread()
-
-    def run2(self):
-        """Old threading method"""
-        self._setup()
-        self.set_queue()
-        while True:
-            self.start_thread()
-            if self.q.empty():
-                break
-        # data will not be filter here for 'None type' in list
-        # must catch all None types in the base method
-        self._teardown()
-        return self.results
 
 
 class Object:
@@ -152,29 +99,33 @@ class Object:
         return [cls.strip_and_lower(x) for x in data]
 
 
-class Selector:
-    @staticmethod
-    def filter_choices(choice, data):
-        """
-        Parse user string choice and return the corresponding data
-        :params:: choice,data
-            choice - user choice. datatype: str
-            data - list or dict object
+class Filter:
+    @classmethod
+    def choices(cls, choice, options, fallback=None):
+        """Filter user choices and return the corresponding options
+        Args:
+            choice (str) - Expected choice
+            options (list,tuple,dict):  Collection of options to select from.
+            fallback (str,int, optional): Fallback choice if original expected choice
+                                          is not found.
         """
         choice = Object.strip_and_lower(choice)
-        if Object.isDict(data):
-            data = Object.lowered_dict(data)
-            val = [val for key, val in data.items() if choice in key]
+        if Object.isDict(options):
+            options = Object.lowered_dict(options)
+            val = [val for key, val in options.items() if choice in key]
         else:
-            val = [val for val in data if choice in Object.strip_and_lower(val)]
+            val = [val for val in options if choice in Object.strip_and_lower(val)]
 
-        if val:
+        if not val and fallback:
+            return cls.choices(fallback, options=options, fallback=None)
+
+        elif val:
             return min(val)
 
     @staticmethod
-    def choice_is_int(choice, data):
+    def by_int(choice, data):
         """
-        Parse user int choice and return the corresponding data
+        Filter choices by integer
         :params:: choice,data
             choice - user choice. datatype: str
             data - list or dict object
@@ -189,21 +140,16 @@ class Selector:
             return
 
     @classmethod
-    def select_from_index(cls, select, data, *args):
-        """select ablums_link by artist name, album name ('title')
-        or by index number of title or artist
-        """
-        data_size = len(data)
-        # checking from index
-        select -= 1
-
-        # catch index errors if user choose a mixtape out of range
-        select = 0 if (0 >= select or select > data_size) else select
-        return select
+    def get_index(cls, index, options):
+        """Filter options by index."""
+        options_size = len(options)
+        index -= 1
+        index = 0 if (0 >= index or index > options_size) else index
+        return index
 
     @classmethod
-    def select_from_choices(cls, select, *args):
-        for choice in args:
-            value = cls.filter_choices(select, choice)
+    def get_indexOf(cls, choice, options):
+        for option in options:
+            value = cls.choices(choice, option)
             if value:
-                return choice.index(value)
+                return option.index(value)

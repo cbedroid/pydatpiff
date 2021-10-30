@@ -60,18 +60,20 @@ ampersands = [
 
 class Html:
     @staticmethod
-    def remove_ampersands(string):
+    def escape_characters(char_list):
         results = []
-        if not isinstance(string, (list, tuple)):
-            string = [string]
-        for x in string:
-            for amps in ampersands:
-                x = re.sub(amps, "", x)
-            results.append(x)
+        if not isinstance(char_list, (list, tuple)):
+            char_list = [char_list]
+
+        for char in char_list:
+            if char in ampersands:
+                amps = ampersands.index(char)
+                char = re.sub(amps, "", char)
+            results.append(char)
         return results
 
 
-class MediaScrape:
+class WebScrape:
     @staticmethod
     def checkRe(f):
         @wraps(f)
@@ -98,7 +100,7 @@ class MediaScrape:
         try:
             desc = re.findall('description"\scontent="(.*)"', string)
             if desc:
-                return Html.remove_ampersands(desc[-1])[0].strip()
+                return Html.escape_characters(desc[-1])[0].strip()
             return " "
         except:
             return " "
@@ -114,7 +116,7 @@ class MediaScrape:
     @classmethod
     def get_song_titles(cls, text):
         songs = re.findall(r'"title"\:"(.*\w*)",\s?"artist"', text)
-        songs = list(Html.remove_ampersands(songs))
+        songs = list(Html.escape_characters(songs))
         return songs
 
     @classmethod

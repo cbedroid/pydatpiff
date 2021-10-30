@@ -1,5 +1,5 @@
 default_language_version:
-    python: python3
+  python: python3
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -7,9 +7,9 @@ repos:
     hooks:
       - id: trailing-whitespace
         exclude: >
-            (?x)^(
-                    tests/|
-                )$
+          (?x)^(
+                  tests/|
+              )$
       - id: check-json
       - id: end-of-file-fixer
       - id: requirements-txt-fixer

@@ -1,28 +1,93 @@
+import logging
 import re
+
+import bs4
 
 from pydatpiff.urls import Urls
 from pydatpiff.utils.request import Session
 
-from .utils import Object, Queued
-from .webhandler import Html
-
-TIME_RAN = 0
+logger = logging.getLogger(__name__)
 
 
 class DOMProcessor:
-    RETRY = 5  # TODO: fix retry:: some reason findRegex fails on first try
+    _MAX_RETRY = 5  # TODO: fix retry:: some reason findRegex fails on first try
+    _MAX_MIXTAPES_PER_PAGE = 52  # maximum amount of mixtapes available per Datpiff's Page
 
     def __init__(self, base_response, limit=600):
-        self.base_response = base_response  # Session.response
-        self.base_url = Urls().url["base"]
+        self._base_response = base_response  # Session.response
+        self._soup = bs4.BeautifulSoup(base_response.text, "html.parser")
+
+        # prepare request session
         self._session = Session()
 
-        # maximum amount of available mixtapes possible
-        self.MAX_MIXTAPES = limit if isinstance(limit, int) else 600
-        self.trys = 1
+        self._total_mixtapes = 0  # total mixtapes found
+        # total mixtapes requested by user
+        self._MIXTAPE_LIMIT = limit if isinstance(limit, int) else 520  # 10 pages
 
-    def __get_mixtapes_total(self, url):
-        """Count the number of mixtapes available per page.
+        self._initialize_attributes()
+        self._get_page_links()
+
+    @property
+    def _attribute_list(self):
+        """Mixtapes dunder Attributes"""
+        return [
+            "_artists",
+            "_mixtapes",
+            "_links",
+            "_ratings",
+            "_views",
+            "_album_covers",
+        ]
+
+    def _initialize_attributes(self):
+        """Invoke  mixtape's attributes. See: pydatpiff.mixtapes.Mixtapes"""
+        for attr in self._attribute_list:
+            setattr(self, attr, [])
+
+    def _set_mixtapes_attributes(self, bs4_content_list):
+
+        for content in bs4_content_list.findAll(class_="contentItemInner"):
+            # set album covers
+            self._album_covers.extend([elem.find("img").get("src") for elem in content.findAll(class_="contentThumb")])
+
+            # set artists
+            self._artists.extend([elem.text for elem in content.findAll(class_="artist")])
+
+            # Set mixtapes and links
+            links = [elem.find("a") for elem in content.findAll(class_="title")]
+
+            self._mixtapes.extend([re.sub(r"listen\sto", "", link.get("title")).strip() for link in links])
+            self._links.extend([link.get("href") for link in links])
+
+            # Set ratings and views
+            self._ratings.extend([int(re.match(r"\d*", content.find(class_="text").img.get("alt"))[0])])
+            self._views.extend(
+                [
+                    int(
+                        re.sub(
+                            r"\D*",
+                            "",
+                            content.findAll(class_="text")[1].span.text,
+                        )[0]
+                    )
+                ]
+            )
+
+    @property
+    def total_mixtapes(self):
+        if hasattr(self, "_total_mixtapes"):
+            return self._total_mixtapes
+        return 0
+
+    @total_mixtapes.setter
+    def total_mixtapes(self, count):
+        if isinstance(count, int):
+            self._total_mixtapes += count
+
+    def _parse_mixtape_page(self, url):
+        """
+        Mixtape's initiator function used to parse mixtape's page
+        and returns detail used to set Mixtape's attributes.
 
         Args:
             url (str): mixtapes' page link url
@@ -31,126 +96,77 @@ class DOMProcessor:
             [int]: total number of mixtape's on page
         """
         text = self._session.method("GET", url=url).text
+        # fmt: off
+        content_container_id = "leftColumnWide"  # Datpiff Mixtape's main content wrapper
+        content_wrapper_class = 'contentListing'
+        mixtapes_content_items = "contentItem"  # Mixtapes's Content Wrapper
+        # fmt: on
         try:
-            filtered_content = re.search("(.*)rightColumnNarrow", text, re.DOTALL).group(1)
+            # Using BeautifulSoap
+            soup = bs4.BeautifulSoup(text, "html.parser")
+            content_container = soup.find(id=content_container_id)
+            if content_container:
+                content_listing = content_container.find(class_=content_wrapper_class)
+                mixtape_items = content_listing.findAll(class_=mixtapes_content_items)
+                # Set total mixtapes found
+                self.total_mixtapes = len(mixtape_items)
 
-            total = re.findall('icon\\smixtape.*src="(.*)"\\salt', filtered_content)
-            return len(total)
+                # set attribute for Mixtapes Class
+                self._set_mixtapes_attributes(content_listing)
         except:
+            logger.exception("CacheContentError")
             return 0
 
-    @property
-    def get_page_links(self):
+    def _get_page_links(self):
         """
         Return a list of html page links from mixtapes.Mixtapes._selectMixtape method.
         """
         try:
-            """
-                What we are trying to accomplish.
-                ---------------------------------
-            On pydatpiff.Mixtape startup, once a user select a category or
-            search for an artist. We then grab the content from that reponse.
-            The initial request should return the FIRST page of the website.
-            DAMN IT,we are greedy and we want them all!! So we parse through
-            the content and search for any album links belonging to the artist.
-            """
+            BASE_URL = Urls.datpiff["base"]
 
-            # Get page links navigation DOM element from response
-            navigations_links = re.findall(r'class\="links"(.*[\n\r]*.*\d)*</a>', self.base_response.text)
+            # Check if pagination links are available
+            pagination = self._soup.find(class_="pagination")
+            if not pagination:
+                # cache the first page and return the return the initial response url
+                self._parse_mixtape_page(self._base_response.url)
+                return [self._base_response.url]
 
-            # map navigation link's anchor tags to base urls
-            page_link_urls = [
-                re.search('href\=.*/(.*=\d{1,2})"', x).group(1) for x in navigations_links[0].split("</a>")
-            ]
+            # Next get all pagination links anchor href.
 
-            """
-                # OPTIMIZE SPEED WHEN LIMITING MIXTAPES SEARCHES
-               NOTE: The website maximum mixtapes per page is 16 columns * 4rows
-                     Since each album will have a cover image, we can use this as
-                     a map to get the max album per page. This will help guide us
-                     and give us an accurate break point to return data sooner.
-                     #So we can break out of the search once we reach the user's
-                     #maximum mixtapes requested.
-                     #Dividing Selector max mixtapes requested by the website maximum
-                     #mixtapes per page should give us an accurate break point.
-            """
-            MAX_PER_PAGE = 64
-            page_limit = int(self.MAX_MIXTAPES / MAX_PER_PAGE)
-            page_limit = page_limit if page_limit > 1 else 1
+            # Since this class (DOMProcessor) has to be initialized with a mixtape
+            # request's content (base_response), we should already have the content
+            # from the first page link (Active Page). Although we already processed this content,
+            # we still include it to accurately count to total mixtapes found.
+            # No Worries about recalling this request, Session cache will reject
+            # the request and return the cached response.
+            page_link_urls = ["".join((BASE_URL, link)) for link in pagination.find(class_="links").findAll("a")]
 
-            # map the page_link_urls to the base_url
+            # iterate through each response (anchor link response)
+            for page_number, link in enumerate(page_link_urls):
+                self._parse_mixtape_page(link)
+                # it mixtapes limit is reached, then return the content
+                # from all previous page link
+                if self.total_mixtapes <= self._MIXTAPE_LIMIT:
+                    return page_link_urls[:page_number]
 
-            global TIME_RAN
-            TIME_RAN += 1
-            pagelinks = []
-            mixtapes_found = 0  # record the number of mixtapes found
-            for page_number, link in enumerate(page_link_urls, start=1):
-                plu = "".join((self.base_url, link))
-                pagelinks.append(plu)
-                mixtapes_found += self.__get_mixtapes_total(plu)
-
-                if mixtapes_found >= page_limit:
-                    return pagelinks
-
-            # return [''.join((self.base_url,link)) for link in page_link_urls]
+            # if for loop don't break then return all anchor urls
+            return page_link_urls
         except:
-            # if No page numbers in original url text,then return the original url
-            return [self.base_response.url]
+            # Cache the first page and return the return the initial response url
+            self._parse_mixtape_page(self._base_response.url)
+            return [self._base_response.url]
 
-    def _getHtmlResponse(self, url):
+    def _request_get(self, url):
         """
-        Calls requests 'GET' method and returns the response content.
-        This function should only be called when using Queued method.
+        Thread safe request session's method.
 
-        :param: url - mixtape's link
-            :datatype: html formatted string
+        This method is used to get content from Datpiff's Mixtape web page
+        during threading operation - ThreadQueue method.  See:  pydatpiff.backend.utils.ThreadQueue
+
+        Args:
+        url (str) - mixtape's link
+
+        Returns:
+            (str) - HTTP response text
         """
         return self._session.method("GET", url).text
-
-    def findRegex(self, re_string, bypass=False):
-        """
-        Uses Regex pattern to return the matching html data from each mixtapes
-        :params: re_string - Regex pattern
-        :return: list object
-
-        :EXAMPLE:
-            re_string = '<div class\="artist">(.*[.\w\s]*)</div>'
-            This re_string will return all of the artist names from
-            the Mixtapes web page (see _getHtmlResponse for Mixtapes web page link).
-        """
-        data = []
-        re_Xpath = re.compile(re_string)
-        # each page requests response data
-        # Map each page links url to request.Session and
-        # place Session in 'queue and thread'
-        lrt = Queued(self._getHtmlResponse, self.get_page_links).run()
-        list_response_text = Object.removeNone(lrt)
-
-        # Remove all unwanted characters from Xpath
-        [
-            data.extend(
-                list(Html.remove_ampersands(pat.group(1))[0] for pat in re_Xpath.finditer(RT) if pat is not None)
-            )
-            for RT in list_response_text
-        ]
-
-        # hackable way to fix this function when its not returning data on first try
-        # recalling the function if its returns None
-        if not data:
-            if self.trys < self.RETRY:
-                self.trys += 1
-                return self.findRegex(re_string)
-            else:
-                return
-        elif len(data) < self.MAX_MIXTAPES and not bypass:
-            # Try to get the maximum amount of mixtapes
-            # Since the first time this function is called, the data weirdly return None
-            # We keep trying until we get the max amount of mixtapes
-
-            if self.trys < self.RETRY:
-                self.trys += 1
-                return self.findRegex(re_string)
-            else:
-                # print('Fuck it')
-                return self.findRegex(re_string, True)
-        return data[: self.MAX_MIXTAPES]

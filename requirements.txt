@@ -1,5 +1,5 @@
 mutagen==1.45.1
 pip-chill==1.0.1
-pre-commit==2.10.1
-python-vlc==3.0.12118
-requests==2.25.1
+pytest==6.2.5
+pyyaml==6.0
+requests==2.26.0
