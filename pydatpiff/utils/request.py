@@ -1,3 +1,4 @@
+import logging
 import warnings
 
 import requests
@@ -5,19 +6,21 @@ from requests.adapters import HTTPAdapter
 
 from pydatpiff.errors import RequestError
 
-from .helper import String
+# Set Request logging levels
+logging.getLogger("requests").setLevel(logging.CRITICAL)
+logging.getLogger("urllib3").setLevel(logging.CRITICAL)
 
 
-class Session(object):
+class Session:
     """Dynamic way to way to keep requests.Session through out whole programs."""
 
     # private
     _TOTAL_TIMEOUT = 0
-    _MAX_RETRIES = 3
+    _MAX_RETRIES = 2
     _CACHE = {}
 
     # public
-    TIMEOUT = 10  # 10 secs
+    TIMEOUT = 3  # 5 secs
     session = requests.Session()
 
     def __init__(self, *arg, **kwargs):
@@ -26,8 +29,11 @@ class Session(object):
 
     @classmethod
     def put_in_cache(cls, url, response):
-        url = url.strip()
-        cls._CACHE[url] = dict(count=1, response=response)
+        try:
+            url = url.strip()
+            cls._CACHE[url] = response
+        except MemoryError:
+            cls.clear_cache()
 
     @classmethod
     def clear_cache(cls):
@@ -35,28 +41,26 @@ class Session(object):
         del cls._CACHE
         cls._CACHE = {}
 
-    @classmethod
-    def check_cache(cls, url):
+    def get_from_cache(self, url):
         """Checks if url already have a response.
         Stop from calling the request method more than once.
         Great for saving mobile data on mobile devices.
         """
-        url = url.strip()
-        try:
-            if url in cls._CACHE.keys():
-                cls._CACHE[url]["count"] += 1
-                return cls._CACHE[url]["response"]
-        except MemoryError:
-            cls.clear_cache()
-        except:
-            pass
+        url = str(url).strip()
+        if url in self._CACHE.keys():
+            return self._CACHE[url]
 
     def method(self, method, url, bypass=None, **kwargs):
         """urllib requests method"""
-        method = String.lower(method)
-        _CACHE = self.check_cache(url)
-        if _CACHE and method != "post":
-            return _CACHE
+        valid_method = ["get", "post"]
+        method = str(method).lower()
+
+        if method not in valid_method:
+            return
+
+        cached_response = self.get_from_cache(url)
+        if cached_response and method != "post":
+            return cached_response
 
         try:
             # GET
@@ -65,14 +69,8 @@ class Session(object):
             # POST
             if method == "post":
                 web = self.session.post(url, timeout=self.TIMEOUT, **kwargs)
-            # PUT
-            if method == "put":
-                web = self.session.put(url, timeout=self.TIMEOUT, **kwargs)
-            # HEAD
-            if method == "head":
-                web = self.session.head(url, timeout=self.TIMEOUT)
 
-        except requests.exceptions.Timeout as e:
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             # first catch server connect error, then user's internet error
             if e is requests.exceptions.ReadTimeout:
                 raise RequestError(1)
@@ -81,7 +79,7 @@ class Session(object):
             self._TOTAL_TIMEOUT += 1
             if self._TOTAL_TIMEOUT >= 3:
                 print("\n")  # need for spacing
-                warn_msg = "\nWarning: Please check your internet connection ! "
+                warn_msg = "\nWarning: Please check your internet connection !"
                 warnings.warn(warn_msg)
                 self._TOTAL_TIMEOUT = 0
             raise RequestError(2)
