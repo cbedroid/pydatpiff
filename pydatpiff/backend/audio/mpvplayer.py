@@ -1,26 +1,23 @@
 import re
 from functools import wraps
-from time import time
+from time import sleep, time
 
 from pydatpiff.backend.filehandler import Path
-from pydatpiff.backend.utils import Threader
 from pydatpiff.errors import MvpError
-from pydatpiff.frontend.display import Print
+from pydatpiff.frontend.screen import Verbose
 
-from .audio_engine import MetaData, Popen
-from .baseplayer import BasePlayer
+from .audio_engine import Popen
+from .baseplayer import BasePlayer, MetaData
 
 
 class MPV(BasePlayer):
+    # 10 mins:  Time to kill inattentive threads see pause.
+    # Save the user's CPU :-)
+    _MAX_INACTIVITY = 60 * 10
+
     def __init__(self):
         self._popen = None
-        self._state = {
-            "playing": False,
-            "pause": False,
-            "stop": False,
-            "load": False,
-        }
-        self._default_volume = 100
+        super().__init__()
 
     def _pre_popen(self, song):
         return [
@@ -33,6 +30,39 @@ class MPV(BasePlayer):
             "%s" % song,
         ]
 
+    def _handlePauseEvent(self):
+        """
+        Captures the time duration when the track is paused.
+        Once track is unpause time will be added back to the original track time
+        This time will be used to calculate the accuracy of current_position
+        when pause state changes from pause to playing.
+        """
+        rollback = 0
+        while True:
+            rollback += 1
+            if not self._track_paused or self._track_playing:
+                self._track_start_time += rollback
+                return
+            sleep(1)  # must use sleep to prevent high cpu usage while threading
+
+            if rollback > self._MAX_INACTIVITY:
+                Verbose('Pydatpiff program was killed due to "Pause Inactivity"...')
+                exit(1)
+
+    def _runPauseHandler(self):
+        import threading
+
+        t = threading.Thread(target=self._handlePauseEvent)
+        t.daemon = True
+        t.start()
+
+    @property
+    def duration(self):
+        """Return track length  in seconds"""
+        if hasattr(self, "_metadata"):
+            return self._metadata.trackDuration
+        return 0
+
     def _format_time(self, pos=None):
         """Format current song time to clock format"""
         pos = self.duration if not pos else pos
@@ -40,149 +70,50 @@ class MPV(BasePlayer):
         secs = int(pos % 60)
         return mins, secs
 
-    @Threader
-    def registerPauseEvent(self):
-        """
-        Captures the time duration when the track is paused.
-        Once track is unpause time will be added to the original track time
-        (MPV._time_elapse).
-        This time will be used to calculate the accuracy of current_position
-        when pause state changes from pause to playing.
-        """
-
-        start = time()
-        rollback = 0
-        while self._isTrackPaused:
-            if time() - start >= 1:
-                rollback += 1
-                start = time()
-
-            if not self._isTrackPaused:
-                self._time_elapse += rollback
-                break
-
     @property
-    def _last_paused_time(self):
-        """Returns the last time track was paused"""
-        return self.__previous_time
+    def current_time(self):
+        """Current time of track"""
+        timenow = time() - self._track_start_time
+        # always capture time to adjust pause time
+        self._cap_time = timenow
 
-    @_last_paused_time.setter
-    def _last_paused_time(self, timer):
-        self.__previous_time = timer
-
-    @property
-    def current_position(self):
-        """Current position's time of track"""
-
-        timer = 0
-        if hasattr(self, "_time_elapse"):
-            timer = time() - self._time_elapse
-            if self._isTrackPaused:  # track was paused
-                return self._last_paused_time
-
-        self._last_paused_time = timer
-        if self.state["stop"]:  # track stop
+        if self._track_stop:
             return 0
-        return timer
 
-    @current_position.setter
-    def current_position(self, position):
-        self._time_elapse += position
+        return timenow
 
-    @property
-    def duration(self):
-        """Return track length  in seconds"""
-        return self._metadata.trackDuration
-
-    def _write_cmd(self, cmd):
-        """
-        Write command to Popen stdin
-        param: cmd - string character to write
-        """
-
-        if hasattr(self, "_popen"):
-            if self._isTrackLoaded and self._popen.is_Alive:
-                self._popen.stdin.write("{}\n".format(cmd).encode("utf8"))
-                self._popen.stdin.flush()
-                return
-
-    def setTrack(self, name, path):
-        self._virtual_time = 0
-
-        if Path.isFile(path):
-            self._resetState()
-            self._song = name
-            self._song_path = path
-            self._metadata = MetaData(path)
-        else:
-            raise MvpError(1)
-
-        Popen.unregister()
-
-    @property
-    def play(self):
-        # setTrack method will handle the loading of track
-        if self._isTrackLoaded and self._isTrackPaused:
-            self.pause
-            return
-
-        elif not self._isTrackLoaded:
-            self._popen = Popen(self._pre_popen(self._song_path))
-            self._popen.register()
-            self._time_elapse = time()
-            self._isTrackPlaying = True
-            self._isTrackLoaded = True
-
-    @property
-    def pause(self):
-        """Pause and unpause the track."""
-        if self._isTrackLoaded:
-
-            cmd = {True: "no", False: "yes"}
-
-            # We are setting pause stated according to its previous state.
-            # if state is paused then unpause and vice versa.
-            state = cmd[self.state["pause"]]
-            pause = "set pause {} \n".format(state)
-            self._write_cmd(pause)
-            last_pause_state = self.state["pause"]
-
-            self._isTrackPlaying = last_pause_state
-            if self._isTrackPaused:
-                self.registerPauseEvent()
-
-        else:
-            print("No track playing")
-            return -1
+    @current_time.setter
+    def current_time(self, timer):
+        if not self._track_stop:
+            self._track_start_time += timer
 
     def _adjustTrackTime(self, sec):
         """
         Adjust the track's time in seconds when track is
         alter either by rewind, fast-forward, or paused.
         """
-        constrains = self.constrain_seek(sec)
-        self._time_elapse += constrains
-        self.__previous_time += -constrains
+        constrains = self._constrain_seek(sec)
+        self._cap_time += constrains
 
-    def constrain_seek(self, seek):
+    def _constrain_seek(self, seek):
         """Force range constraints on setting seek time,
-        when rewinding and fast-fowarding.
+        when rewinding and fast-forwarding.
         Time that is set out of range will be set to its nearest position.
         """
         seek = float(seek)
-        current_pos = self.current_position
+        current_pos = self.current_time
 
         # rewind past track's starting point
         if current_pos + seek < 0:
             return 0
         # ffwd past track's duration, then set track 5 seconds before ending.
         elif len(self) < current_pos + seek:
-            self._resetState(stop=True)
+            # self.track_stop = True
             return len(self) - 5.0
 
         return int(seek) * -1
 
-    def _duration_callback(f):
+    def _seek_adjuster(f):
         """
         Callback function that force track time to be alter
         whenever track position is being seeked see: MPV._seeker.
@@ -195,7 +126,7 @@ class MPV(BasePlayer):
 
         return inner
 
-    @_duration_callback
+    @_seek_adjuster
     def _seeker(self, sec=5):
         """
         Control fast forward and rewind function.
@@ -205,11 +136,74 @@ class MPV(BasePlayer):
 
         raw_sec = re.sub(r"\-", "", str(sec))
         if not raw_sec.isnumeric():
-            Print("Must use numerical numbers")
+            Verbose("Must use numerical numbers")
             return
         seek = "seek %s \n" % sec
         self._write_cmd(seek)
         return int(sec)
+
+    def setTrack(self, name, path):
+        # media class method
+
+        if Path.isFile(path):
+            self._song = name
+            self._song_path = path
+            self._metadata = MetaData(path)
+            self._track_loaded = True
+            self._track_start_time = time()
+            self._adjtime = 0
+            self._volume = self._global_volume
+        else:
+            raise MvpError(1)
+
+        Popen.unregister()
+
+    def _write_cmd(self, cmd):
+        """
+        Write command to Popen stdin
+        param: cmd - string character to write
+        """
+
+        if getattr(self, "_popen"):
+            if self._track_loaded and self._popen.is_alive:
+                self._popen.stdin.write("{}\n".format(cmd).encode("utf8"))
+                self._popen.stdin.flush()
+                return
+
+    @property
+    def play(self):
+        # setTrack method will handle the loadeding of track
+        if self._track_loaded:
+            if self._track_playing:
+                return
+            # if track not loaded, then load it and play
+            self._popen = Popen(self._pre_popen(self._song_path))
+            self._popen.register()
+            self._track_loaded = True
+            self._track_playing = True
+            self.play
+            self._volume = self._global_volume
+
+    @property
+    def pause(self):
+        """Pause and unpause the track."""
+
+        if self._track_loaded:
+            if self._track_playing:
+                cmd = "set pause yes \n"
+                self._write_cmd(cmd)
+                self._track_playing = False
+                self._track_paused = True
+                self._hpe = self._runPauseHandler()
+            else:
+                Verbose("\nUnpause")
+                self._track_paused = False
+                self._track_playing = True
+                cmd = "set pause no \n"
+                self._write_cmd(cmd)
+                # self._hpe.terminate()
+        else:
+            Verbose("No track playing")
 
     def rewind(self, sec=5):
         """
@@ -234,34 +228,24 @@ class MPV(BasePlayer):
     @property
     def stop(self):
         """Stop the current track from playing."""
-        userstop = False
         self._write_cmd("quit \n")
-        if self.current_position < len(self):
-            # user manaully stop track
-            userstop = True
-        self._resetState(stop=True, userstop=userstop)
+        self._track_stop = True
         Popen.unregister()
 
     @property
-    def _volumeLevel(self):
+    def _volume(self):
         """Current media player volume"""
-        return self._default_volume
+        return self._global_volume
 
-    @_volumeLevel.setter
-    def _volumeLevel(self, level):
-        self._default_volume = level
+    @_volume.setter
+    def _volume(self, level):
+        self._global_volume = level
 
-    def _set_volume(self, level, combine=True):
-        try:
-            level = int(level)
-        except:
-            return
-
+    def volume(self, level=None):
+        """Set the volume to exact number"""
         MAX_LEVEL = 200
-        if combine:
-            # combine will add the original volume level + new volume level.
-            # use combine = False to set volume to exact level( no filtering)
-            level = self._volumeLevel + level
+        if not level or not isinstance(level, int):
+            return
 
         if level > MAX_LEVEL:
             level = MAX_LEVEL
@@ -269,21 +253,21 @@ class MPV(BasePlayer):
         elif level < 0:
             level = 0
 
-        self._volumeLevel = level
+        self._volume = level
         self._write_cmd("set volume %s" % level)
 
     def volumeUp(self, vol=5):
         """Turn the media volume up"""
-        self._set_volume(vol)
+
+        if not isinstance(vol, int):
+            return
+
+        self._volume += vol
 
     def volumeDown(self, vol=5):
         """Turn the media volume down"""
-        try:
-            vol = int(vol)
-        except:
-            return
-        self._set_volume(-(vol))
 
-    def volume(self, vol=100):
-        """Set the volume to exact number"""
-        self._set_volume(vol, False)
+        if not isinstance(vol, int):
+            return
+
+        self._volume -= vol

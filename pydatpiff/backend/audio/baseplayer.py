@@ -1,12 +1,10 @@
-from time import time
+from time import sleep
+
+from mutagen.mp3 import MP3
 
 from pydatpiff.backend.utils import Threader
 from pydatpiff.errors import PlayerError
-from pydatpiff.frontend.display import Print
-
-
-class DerivedError(Exception):
-    pass
+from pydatpiff.frontend.screen import Verbose
 
 
 class BaseMeta(type):
@@ -18,42 +16,67 @@ class BaseMeta(type):
     They will be forced here in BaseMeta(MetaClass). See: BaseMeta.methods
     """
 
-    # more variables: _songs,current_position
+    # more variables: _songs,current_time
 
-    def __new__(cls, name, bases, body):
+    def __new__(cls, name, bases, attrs):
         methods = [
             "setTrack",
-            "_format_time",
             "duration",
+            "current_time",
+            "_format_time",
             "_seeker",
+            "volume",
+            "volumeUp",
+            "volumeDown",
+            "play",
+            "pause",
+            "rewind",
+            "ffwd",
+            "stop",
         ]
-
-        # more variables: _songs,current_position
+        # NOTE: 10/28/2021 - need:  See vlc and mpv player
+        #    "_global_volume" - to control initial volume on media switch
+        #     "volume_level" - setter and getter
+        # more variables: _songs,current_time
         cls._name = name
         cls._bases = bases
-        cls._body = body
+        cls._attrs = attrs
 
-        for method in methods:
-            if method not in body:
-                error = 'Method: "%s.%s" must be implemented in derived class ' "to use BasePlayer" % (name, method)
+        for _ in bases:
+            for method in methods:
+                if method not in attrs:
+                    error = 'Method: "%s.%s" must be implemented in your Derived Class ' "to use BasePlayer" % (
+                        name,
+                        method,
+                    )
 
-                raise DerivedError(error)
-        return super().__new__(cls, name, bases, body)
+                    raise NotImplementedError(error)
+        return super().__new__(cls, name, bases, attrs)
 
 
 class BasePlayer(metaclass=BaseMeta):
     """Media player base controller"""
 
+    _global_volume = 100
+    _is_monitoring = False
+    _track_start_time = 0
+    # _adjtime = 0
+
+    _state = {
+        "playing": False,
+        "pause": False,
+        "stop": False,
+        "systemstop": False,
+        "loaded": False,
+    }
+
     def __init__(self, *args, **kwargs):
-        self._state = {
-            "playing": False,
-            "pause": False,
-            "stop": False,
-            "userstop": False,
-            "load": False,
-        }
-        self.__is_monitoring = False
-        self._monitor()
+        self._track_loaded = False
+        self._track_playing = False
+        self._track_paused = False
+        self._track_stop = False
+        self._system_stop = False
+        self._manageState()
 
     def __len__(self):
         # duration will be forced to be implemented by Meta class
@@ -61,13 +84,13 @@ class BasePlayer(metaclass=BaseMeta):
 
     def _resetState(self, **kwargs):
         """Reset all track's states (see Android.state)"""
-        self._state = dict(playing=False, pause=False, load=False, stop=False)
+        self._state.update(playing=False, pause=False, loaded=False, stop=False)
         self._state.update(**kwargs)
 
     @property
     def name(self):
         if not hasattr(self, "_song"):
-            raise PlayerError(2, "Cannot find a name for the song playing")
+            raise PlayerError(2, "Cannot find song's name ")
         return self._song
 
     @property
@@ -79,25 +102,26 @@ class BasePlayer(metaclass=BaseMeta):
             raise PlayerError(3, "def _state")
 
     @state.setter
-    def state(self, **state):
-        self._state.update(**state)
+    def state(self, state):
+        self._state = state
 
     @property
-    def _isTrackPlaying(self):
+    def _track_loaded(self):
+        """Return player loaded state"""
+        return self.state["loaded"]
+
+    @_track_loaded.setter
+    def _track_loaded(self, state=False):
+        self.state["loaded"] = bool(state)
+
+    @property
+    def _track_playing(self):
         """Return the track playing state"""
         # if boolean param not specified, then return the playing state
         return self.state["playing"]
 
-    @property
-    def _isTrackPaused(self):
-        return self.state["pause"]
-
-    @_isTrackPaused.setter
-    def _isTrackPaused(self, boolean=False):
-        self.state["pause"] = bool(boolean)
-
-    @_isTrackPlaying.setter
-    def _isTrackPlaying(self, boolean=False):
+    @_track_playing.setter
+    def _track_playing(self, state=False):
         """
         Set the state of playing and pause.
 
@@ -105,88 +129,73 @@ class BasePlayer(metaclass=BaseMeta):
                 True: sets playing True and pause False
                 False: sets playing False and pause True
         """
-
-        if boolean is not None:  # update state if boolean param True or False
-            self.state.update(dict(playing=bool(boolean), pause=not bool(boolean)))
+        self.state["playing"] = state
 
     @property
-    def _isTrackLoaded(self):
-        """Return player loaded state"""
-        return self.state["load"]
+    def _track_paused(self):
+        return self.state["pause"]
 
-    @_isTrackLoaded.setter
-    def _isTrackLoaded(self, boolean=False):
-        self.state["load"] = bool(boolean)
+    @_track_paused.setter
+    def _track_paused(self, state=False):
+        self.state["pause"] = bool(state)
 
-    @staticmethod
-    def __wait(*args):
-        start = time()
-        while (time() - start) < 10:
-            pass
+    @property
+    def _track_stop(self):
+        return self.state["pause"]
 
-    def _didTrackStop(self, mode=1):
-        """Check if track has ended"""
+    @_track_stop.setter
+    def _track_stop(self, state=False):
+        self.state["stop"] = bool(state)
 
-        """
-            Give a moment to allow track time to fully end.
-            Critical  while autoplay feature is enabled.
-            (see pydatpiff.media.autoplay)
-        """
-        # WAIT = 2
-        WAIT = 1
-        current = self._format_time(self.current_position)
-        end = self._format_time(self.duration)
+    @property
+    def _system_stop(self):
+        return self.state["pause"]
 
-        if current >= end:
-            # recheck position to see if track has ended or its a false positive
-            if mode == 1:
-                re_check = time()
-                while (time() - re_check) < WAIT:
-                    pass
-                return self._didTrackStop(mode=2)
+    @_system_stop.setter
+    def _system_stop(self, state=False):
+        self.state["system_stop"] = bool(state)
 
-            self._resetState(stop=True)
-            return True
-
+    @classmethod
     @Threader
-    def _monitor(self):
-        """
-        -- For AndroidPlayer And MPV player --
-        Monitor media track and automatically set state
-        when media state changes.
-        """
-        while not self.__is_monitoring:
-            if self._isTrackPlaying:
-                self._isTrackPlaying = True
-                self.__is_monitoring = True
+    def _manageState(cls, *args, **kwargs):
+        while True:
 
-        # If media.autoplay changes track before song finish
-        # adjust sleep time
-        # wait for duration(sec), if the track is load then monitor when the track stops
+            state = dict(
+                loaded=False,
+                playing=False,
+                pause=False,
+                stop=False,
+                systemstop=False,
+            )
+            if cls._track_loaded and not cls._track_playing:
+                if cls.current_time > 0:
+                    state.update(dict(loaded=True, pause=True))
+                else:
+                    state.update(dict(loaded=True))
 
-        SLEEP_TIME = 1
+            elif cls._track_playing:
+                state.update(dict(loaded=True, playing=True))
 
-        self.__wait(2)
-        while self._isTrackLoaded:
-            playing = self.state.get("playing")
-            if playing:
-                self.__wait(SLEEP_TIME)  # wait for track to load
+            elif cls._track_paused:
+                state.update(dict(loaded=True, pause=True))
 
-                current_position = self._format_time(self.current_position)
-                endtime = self._format_time(self.duration)
+            elif cls._track_stop:
+                cls._paused_time = 0
+                cls._track_start_time = 0
+                state.update(dict(stop=True))
 
-                if self._didTrackStop() or current_position >= endtime:
-                    self.resetSate(False, stop=True)
-                    break
-                if self._state["userstop"]:
-                    # user pressed stop then stop monitoring and stop auto play
-                    return
+            elif cls.current_time > cls.duration:
+                state.update(dict(stop=True, systemstop=True))
+                cls.stop  # default state will handle reseting the everything
 
-        # If track is stop then recall function for next track
-        self.__is_monitoring = False
-        self._monitor()  # recursive callback
+                # handle track unload
+                # reset position
+
+            cls.state = state
+            sleep(1)
 
     def setTrack(self, *args, **kwargs):
+        # Media class methos needed on all player
         raise NotImplementedError
 
     @property
@@ -200,38 +209,41 @@ class BasePlayer(metaclass=BaseMeta):
     @property
     def info(self):
         """Returns feedback for media song being played"""
-        if not self._isTrackLoaded:
+        if not self._track_loaded:
             return "No media"
-        c_min, c_sec = self._format_time(self.current_position)
+        c_min, c_sec = self._format_time(self.current_time)
         c_sec = c_sec if len(str(c_sec)) > 1 else str(c_sec).zfill(2)
 
         l_min, l_sec = self._format_time(self.duration)
         l_sec = l_sec if len(str(l_sec)) > 1 else str(l_sec).zfill(2)
 
         # 9615
-        if self._isTrackPlaying:
+        if self._track_playing:
             mode = chr(9199) or "|>"
-        elif self.is_TrackPaused:
+        elif self._track_paused:
             mode = chr(9208) or "||"
         else:
             mode = chr(9209) or "[]"
-        Print("\n%s TRACK: %s" % (chr(9836), self.name))
+        Verbose("\n%s TRACK: %s" % (chr(9836), self.name))
         pos = "{0}  {1}:{2} - {3}:{4}\n".format(mode, c_min, c_sec, l_min, l_sec)
         if hasattr(self, "_media_autoplay"):
             if self._media_autoplay:
-                Print(" " * 2, chr(9850), pos)
+                Verbose(" " * 2, chr(9850), pos)
                 return
 
-        Print(" " * 6, pos)
+        Verbose(" " * 6, pos)
 
     @property
-    def _volumeLevel(self):
+    def volume_level(self):
         """Current media player volume"""
         # TODO implement method to monitor the volume
-        return -1
+        return 100
 
-    def _set_volume(self, *args, **kwargs):
-        raise NotImplementedError
+    @volume_level.setter
+    def volume_level(self, level):
+        """set Current media player volume"""
+        self._global_volume = level
+        # individual player volume control method here
 
     def volumeUp(self, vol=5):
         """Turn the media volume up"""
@@ -282,3 +294,12 @@ class BasePlayer(metaclass=BaseMeta):
     def stop(self):
         """Stops the song"""
         raise NotImplementedError
+
+
+class MetaData(MP3):
+    def __init__(self, track):
+        super().__init__(track)
+
+    @property
+    def trackDuration(self):
+        return self.info.length

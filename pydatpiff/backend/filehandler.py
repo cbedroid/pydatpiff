@@ -20,7 +20,7 @@ class Tmp(object):
     """
     Handle all temporary files created by Media player.
 
-    It removes the hanging temparary files that are not destroyed.
+    It removes the hanging temporary files that are not destroyed.
     Since we are creating temporary files to store mp3 content, we need
     to remove these files manually after being used.
     python3 module 'signal' sometimes fail to catch  signal
@@ -78,7 +78,7 @@ class Path:
 
     @staticmethod
     def standardizeName(name):
-        return re.sub(r"[^\w_\-\.]", "", name)
+        return re.sub(r"[^\w_\s\-\.]", "", name)
 
     @staticmethod
     def writeFile(filename, content, mode="wb"):
