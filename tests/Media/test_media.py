@@ -67,11 +67,15 @@ class TestMedia(BaseTest, TestCase):
         # test songs total is correct
         self.assertCountEqual(self.song_list, songs)
 
-    """
-    def test_media_download_song_correct(self):
-        self.mix._writeAudio
-        self.content = self.get_request_content("media")
-        self.method = media.Session.method = Mock(autospec=True)
-        self.method.return_value = self.mocked_response(content=self.content)
-
-    """
+    # @patch.object(media.Path, "writeFile")
+    # @patch.object(media.Media, "_writeAudio")
+    # def test_media_download_song_from_song_index(self, write_file, write_audio):
+    #     write_audio.return_value = b"song content"
+    #     self.media.download(0)
+    #
+    #     songname = " - ".join((self.media.artist, self.song_list[0].strip() + ".mp3"))
+    #     songname = media.Path.join(os.getcwd(), download_path)
+    #     write_file.assert_called_once()
+    #     write_file.assert_called_with(
+    #         download_path, b"song content", mode="wb"
+    #       )

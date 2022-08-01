@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class DOMProcessor:
-    _MAX_RETRY = 5  # TODO: fix retry:: some reason findRegex fails on first try
+    _MAX_RETRY = 5
     _MAX_MIXTAPES_PER_PAGE = 52  # maximum amount of mixtapes available per Datpiff's Page
 
     def __init__(self, base_response, limit=600):
@@ -119,7 +119,7 @@ class DOMProcessor:
 
     def _get_page_links(self):
         """
-        Return a list of html page links from mixtapes.Mixtapes._selectMixtape method.
+        Return a list of html page links from mixtapes. Mixtapes._selectMixtape method.
         """
         try:
             BASE_URL = Urls.datpiff["base"]
@@ -127,7 +127,7 @@ class DOMProcessor:
             # Check if pagination links are available
             pagination = self._soup.find(class_="pagination")
             if not pagination:
-                # cache the first page and return the return the initial response url
+                # cache the first page and return the initial response url
                 self._parse_mixtape_page(self._base_response.url)
                 return [self._base_response.url]
 
@@ -144,15 +144,15 @@ class DOMProcessor:
             # iterate through each response (anchor link response)
             for page_number, link in enumerate(page_link_urls):
                 self._parse_mixtape_page(link)
-                # it mixtapes limit is reached, then return the content
+                # It mixtapes limit is reached, then return the content
                 # from all previous page link
                 if self.total_mixtapes <= self._MIXTAPE_LIMIT:
                     return page_link_urls[:page_number]
 
-            # if for loop don't break then return all anchor urls
+            # if forloop don't break then return all anchor urls
             return page_link_urls
         except:
-            # Cache the first page and return the return the initial response url
+            # Cache the first page and return the initial response url
             self._parse_mixtape_page(self._base_response.url)
             return [self._base_response.url]
 

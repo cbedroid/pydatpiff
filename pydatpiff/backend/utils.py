@@ -4,8 +4,8 @@
 
 """
 import concurrent.futures as cf
-import multiprocessing as mp
 import sys  # noqa: F401
+import threading
 from functools import wraps
 
 
@@ -16,17 +16,9 @@ class ThreadPool:
 def Threader(f):
     @wraps(f)
     def inner(*a, **kw):
-        for p in ThreadPool.pool.copy():
-            if p[0] == f:
-                try:  # for multiprocessing
-                    p[1].terminate()
-                    ThreadPool.pool.remove(p)
-                except:
-                    pass
-        t = mp.Process(target=f, args=(a), kwargs=dict(kw))
+        t = threading.Thread(target=f, args=(a), kwargs=dict(kw))
         t.daemon = True
         t.start()
-        ThreadPool.pool.append([f, t])
         return t
 
     return inner
@@ -113,8 +105,10 @@ class Filter:
         if Object.isDict(options):
             options = Object.lowered_dict(options)
             val = [val for key, val in options.items() if choice in key]
+        elif Object.isList(options):
+            val = [val for val in options if choice == Object.strip_and_lower(val)]
         else:
-            val = [val for val in options if choice in Object.strip_and_lower(val)]
+            val = options if choice == Object.strip_and_lower(options) else fallback
 
         if not val and fallback:
             return cls.choices(fallback, options=options, fallback=None)

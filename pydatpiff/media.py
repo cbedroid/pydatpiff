@@ -250,10 +250,9 @@ class Media:
         Set current song
         name - name of song or song's index
         """
-        songs = self.songs
         index = self.__index_of_song(name)
         if index is not None:
-            self._selected_song = songs[index]
+            self._selected_song = self.songs[index]
             self._current_index = index
         else:
             Verbose("\n\t song was not found")
@@ -298,7 +297,7 @@ class Media:
 
         selection = self.__index_of_song(track)
         if selection is None:
-            return
+            raise MediaError("Song not found")
 
         self.__song_index = selection
         link = self.mp3_urls[selection]
@@ -452,7 +451,6 @@ class Media:
 
         try:
             content = self._writeAudio(song).read()
-
             size = file_size(len(content))
             Path.writeFile(songname, content, mode="wb")
             screen.display_download_message(title, size)
