@@ -1,7 +1,10 @@
-import vlc
 import re
+
+import vlc
+
 from ...errors import PlayerError
 from .baseplayer import BasePlayer
+
 
 class VLCPlayer(BasePlayer):
     def __init__(self, *args, **kwargs):
@@ -9,7 +12,7 @@ class VLCPlayer(BasePlayer):
         try:
             self._vlc = vlc.Instance("-q")
             self._player = self._vlc.media_player_new()
-        except:
+        except:  # noqa E722
             extended_msg = "Please check if your device supports VLC"
             raise PlayerError(1, extended_msg)
 
@@ -35,7 +38,7 @@ class VLCPlayer(BasePlayer):
             self._path = path
             self._player.set_mrl(path)
         else:
-            Print("No media to play")
+            print("No media to play")
 
     def _set_volume(self, vol=5, way="down"):
         """Turn the media volume up or down"""
@@ -61,14 +64,14 @@ class VLCPlayer(BasePlayer):
                 elif way == "exact":
                     vol = 0 if vol < min_vol else vol
                     vol = 100 if vol > max_vol else vol
-                Print("volume: %s" % vol)
-            except:
+                print("volume: %s" % vol)
+            except:  # noqa E722
                 pass
         self._player.audio_set_volume(vol)
 
     @property
     def _volumeLevel(self):
-        """ Current media _player volume"""
+        """Current media _player volume"""
         return self._player.audio_get_volume()
 
     def volumeUp(self, vol=5):
@@ -101,15 +104,15 @@ class VLCPlayer(BasePlayer):
 
     @property
     def play(self):
-        """ Play media song"""
+        """Play media song"""
         if not self.state["stop"]:
             if self._isTrackPaused:
                 # unpause if track is already playing but paused
                 self.pause
             else:
                 self._player.play()
-                
-            self._resetState(False, playing=True, load=True)
+
+            self._resetState(stop=False, pause=False, playing=True, load=True)
             return
         else:
             try:
@@ -146,18 +149,18 @@ class VLCPlayer(BasePlayer):
 
     def rewind(self, pos=10):
         """Rewind track
-          @params: pos:: time(second) to rewind media. default:10(sec)
+        @params: pos:: time(second) to rewind media. default:10(sec)
         """
         self._seeker(pos, True)
 
     def ffwd(self, pos=10):
         """Fast forward track
-          vlc time is in milliseconds
-          @params: pos:: time(second) to rewind media. default:10(sec)
+        vlc time is in milliseconds
+        @params: pos:: time(second) to rewind media. default:10(sec)
         """
         self._seeker(pos, False)
 
     @property
     def stop(self):
         self._player.stop()
-        self._resetState(False, stop=True)
+        self._resetState(playing=False, stop=True)
