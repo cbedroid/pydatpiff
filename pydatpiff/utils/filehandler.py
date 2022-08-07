@@ -4,7 +4,7 @@ import re
 import tempfile
 
 
-def file_size(buf_size):
+def get_human_readable_file_size(buf_size):
     """Convert file size and returns user readable size"""
     if buf_size == 0:
         return "0B"
@@ -18,32 +18,26 @@ def file_size(buf_size):
 
 class Tmp(object):
     """
-    Handle all temporary files created by Media player.
+    Handle all temporary files created by the media player.
 
     It removes the hanging temporary files that are not destroyed.
     Since we are creating temporary files to store mp3 content, we need
     to remove these files manually after being used.
     python3 module 'signal' sometimes fail to catch  signal
-    on certain platform like Windows IDLE.
+    on certain platforms like Windows IDLE.
     We create our own, in case user close window or program dies before
     being able to remove these files.
     """
 
-    """
-    def __init__(self):
-        pass
-
-    """
-
     @staticmethod
     def create():
-        """Create a temporary file with suffix __datpiff"""
+        """Create a temporary file with the suffix  `__datpiff`"""
         return tempfile.NamedTemporaryFile(suffix="_datpiff", delete=False)
 
     @staticmethod
     def removeTmpOnStart():
         """remove all temporary file created by Datpiff on start up"""
-        # every tmpfile using media player will have this suffix
+        # every tmp file using media player will have this suffix
         suffix = "_datpiff"
         tmp_dir = tempfile.gettempdir()
         if os.path.isdir(tmp_dir):
@@ -52,22 +46,18 @@ class Tmp(object):
                     try:
                         lf = "/".join((tmp_dir, lf))
                         os.remove(lf)
-                    except:
+                    except:  # noqa
                         pass
 
 
-class Path:
+class File:
     @staticmethod
     def is_dir(path):
         path = path or ""
         return os.path.isdir(path)
 
     @staticmethod
-    def isFile(path):
-        """
-        Check if file path exists
-        :params: path - path of song
-        """
+    def is_file(path):
         return os.path.isfile(path)
 
     @classmethod
@@ -77,11 +67,11 @@ class Path:
         return os.path.join(path, to)
 
     @staticmethod
-    def standardizeName(name):
-        return re.sub(r"[^\w_\s\-\.]", "", name)
+    def standardize_name(name):
+        return re.sub(r"[^\w_\s\-.]", "", name)
 
     @staticmethod
-    def writeFile(filename, content, mode="wb"):
+    def write_to_file(filename, content, mode="wb"):
         with open(filename, mode) as f:
             f.write(content)
             return True
