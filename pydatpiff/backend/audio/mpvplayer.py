@@ -2,9 +2,9 @@ import re
 from functools import wraps
 from time import sleep, time
 
-from pydatpiff.backend.filehandler import Path
 from pydatpiff.errors import MvpError
 from pydatpiff.frontend.screen import Verbose
+from pydatpiff.utils.filehandler import File
 
 from .audio_engine import Popen
 from .baseplayer import BasePlayer, MetaData
@@ -16,8 +16,14 @@ class MPV(BasePlayer):
     _MAX_INACTIVITY = 60 * 10
 
     def __init__(self):
+        self.time_captured = None
+        self._song_path = None
+        self._song = None
         self._popen = None
         super().__init__()
+
+        # making Baseplayer state -> private to public
+        self.state = self._state
 
     def _pre_popen(self, song):
         return [
@@ -30,7 +36,7 @@ class MPV(BasePlayer):
             "%s" % song,
         ]
 
-    def _handlePauseEvent(self):
+    def _pause_handler(self):
         """
         Captures the time duration when the track is paused.
         Once track is unpause time will be added back to the original track time
@@ -49,10 +55,10 @@ class MPV(BasePlayer):
                 Verbose('Pydatpiff program was killed due to "Pause Inactivity"...')
                 exit(1)
 
-    def _runPauseHandler(self):
+    def _run_pause_handler(self):
         import threading
 
-        t = threading.Thread(target=self._handlePauseEvent)
+        t = threading.Thread(target=self._pause_handler)
         t.daemon = True
         t.start()
 
@@ -60,40 +66,40 @@ class MPV(BasePlayer):
     def duration(self):
         """Return track length  in seconds"""
         if hasattr(self, "_metadata"):
-            return self._metadata.trackDuration
+            return self._metadata.track_duration
         return 0
 
     def _format_time(self, pos=None):
         """Format current song time to clock format"""
         pos = self.duration if not pos else pos
-        mins = int(pos / 60)
-        secs = int(pos % 60)
-        return mins, secs
+        minutes = int(pos / 60)
+        seconds = int(pos % 60)
+        return minutes, seconds
 
     @property
     def current_time(self):
         """Current time of track"""
-        timenow = time() - self._track_start_time
+        time_now = time() - self._track_start_time
         # always capture time to adjust pause time
-        self._cap_time = timenow
+        self.time_captured = time_now
 
-        if self._track_stop:
+        if self._track_stopped:
             return 0
 
-        return timenow
+        return time_now
 
     @current_time.setter
     def current_time(self, timer):
-        if not self._track_stop:
+        if not self._track_stopped:
             self._track_start_time += timer
 
-    def _adjustTrackTime(self, sec):
+    def _sync_track_time(self, sec):
         """
         Adjust the track's time in seconds when track is
-        alter either by rewind, fast-forward, or paused.
+        being rewinding, fast-forwarding, or paused.
         """
         constrains = self._constrain_seek(sec)
-        self._cap_time += constrains
+        self.time_captured += constrains
 
     def _constrain_seek(self, seek):
         """Force range constraints on setting seek time,
@@ -108,33 +114,33 @@ class MPV(BasePlayer):
             return 0
         # ffwd past track's duration, then set track 5 seconds before ending.
         elif len(self) < current_pos + seek:
-            # self.track_stop = True
+            # self.track_stopped = True
             return len(self) - 5.0
 
         return int(seek) * -1
 
-    def _seek_adjuster(f):
+    def _seek_syncer(func):
         """
-        Callback function that force track time to be alter
+        Callback function that force track time to be synced with the time
         whenever track position is being seeked see: MPV._seeker.
         """
 
-        @wraps(f)
+        @wraps(func)
         def inner(self, time_sec):
-            self._adjustTrackTime(time_sec)
-            return f(self, time_sec)
+            self._sync_track_time(time_sec)
+            return func(self, time_sec)
 
         return inner
 
-    @_seek_adjuster
+    @_seek_syncer
     def _seeker(self, sec=5):
         """
-        Control fast forward and rewind function.
+        Control fast-forward and rewind function.
 
         :param: pos - time to rewind or fast-forward (in seconds)
         """
 
-        raw_sec = re.sub(r"\-", "", str(sec))
+        raw_sec = re.sub(r"-", "", str(sec))
         if not raw_sec.isnumeric():
             Verbose("Must use numerical numbers")
             return
@@ -142,16 +148,15 @@ class MPV(BasePlayer):
         self._write_cmd(seek)
         return int(sec)
 
-    def setTrack(self, name, path):
+    def set_track(self, name, path):
         # media class method
 
-        if Path.isFile(path):
+        if File.is_file(path):
             self._song = name
             self._song_path = path
             self._metadata = MetaData(path)
             self._track_loaded = True
             self._track_start_time = time()
-            self._adjtime = 0
             self._volume = self._global_volume
         else:
             raise MvpError(1)
@@ -172,7 +177,7 @@ class MPV(BasePlayer):
 
     @property
     def play(self):
-        # setTrack method will handle the loadeding of track
+        # set_track method will handle the loadeding of track
         if self._track_loaded:
             if self._track_playing:
                 return
@@ -181,7 +186,7 @@ class MPV(BasePlayer):
             self._popen.register()
             self._track_loaded = True
             self._track_playing = True
-            self.play
+            self.play  # noqa  - this is a property function in baseplayer
             self._volume = self._global_volume
 
     @property
@@ -194,14 +199,13 @@ class MPV(BasePlayer):
                 self._write_cmd(cmd)
                 self._track_playing = False
                 self._track_paused = True
-                self._hpe = self._runPauseHandler()
+                self._run_pause_handler()
             else:
                 Verbose("\nUnpause")
                 self._track_paused = False
                 self._track_playing = True
                 cmd = "set pause no \n"
                 self._write_cmd(cmd)
-                # self._hpe.terminate()
         else:
             Verbose("No track playing")
 
@@ -218,10 +222,8 @@ class MPV(BasePlayer):
     def ffwd(self, sec=5):
         """
         Fast-forward track.
-
-        :param: pos - time to rewind or fast-forward (in seconds)
+            :param: pos - time to rewind or fast-forward (in seconds)
         """
-
         sec = str(sec)
         self._seeker(sec)
 
@@ -229,7 +231,7 @@ class MPV(BasePlayer):
     def stop(self):
         """Stop the current track from playing."""
         self._write_cmd("quit \n")
-        self._track_stop = True
+        self._track_stopped = True
         Popen.unregister()
 
     @property
@@ -256,7 +258,7 @@ class MPV(BasePlayer):
         self._volume = level
         self._write_cmd("set volume %s" % level)
 
-    def volumeUp(self, vol=5):
+    def volume_up(self, vol=5):
         """Turn the media volume up"""
 
         if not isinstance(vol, int):
@@ -264,7 +266,7 @@ class MPV(BasePlayer):
 
         self._volume += vol
 
-    def volumeDown(self, vol=5):
+    def volume_down(self, vol=5):
         """Turn the media volume down"""
 
         if not isinstance(vol, int):

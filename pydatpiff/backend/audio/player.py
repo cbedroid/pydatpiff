@@ -1,5 +1,5 @@
-from pydatpiff.backend.utils import Object
 from pydatpiff.errors import InstallationError, PlayerError
+from pydatpiff.utils.utils import Object
 
 from .mpvplayer import MPV
 from .vlcplayer import VLCPlayer

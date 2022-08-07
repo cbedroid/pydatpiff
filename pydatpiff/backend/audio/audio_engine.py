@@ -3,9 +3,9 @@ import os
 import platform
 import subprocess
 
-from pydatpiff.backend.utils import Threader
 from pydatpiff.errors import PlayerError
 from pydatpiff.utils.logging import logging
+from pydatpiff.utils.utils import threader_wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class Popen(subprocess.Popen):
         except:
             logger.exception("Failed to kill player")
 
-    @Threader
+    @threader_wrapper
     def register(self, callback=None, *args, **kwargs):
         """
         Kills subprocess Popen when error occur or when process job finish

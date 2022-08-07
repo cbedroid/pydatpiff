@@ -1,10 +1,11 @@
-from time import sleep
+import re
 
 from mutagen.mp3 import MP3
 
-from pydatpiff.backend.utils import Threader
+from pydatpiff.constants import music_symbols, player_state_keys
 from pydatpiff.errors import PlayerError
 from pydatpiff.frontend.screen import Verbose
+from pydatpiff.utils.utils import threader_wrapper
 
 
 class BaseMeta(type):
@@ -20,14 +21,14 @@ class BaseMeta(type):
 
     def __new__(cls, name, bases, attrs):
         methods = [
-            "setTrack",
+            "set_track",
             "duration",
             "current_time",
             "_format_time",
             "_seeker",
             "volume",
-            "volumeUp",
-            "volumeDown",
+            "volume_up",
+            "volume_down",
             "play",
             "pause",
             "rewind",
@@ -60,32 +61,37 @@ class BasePlayer(metaclass=BaseMeta):
     _global_volume = 100
     _is_monitoring = False
     _track_start_time = 0
-    # _adjtime = 0
 
-    _state = {
-        "playing": False,
-        "pause": False,
-        "stop": False,
-        "systemstop": False,
-        "loaded": False,
-    }
+    """
+    Set default player state
+        E.g.
+            "playing": False,
+            "paused": False,
+            "stopped": False,
+            "system_stopped": False,
+        }
+    """
+    # NOTE: do not change `_state` private variables to public variables
+    _state = dict((k, False) for k in player_state_keys)
 
     def __init__(self, *args, **kwargs):
         self._track_loaded = False
         self._track_playing = False
         self._track_paused = False
-        self._track_stop = False
-        self._system_stop = False
-        self._manageState()
+        self._track_stopped = False
+        self._system_stopped = False
+        self.auto_manage_state()
 
     def __len__(self):
         # duration will be forced to be implemented by Meta class
         return int(self.duration)
 
-    def _resetState(self, **kwargs):
-        """Reset all track's states (see Android.state)"""
-        self._state.update(playing=False, pause=False, loaded=False, stop=False)
-        self._state.update(**kwargs)
+    def reset_and_update_state(self, update=None):
+        """Reset and update  all player's state"""
+        self._state.update(playing=False, paused=False, loaded=False, stopped=False)
+        #  update state if specified.
+        update = update if update else {}
+        self._state.update(**update)
 
     @property
     def name(self):
@@ -126,50 +132,49 @@ class BasePlayer(metaclass=BaseMeta):
         Set the state of playing and pause.
 
         param: boolean - True or False
-                True: sets playing True and pause False
-                False: sets playing False and pause True
+                True: sets playing True and pause to False.
+                False: sets playing False and pause True.
         """
         self.state["playing"] = state
 
     @property
     def _track_paused(self):
-        return self.state["pause"]
+        return self.state["paused"]
 
     @_track_paused.setter
     def _track_paused(self, state=False):
-        self.state["pause"] = bool(state)
+        self.state["paused"] = bool(state)
 
     @property
-    def _track_stop(self):
-        return self.state["pause"]
+    def _track_stopped(self):
+        return self.state["paused"]
 
-    @_track_stop.setter
-    def _track_stop(self, state=False):
-        self.state["stop"] = bool(state)
+    @_track_stopped.setter
+    def _track_stopped(self, state=False):
+        self.state["stopped"] = bool(state)
 
     @property
-    def _system_stop(self):
-        return self.state["pause"]
+    def _system_stopped(self):
+        return self.state["paused"]
 
-    @_system_stop.setter
-    def _system_stop(self, state=False):
-        self.state["system_stop"] = bool(state)
+    @_system_stopped.setter
+    def _system_stopped(self, state=False):
+        self.state["system_stopped"] = bool(state)
 
     @classmethod
-    @Threader
-    def _manageState(cls, *args, **kwargs):
+    @threader_wrapper
+    def auto_manage_state(cls, *args, **kwargs):
         while True:
-
             state = dict(
                 loaded=False,
                 playing=False,
-                pause=False,
-                stop=False,
-                systemstop=False,
+                paused=False,
+                stopped=False,
+                system_stopped=False,
             )
             if cls._track_loaded and not cls._track_playing:
                 if cls.current_time > 0:
-                    state.update(dict(loaded=True, pause=True))
+                    state.update(dict(loaded=True, paused=True))
                 else:
                     state.update(dict(loaded=True))
 
@@ -177,25 +182,21 @@ class BasePlayer(metaclass=BaseMeta):
                 state.update(dict(loaded=True, playing=True))
 
             elif cls._track_paused:
-                state.update(dict(loaded=True, pause=True))
+                state.update(dict(loaded=True, paused=True))
 
-            elif cls._track_stop:
+            elif cls._track_stopped:
                 cls._paused_time = 0
                 cls._track_start_time = 0
-                state.update(dict(stop=True))
+                state.update(dict(stopped=True))
 
             elif cls.current_time > cls.duration:
-                state.update(dict(stop=True, systemstop=True))
-                cls.stop  # default state will handle reseting the everything
-
-                # handle track unload
-                # reset position
+                state.update(dict(stopped=True, system_stopped=True))
+                cls.stop
 
             cls.state = state
-            sleep(1)
 
-    def setTrack(self, *args, **kwargs):
-        # Media class methos needed on all player
+    def set_track(self, *args, **kwargs):
+        # Media class method needed on all player
         raise NotImplementedError
 
     @property
@@ -208,30 +209,64 @@ class BasePlayer(metaclass=BaseMeta):
 
     @property
     def info(self):
-        """Returns feedback for media song being played"""
-        if not self._track_loaded:
-            return "No media"
-        c_min, c_sec = self._format_time(self.current_time)
-        c_sec = c_sec if len(str(c_sec)) > 1 else str(c_sec).zfill(2)
+        """Current state of the song"""
+        if not hasattr(self, "_song") or not hasattr(self, "current_time"):
+            return "no song loaded"
 
-        l_min, l_sec = self._format_time(self.duration)
-        l_sec = l_sec if len(str(l_sec)) > 1 else str(l_sec).zfill(2)
-
-        # 9615
-        if self._track_playing:
-            mode = chr(9199) or "|>"
-        elif self._track_paused:
-            mode = chr(9208) or "||"
+        if "vlc" in str(self.__class__.__name__).lower():
+            # VLC player has its own state manager
+            state = re.match(r"[\w.]*\.(\w*)", str(self._player.get_state())).group(1)
         else:
-            mode = chr(9209) or "[]"
-        Verbose("\n%s TRACK: %s" % (chr(9836), self.name))
-        pos = "{0}  {1}:{2} - {3}:{4}\n".format(mode, c_min, c_sec, l_min, l_sec)
-        if hasattr(self, "_media_autoplay"):
-            if self._media_autoplay:
-                Verbose(" " * 2, chr(9850), pos)
-                return
+            state = self._state
 
-        Verbose(" " * 6, pos)
+        symbol = "[]"
+        if isinstance(state, str) and state == "NothingSpecial":
+            # convert state's str to key/value pairs.
+            # On initialization, set all state values => False
+            for k, v in self._state.items():
+                self._state[k] = False
+
+            vlc_state = state.lower()
+            # See vlc.get_state docs for more info on VLC states
+            self._state["playing"] = "playing" in vlc_state
+            self._state["paused"] = "paused" in vlc_state
+            self._state["stopped"] = "ended" in state.lower() or "error" in vlc_state or "stopped" in vlc_state
+            self._state["system_stopped"] = "error" in vlc_state
+
+        """
+        NOTE: we don't want to reset all state, we only want to update the state and its opposing state
+        e.g: playing: True -> paused: False
+             paused:True -> playing: False
+
+             stopped: True -> playing: False
+             playing: True -> stopped: False
+        """
+
+        if self._state.get("paused"):
+            self._track_paused = True
+            self._track_playing = False
+            symbol = music_symbols["paused"]
+        elif self._state.get("playing"):
+            self._track_playing = True
+            self._track_paused = False
+            symbol = music_symbols["playing"]
+        else:
+            self.reset_and_update_state()
+            symbol = music_symbols["stopped"]
+
+        # song current time
+        current_min, current_sec = self._format_time(self.current_time)
+        # song duration
+        duration_min, duration_sec = self._format_time(self.duration)
+
+        current_sec = str(current_sec).zfill(2)
+        duration_sec = str(duration_sec).zfill(2)
+        track_info = "{0}  {1}:{2} - {3}:{4}\n".format(symbol, current_min, current_sec, duration_min, duration_sec)
+
+        is_auto_playing = getattr(self, "_media_autoplay", False)
+        autoplay_symbol = music_symbols["autoplay"] if is_auto_playing else ""
+        Verbose("\n%s TRACK: %s" % (music_symbols["music"], self.name))
+        Verbose(autoplay_symbol, track_info)
 
     @property
     def volume_level(self):
@@ -245,11 +280,11 @@ class BasePlayer(metaclass=BaseMeta):
         self._global_volume = level
         # individual player volume control method here
 
-    def volumeUp(self, vol=5):
+    def volume_up(self, vol=5):
         """Turn the media volume up"""
         raise NotImplementedError
 
-    def volumeDown(self, vol=5):
+    def volume_down(self, vol=5):
         """Turn the media volume down"""
         raise NotImplementedError
 
@@ -263,7 +298,7 @@ class BasePlayer(metaclass=BaseMeta):
         raise NotImplementedError
 
     @play.setter
-    def play(*args, **kwargs):
+    def play(self, *args, **kwargs):
         raise NotImplementedError
 
     @property
@@ -278,15 +313,14 @@ class BasePlayer(metaclass=BaseMeta):
     def rewind(self, pos=10):
         """
         Rewind the media song
-             vlc time is in milliseconds
              @params: pos:: time(second) to rewind media. default:10(sec)
         """
         raise NotImplementedError
 
     def ffwd(self, pos=10):
-        """Fast forward media
-        vlc time is in milliseconds
-        @params: pos:: time(second) to rewind media. default:10(sec)
+        """
+        Fast-forward the media song
+            @params: pos:: time(second) to rewind media. default:10(sec)
         """
         raise NotImplementedError
 
@@ -301,5 +335,5 @@ class MetaData(MP3):
         super().__init__(track)
 
     @property
-    def trackDuration(self):
+    def track_duration(self):
         return self.info.length
