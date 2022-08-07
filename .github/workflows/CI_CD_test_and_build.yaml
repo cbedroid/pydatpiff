@@ -26,16 +26,16 @@ jobs:
         run: |
             if [ "$RUNNER_OS"  == "Linux" ]; then
               echo "Installing Ubuntu OS dependencies";
-              sudo apt-get update && sudo apt-get install -y vlc libvlc-dev
+              sudo apt-get update && sudo apt-get install -y vlc
             else
                 echo "Installing Mac OS dependencies"
                 brew install vlc
-                brew install libvlc
             fi
         shell: bash
       - name: Install Tox
         run: |
           pip install --upgrade tox setuptools
           python -m pip install --upgrade pip
+          pip install -r requirements.txt
       - name: Run Tox tests
         run: tox -e tests
