@@ -15,22 +15,11 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
         python-version: [ '3.7', '3.8', '3.9']
 
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Install apt prerequisites for ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install python-dev libpq-dev
-      - name: Install apt prerequisites for macos
-        if: matrix.os == 'macos-latest'
-        run : brew install python-dev libpq-dev
-      - name: Install apt prerequisites for windows
-        if : matrix.os == 'windows-latest'
-        run : choco install python-dev libpq-dev
-
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -38,6 +27,5 @@ jobs:
         run: |
           pip install --upgrade tox setuptools
           python -m pip install --upgrade pip
-
       - name: Run Tox tests
         run: tox -e tests
