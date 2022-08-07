@@ -22,18 +22,19 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Ubuntu OS dependencies
-        if: ${{ matrix.os }} == "ubuntu-latest"
+      - name: Install OS dependencies
         run: |
-            echo "Installing Ubuntu OS dependencies" && \
-            sudo apt-get update && sudo apt-get install -y python3-pip vlc libvlc-dev
-      - name: Install Mac OS dependencies
-        if: ${{ matrix.os }} == "macos-latest"
-        run: |
+            if [ "$RUNNER_OS"  == "Linux" ]; then
+              echo "Installing Ubuntu OS dependencies";
+              sudo apt-get update && sudo apt-get install -y python3-pip vlc libvlc-dev
+            else
+                echo "Installing Mac OS dependencies"
                 brew install python3
                 brew install python3-pip
                 brew install vlc
                 brew install libvlc
+            fi
+        shell: bash
       - name: Install Tox
         run: |
           pip install --upgrade tox setuptools
