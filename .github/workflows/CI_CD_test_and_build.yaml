@@ -20,6 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Install Ubuntu OS dependencies
         if: ${{ matrix.os }} == "ubuntu-latest"
         run: |
@@ -32,8 +34,6 @@ jobs:
                 brew install python3-pip
                 brew install vlc
                 brew install libvlc
-        with:
-          python-version: ${{ matrix.python-version }}
       - name: Install Tox
         run: |
           pip install --upgrade tox setuptools
