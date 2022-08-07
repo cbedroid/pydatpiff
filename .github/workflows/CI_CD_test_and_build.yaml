@@ -28,4 +28,4 @@ jobs:
         run: pip install --upgrade tox setuptools pip
 
       - name: Run Tox and Release
-        run: tox -e py, release
+        run: tox -e tests, release
