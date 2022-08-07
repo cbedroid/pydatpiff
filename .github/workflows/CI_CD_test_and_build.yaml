@@ -27,5 +27,5 @@ jobs:
       - name: Install Tox
         run: pip install --upgrade tox setuptools pip
 
-      - name: Run Tox and Release
-        run: tox -e tests, release
+      - name: Run Tox tests
+        run: tox -e tests
