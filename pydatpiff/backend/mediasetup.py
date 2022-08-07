@@ -4,9 +4,9 @@ import warnings
 from pydatpiff.errors import DatpiffError, Mp3Error
 from pydatpiff.urls import Urls
 from pydatpiff.utils.request import Session
+from pydatpiff.utils.utils import Object
 
-from .utils import Object
-from .webhandler import WebScrape
+from .scraper import MediaScraper
 
 SERVER_DOWN_MSG = (
     "\n\t--- UNOFFICIAL DATPIFF MESSAGE --"
@@ -19,7 +19,7 @@ SERVER_DOWN_MSG = (
 class DatpiffPlayer:
     """Datpiff's frontend media player object"""
 
-    # Flag for mobile version.
+    # Flag for mobile's version.
     # Fallback if desktop version is not working ('website issue')
     _USE_MOBILE = False
 
@@ -39,14 +39,14 @@ class DatpiffPlayer:
         Private function that will check program and determine
         which version ( desktop or mobile ) to use.
 
-        As of July 10,2020, Datpiff's desktop version is broken,
+        As of July 10, 2020, Datpiff's desktop's version is broken,
         and is not populating album data.
 
         Data that is NOT being populated are ONLY the followings:
           - Album.name
           - Mp3.songs
 
-        All other function still work as intended.
+        All others function still work as intended.
 
         This function will check if an album name is populated correct.
         if not then mobile version will be used as a fallback
@@ -61,7 +61,7 @@ class DatpiffPlayer:
     def build_album_url(cls, album_id):
         """Creates album url link from Datpiff's embedded music player."""
 
-        # July 10 2020 , This will fixed error with songs name not populating
+        # July 10, 2020 , This will fix error with songs name not populating
         # if desktop version fails, flag program to use Mobile version as a fallback
         version = "mobile" if cls._USE_MOBILE else "embeds"
         return "".join(
@@ -77,7 +77,7 @@ class DatpiffPlayer:
         """Returns Datpiff embedded player response text"""
         # Note: Request Sessions are being cached for every request.
         #      If the url endpoint is found in the cached, the request
-        #      will NOT be recalled.  Instead the cached response will be returned.
+        #      will NOT be recalled.  Instead, the cached response will be returned.
         url = self.build_album_url(self.album_ID)
         try:
             return self._session.method("GET", url).text
@@ -88,11 +88,11 @@ class DatpiffPlayer:
     @property
     def album_ID(self):
         """Album ID Number"""
-        return WebScrape.get_album_suffix_number(self._album_link)
+        return MediaScraper.get_album_suffix_number(self._album_link)
 
     @property
     def bio(self):
-        return WebScrape.get_uploader_bio(self.embedded_player_content)
+        return MediaScraper.get_uploader_bio(self.embedded_player_content)
 
     @property
     def name(self):
@@ -107,10 +107,10 @@ class DatpiffPlayer:
 
 class Album(DatpiffPlayer):
     """
-    Renders Datpiff's Mixtape page and create URI link to it's media player object.
+    Renders Datpiff's Mixtape page and create URI link to its media player object.
     Data from URI link will be process and use to populate data for mixtapes. This data
     includes:
-        Album uploader's name and bio
+        Album uploader name and bio
         Album's name and songs
     """
 
@@ -129,7 +129,7 @@ class Album(DatpiffPlayer):
     @property
     def album_html(self):
         """
-        Return the requests response from the current Mixtapes link
+        Return the requests' response from the current Mixtapes link
             See __init__ or mixtapes.Mixtapes.links.
         """
         # we don't have to worry about recalling this requests method
@@ -143,10 +143,10 @@ class Album(DatpiffPlayer):
 
     @property
     def uploader(self):
-        return WebScrape.get_uploader_name(self.album_html)
+        return MediaScraper.get_uploader_name(self.album_html)
 
     @classmethod
-    def searchFor(cls, links, song, *args, **kwargs):
+    def lookup_song(cls, links, song, *args, **kwargs):
         """
         Search through all Albums and return all Albums
         that contains similar songs' title.
@@ -182,32 +182,21 @@ class Mp3:
         return "MP3"
 
     @property
-    def song_duration(self):
-        """Duration of songs"""
-        # Tested July 10, 2020 This code is not implemented
-        #  and has not been implemented since duration of project
-        #  TODO: USE IT OR GET RID OF IT
-        # --
-        # This methodology will implement in backend/audio/baseplayer instead
-        # Tested and this code will cause error using desktop (default) version
-        return WebScrape.get_duration_from(self.album_response)
-
-    @property
     def songs(self):
         """Returns all songs name from album."""
-        return WebScrape.get_song_titles(self.album_response)
+        return MediaScraper.get_song_titles(self.album_response)
 
     @property
     def urlencode_track(self):
         """Url encode audio url"""
-        songs = WebScrape.get_mp3_urls(self.album_response)
+        songs = MediaScraper.get_mp3_urls(self.album_response)
         return [re.sub(" ", "%20", song) for song in songs]
 
     @property
     def album_id(self):
         """Media Album reference ID number Ex: 6/m1393dba"""
         try:
-            return WebScrape.get_embed_player_id(self.album_response)
+            return MediaScraper.get_embed_player_id(self.album_response)
         except:
             Mp3Error(1)
 
