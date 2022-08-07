@@ -1,7 +1,7 @@
 bs4==0.0.1
 mutagen==1.45.1
 pip-chill==1.0.1
-pylint==2.14.5
+pylint
 pytest-cov==3.0.0
 python-vlc==3.0.16120
 pyyaml==6.0
