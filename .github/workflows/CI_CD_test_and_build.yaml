@@ -22,10 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-      - name: Install apt prerequisites
-        run: apt-get install python-dev libpq-dev vlc mpv
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install apt prerequisites
+        run: sudo apt-get install python-dev libpq-dev vlc mpv
       - name: Install Tox
         run: |
           pip install --upgrade tox setuptools
