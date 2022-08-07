@@ -110,18 +110,21 @@ class TestMixtapes(BaseTest, TestCase):
         artist_name = artists[artists.index(test_artist)]
         self.assertEqual(artist_name, "Moneybagg Yo")
 
-    def test_mixtapes_are_found_even_when_category_is_invalid(self):
+    def test_category_defaults_to_hot_when_category_is_invalid(self):
         content = self.get_request_content("mixtape")
         request = mixtapes.Session.method = Mock(autospec=True)
         request.return_value = self.mocked_response(content=content)
         mix = mixtapes.Mixtapes("some_invalid_category")
-        # test Mixtapes Class sets default category when user enters a invalid category
-        self.assertEqual(len(mix.mixtapes), 12)
-        self.assertEqual(len(mix.album_covers), 12)
-        self.assertEqual(len(mix.artists), 12)
-        self.assertEqual(len(mix.links), 12)
-        self.assertEqual(len(mix.views), 12)
-        self.assertEqual(len(mix.ratings), 12)
+        self.assertEqual(mix._user_selected, "hot")
+
+    def test_mixtape_initialized_with_valid_categories(self):
+        content = self.get_request_content("mixtape")
+        request = mixtapes.Session.method = Mock(autospec=True)
+        request.return_value = self.mocked_response(content=content)
+
+        for category in mixtapes.Mixtapes.valid_categories:
+            mix = mixtapes.Mixtapes(category=category)
+            self.assertEqual(mix._user_selected, category)
 
 
 class TestMixtapesSearch(BaseTest, TestCase):

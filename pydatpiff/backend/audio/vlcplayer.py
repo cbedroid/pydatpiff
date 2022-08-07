@@ -1,5 +1,3 @@
-import re
-
 import vlc
 
 from pydatpiff.errors import PlayerError
@@ -34,23 +32,7 @@ class VLCPlayer(BasePlayer):
     def current_time(self):
         return self._player.get_time()
 
-    @property
-    def info(self):
-        """Current state of the song being played"""
-        state = re.match(r"[\w.]*\.(\w*)", str(self._player.get_state())).group(1)
-        if state == "NothingSpecial":
-            # set all player value to False
-            for k, v in self._state.items():
-                self._state[k] = False
-        elif "pause" in state.lower():
-            self._track_paused = True
-            self._track_playing = False
-        else:
-            self._track_playing = True
-            self._track_paused = False
-        return self.state
-
-    def setTrack(self, name, path=None):
+    def set_track(self, name, path=None):
         if path:
             self._song = name
             self._path = path
@@ -76,13 +58,13 @@ class VLCPlayer(BasePlayer):
         self._player.audio_set_volume(level)
         self._global_volume = level
 
-    def volumeUp(self, level=5):
+    def volume_up(self, level=5):
         """Turn the media volume up"""
         if not level and not isinstance(level, int):
             return
         self._volume += level
 
-    def volumeDown(self, level=5):
+    def volume_down(self, level=5):
         """Turn the media volume down"""
         if not level and not isinstance(level, int):
             return
@@ -97,7 +79,7 @@ class VLCPlayer(BasePlayer):
     @property
     def play(self):
         """Play media song"""
-        if not self._track_stop:
+        if not self._track_stopped:
             if self._track_paused:
                 # unpause if track is already playing but paused
                 self.pause
@@ -105,26 +87,25 @@ class VLCPlayer(BasePlayer):
                 self._player.play()
 
             self._track_playing = True
-            return
         else:
             try:
-                self.setTrack(self._song, self._path)
-                self.state["stop"] = False
+                self.set_track(self._song, self._path)
+                self.state["stopped"] = False
                 return self.play
             except RecursionError:
-                self.state["stop"] = True
+                self.state["stopped"] = True
 
     @property
     def pause(self):
         """Pause the media song"""
 
-        pause = self._track_paused
-        self._track_playing = pause
+        is_paused = self._track_paused
+        self._track_playing = is_paused
         self._player.pause()
-        self._track_paused = not pause
+        self._track_paused = not is_paused
 
     def _seeker(self, pos=10, rew=True):
-        if self._state["stop"]:
+        if self._state["stopped"]:
             return
         if rew:
             to_position = self._player.get_time() - (pos * 1000)
@@ -155,4 +136,4 @@ class VLCPlayer(BasePlayer):
     @property
     def stop(self):
         self._player.stop()
-        self._track_stop = True
+        self._track_stopped = True

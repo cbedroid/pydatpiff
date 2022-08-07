@@ -4,8 +4,8 @@
 
 """
 import concurrent.futures as cf
-import multiprocessing as mp
 import sys  # noqa: F401
+import threading
 from functools import wraps
 
 
@@ -13,20 +13,12 @@ class ThreadPool:
     pool = []
 
 
-def Threader(f):
+def threader_wrapper(f):
     @wraps(f)
     def inner(*a, **kw):
-        for p in ThreadPool.pool.copy():
-            if p[0] == f:
-                try:  # for multiprocessing
-                    p[1].terminate()
-                    ThreadPool.pool.remove(p)
-                except:
-                    pass
-        t = mp.Process(target=f, args=(a), kwargs=dict(kw))
+        t = threading.Thread(target=f, args=(a), kwargs=dict(kw))
         t.daemon = True
         t.start()
-        ThreadPool.pool.append([f, t])
         return t
 
     return inner
@@ -51,26 +43,26 @@ class ThreadQueue:
 
 class Object:
     @staticmethod
-    def isDict(_type):
+    def is_dict(_type):
         return isinstance(_type, dict)
 
     @staticmethod
-    def isStr(_type):
+    def is_string(_type):
         return isinstance(_type, str)
 
     @staticmethod
-    def isList(_type):
+    def is_list(_type):
         return isinstance(_type, list)
 
     @classmethod
-    def removeNone(cls, _list):
+    def remove_none_value(cls, _list):
         return list(filter(None, _list))
 
     @classmethod
     def enumerate_it(cls, data, start=0):
         """Return enumerate object"""
-        if cls.isDict(data) or cls.isList(data):
-            if cls.isDict(data):
+        if cls.is_dict(data) or cls.is_list(data):
+            if cls.is_dict(data):
                 data = data.items()
             return list(enumerate(data, start=start))
         raise NotImplementedError("datatype is not a dictionary or list ")
@@ -83,7 +75,7 @@ class Object:
     @classmethod
     def lowered_dict(cls, data):
         """Strip and lower keys in dictionary"""
-        if not cls.isDict(data):
+        if not cls.is_dict(data):
             raise NotImplementedError("datatype is not a dictionary")
 
         item = {}
@@ -94,15 +86,15 @@ class Object:
     @classmethod
     def lowered_list(cls, data):
         """Strip and lower string in list"""
-        if not cls.isList(data):
+        if not cls.is_list(data):
             raise NotImplementedError("datatype is not a List")
         return [cls.strip_and_lower(x) for x in data]
 
 
-class Filter:
+class Select:
     @classmethod
-    def choices(cls, choice, options, fallback=None):
-        """Filter user choices and return the corresponding options
+    def by_choices(cls, choice, options, fallback=None):
+        """Select user choices and return the corresponding options
         Args:
             choice (str) - Expected choice
             options (list,tuple,dict):  Collection of options to select from.
@@ -110,22 +102,27 @@ class Filter:
                                           is not found.
         """
         choice = Object.strip_and_lower(choice)
-        if Object.isDict(options):
-            options = Object.lowered_dict(options)
-            val = [val for key, val in options.items() if choice in key]
-        else:
-            val = [val for val in options if choice in Object.strip_and_lower(val)]
 
-        if not val and fallback:
-            return cls.choices(fallback, options=options, fallback=None)
+        try:
 
-        elif val:
-            return min(val)
+            if Object.is_dict(options):
+                return min([val for key, val in options.items() if choice in Object.strip_and_lower(key)])
+
+            elif Object.is_list(options):
+                return min([val for val in options if choice in Object.strip_and_lower(val)])
+
+            elif Object.is_string(options):
+                return options if choice == Object.strip_and_lower(options) else fallback
+
+        except ValueError:
+            if fallback:  # no value found, then return fallback
+                return cls.by_choices(fallback, options=options, fallback=None)
+            raise ValueError("No value found for {}".format(choice))
 
     @staticmethod
     def by_int(choice, data):
         """
-        Filter choices by integer
+        Select choices by integer
         :params:: choice,data
             choice - user choice. datatype: str
             data - list or dict object
@@ -133,23 +130,24 @@ class Filter:
         try:
             choice = int(choice)
             results = Object.enumerate_it(data)
-            if Object.isDict(data):
+            if Object.is_dict(data):
                 return results[choice][1][1]
             return results[choice][1]
         except:
-            return
+            pass
 
     @classmethod
     def get_index(cls, index, options):
-        """Filter options by index."""
+        """Select options by an index."""
         options_size = len(options)
         index -= 1
         index = 0 if (0 >= index or index > options_size) else index
         return index
 
     @classmethod
-    def get_indexOf(cls, choice, options):
+    def get_index_of(cls, choice, options):
         for option in options:
-            value = cls.choices(choice, option)
+            value = cls.by_choices(choice, option)
             if value:
                 return option.index(value)
+        raise ValueError("Choice not found")

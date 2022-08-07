@@ -1,16 +1,31 @@
 import logging
 import re
+from functools import wraps
 
 import bs4
 
+from pydatpiff.constants import ampersands
 from pydatpiff.urls import Urls
 from pydatpiff.utils.request import Session
 
 logger = logging.getLogger(__name__)
 
 
-class DOMProcessor:
-    _MAX_RETRY = 5  # TODO: fix retry:: some reason findRegex fails on first try
+def escape_html_characters(char_list):
+    results = []
+    if not isinstance(char_list, (list, tuple)):
+        char_list = [char_list]
+
+    for char in char_list:
+        if char in ampersands:
+            amps = ampersands.index(char)
+            char = re.sub(amps, "", char)
+        results.append(char)
+    return results
+
+
+class MixtapeScraper:
+    _MAX_RETRY = 5
     _MAX_MIXTAPES_PER_PAGE = 52  # maximum amount of mixtapes available per Datpiff's Page
 
     def __init__(self, base_response, limit=600):
@@ -44,7 +59,7 @@ class DOMProcessor:
         for attr in self._attribute_list:
             setattr(self, attr, [])
 
-    def _set_mixtapes_attributes(self, bs4_content_list):
+    def _setMedias_attributes(self, bs4_content_list):
 
         for content in bs4_content_list.findAll(class_="contentItemInner"):
             # set album covers
@@ -99,7 +114,7 @@ class DOMProcessor:
         # fmt: off
         content_container_id = "leftColumnWide"  # Datpiff Mixtape's main content wrapper
         content_wrapper_class = 'contentListing'
-        mixtapes_content_items = "contentItem"  # Mixtapes's Content Wrapper
+        mixtapes_content_items = "contentItem"  # Mixtapes' Content Wrapper
         # fmt: on
         try:
             # Using BeautifulSoap
@@ -112,14 +127,14 @@ class DOMProcessor:
                 self.total_mixtapes = len(mixtape_items)
 
                 # set attribute for Mixtapes Class
-                self._set_mixtapes_attributes(content_listing)
+                self._setMedias_attributes(content_listing)
         except:
             logger.exception("CacheContentError")
             return 0
 
     def _get_page_links(self):
         """
-        Return a list of html page links from mixtapes.Mixtapes._selectMixtape method.
+        Return a list of html page links from mixtapes. Mixtapes._selectMixtape method.
         """
         try:
             BASE_URL = Urls.datpiff["base"]
@@ -127,13 +142,13 @@ class DOMProcessor:
             # Check if pagination links are available
             pagination = self._soup.find(class_="pagination")
             if not pagination:
-                # cache the first page and return the return the initial response url
+                # cache the first page and return the initial response url
                 self._parse_mixtape_page(self._base_response.url)
                 return [self._base_response.url]
 
             # Next get all pagination links anchor href.
 
-            # Since this class (DOMProcessor) has to be initialized with a mixtape
+            # Since this class (MixtapeScraper) has to be initialized with a mixtape
             # request's content (base_response), we should already have the content
             # from the first page link (Active Page). Although we already processed this content,
             # we still include it to accurately count to total mixtapes found.
@@ -144,15 +159,15 @@ class DOMProcessor:
             # iterate through each response (anchor link response)
             for page_number, link in enumerate(page_link_urls):
                 self._parse_mixtape_page(link)
-                # it mixtapes limit is reached, then return the content
+                # It mixtapes limit is reached, then return the content
                 # from all previous page link
                 if self.total_mixtapes <= self._MIXTAPE_LIMIT:
                     return page_link_urls[:page_number]
 
-            # if for loop don't break then return all anchor urls
+            # if forloop don't break then return all anchor urls
             return page_link_urls
         except:
-            # Cache the first page and return the return the initial response url
+            # Cache the first page and return the initial response url
             self._parse_mixtape_page(self._base_response.url)
             return [self._base_response.url]
 
@@ -170,3 +185,57 @@ class DOMProcessor:
             (str) - HTTP response text
         """
         return self._session.method("GET", url).text
+
+
+class MediaScraper:
+    @staticmethod
+    def wrapper(f):
+        @wraps(f)
+        def inner(obj):
+            try:
+                f(obj)
+            except:
+                raise AttributeError("Regex Error")
+            else:
+                return f(obj)
+
+        return inner
+
+    @staticmethod
+    def get_uploader_name(string):
+        """Return the name of the person whom upload the mixtape"""
+        try:
+            return re.search(r'.*profile/(.*\w*.*)"', string).group(1)
+        except:
+            return " "
+
+    @staticmethod
+    def get_uploader_bio(string):
+        try:
+            desc = re.findall('description"\scontent="(.*)"', string)
+            if desc:
+                return escape_html_characters(desc[-1])[0].strip()
+        except:  # noqa
+            pass
+        return " "
+
+    @staticmethod
+    def get_album_suffix_number(string):
+        return re.search(r"\.(\d*)\.html", string).group(1)
+
+    @staticmethod
+    def get_embed_player_id(text):
+        return re.search(r"/mixtapes/([\w\/]*)", text).group(1)  # noqa
+
+    @classmethod
+    def get_song_titles(cls, text):
+        songs = re.findall(r'"title":"(.*\w*)",\s?"artist"', text)
+        songs = list(escape_html_characters(songs))
+        return songs
+
+    @classmethod
+    def get_duration_from(cls, text):
+        return re.findall(r'"duration">(.*\d*)<', text)
+
+    def get_mp3_urls(text):
+        return re.findall(r"fix.concat\(\s\'(.*\w*)\'", text)  # noqa

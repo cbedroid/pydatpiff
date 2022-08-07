@@ -33,14 +33,14 @@ class TestMedia(BaseTest, TestCase):
             media.Media(object)
 
     @patch.object(media.ThreadQueue, "execute", autospec=True)
-    def test_media_findSong_return_albums(self, queue):
+    def test_media_find_song_return_albums(self, queue):
         query_result = {
             "index": 1,
             "album": "A Gangsta's Pain: Reloaded",
             "song": "Switches  Dracs (feat. Lil Durk  EST Gee)",
         }
         queue.return_value = [query_result]
-        response = self.media.findSong("Switches")
+        response = self.media.find_song("Switches")
         self.assertIn(query_result, response)
 
     def test_media_album_is_correct(self):
@@ -67,11 +67,15 @@ class TestMedia(BaseTest, TestCase):
         # test songs total is correct
         self.assertCountEqual(self.song_list, songs)
 
-    """
-    def test_media_download_song_correct(self):
-        self.mix._writeAudio
-        self.content = self.get_request_content("media")
-        self.method = media.Session.method = Mock(autospec=True)
-        self.method.return_value = self.mocked_response(content=self.content)
-
-    """
+    # @patch.object(media.File, "write_to_file")
+    # @patch.object(media.Media, "_write_audio")
+    # def test_media_download_song_from_song_index(self, write_file, write_audio):
+    #     write_audio.return_value = b"song content"
+    #     self.media.download(0)
+    #
+    #     songname = " - ".join((self.media.artist, self.song_list[0].strip() + ".mp3"))
+    #     songname = media.File.join(os.getcwd(), download_path)
+    #     write_file.assert_called_once()
+    #     write_file.assert_called_with(
+    #         download_path, b"song content", mode="wb"
+    #       )

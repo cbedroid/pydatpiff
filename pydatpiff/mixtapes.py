@@ -1,15 +1,18 @@
-from .backend.mixsetup import DOMProcessor
-from .backend.utils import Filter
+from pydatpiff.utils.utils import Select
+
+from .backend.scraper import MixtapeScraper
 from .errors import MixtapesError
 from .frontend.screen import Verbose
 from .urls import Urls
 from .utils.request import Session
 
 
-class Mixtapes(DOMProcessor):
-    category = list(Urls.category)
+class Mixtapes(MixtapeScraper):
+    valid_categories = list(Urls.category)
+    _default_category = "hot"
+    _user_selected = _default_category  # user  category or search input
 
-    def __init__(self, category="hot", search="", limit=None, *args, **kwargs):
+    def __init__(self, category=None, search=None, limit=None, *args, **kwargs):
         """
         Mixtapes Initialization.
 
@@ -26,19 +29,17 @@ class Mixtapes(DOMProcessor):
         initial_page_content = self._request_response
         super().__init__(initial_page_content, limit=limit)
 
-        # self._setAttributeRegex()
-
         if not len(self):
             Verbose("No Mixtapes Found")
         else:
             Verbose("Found %s Mixtapes" % len(self))
 
     def __repr__(self):
-        return "{}('hot')".format(self.__class__.__name__)
+        return f"{self.__class__.__name__}('{self._default_category}')"
 
     def __str__(self):
-        prefix = self._selected_search or self._selected_category
-        return "{} {}".format(prefix.title(), self.__class__.__name__)
+        prefix = getattr(self, "_user_selected", self._default_category)
+        return f"{prefix.title()} {self.__class__.__name__}"
 
     def __len__(self):
         if hasattr(self, "_artists"):
@@ -79,7 +80,7 @@ class Mixtapes(DOMProcessor):
         url = Urls.datpiff["search"]
         return self._session.method("POST", url, data=Urls.payload(name))
 
-    def _selectMixtape(self, category="hot", search=None):
+    def _selectMixtape(self, category=None, search=None):
         """
         Initial setup. Gets all available mixtapes.
 
@@ -90,9 +91,15 @@ class Mixtapes(DOMProcessor):
         if search:  # Search for an artist or mixtape
             filtered_search = self._validate_search(search)
             body = self._perform_search(filtered_search)
+            self._user_selected = search  # capture user search input
 
         else:  # Selecting from category
-            choice = Filter.choices(category, Urls.category, fallback="hot")
+            category = category or self._default_category
+            if category.lower() not in self.valid_categories:
+                category = self._default_category
+
+            self._user_selected = category  # capture user category input
+            choice = Select.by_choices(category, Urls.category)
             body = self._session.method("GET", choice)
         self._request_response = body
         return body

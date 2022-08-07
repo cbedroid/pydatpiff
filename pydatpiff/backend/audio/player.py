@@ -1,5 +1,5 @@
-from pydatpiff.backend.utils import Object
 from pydatpiff.errors import InstallationError, PlayerError
+from pydatpiff.utils.utils import Object
 
 from .mpvplayer import MPV
 from .vlcplayer import VLCPlayer
@@ -14,12 +14,12 @@ class Player:
         try:
             if player:
                 player = Object.strip_and_lower(player)
-                selected_player_class = player_options.get(player)
+                selected_player_class = player_options.get(player, None)
                 if selected_player_class:
                     # return initialized player class
                     return selected_player_class.__call__()
         except:
-            extended_msg = "\nThe player you chosen is not compatible with your device.\n"
+            extended_msg = "\nThe player you have chosen is not compatible with your device.\n"
             raise PlayerError(5, extended_msg)
 
         # if no player is specified by the user, then select a default player

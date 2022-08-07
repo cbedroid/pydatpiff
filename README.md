@@ -113,10 +113,10 @@ Either argument __category__ or __search__ should be used at a given time. If no
 
 
 Here are somethings you can do with **`Pydtapiff Media`**
- - `findSong` - Find any song made by an artist.
+ - `find_song` - Find any song made by an artist.
  - `play`  - Plays songs from  current mixtape.
  - `download` - Download current song.
- - `downloadAlbum` - Download all songs from an mixtape.
+ - `download_album` - Download all songs from an mixtape.
 
 --- ---
  #### Setup and play song from a mixtape
@@ -197,15 +197,15 @@ Song's name __do not__ have to be an exact match.
 
   **No worries... We got you covered!**
 
-Find any song made by an artist using the **`findSong`** method in **`media`**.
+Find any song made by an artist using the **`find_song`** method in **`media`**.
 
   - search by `song's name`.
   - search by `album's name`.
 
- **media.findSong**
+ **media.find_song**
 ```python
    #Search for a song
-   >>> media.findSong('green lan') # returns mixtape's index and name
+   >>> media.find_song('green lan') # returns mixtape's index and name
 
    #results
    [(1, 'Creative Control'),
@@ -233,8 +233,8 @@ Simply create a variable ` player = media.player`
  - `pause` - pause/unpause track.
  - `stop` - stop track.
  - `volume` - set the volume level (1 - 100).
- - `volumeUp` - increase volume ( *default: increase by 5*).
- - `volumeDown` - decrease volume ( *default: decrease by 5*).
+ - `volume_up` - increase volume ( *default: increase by 5*).
+ - `volum_down` - decrease volume ( *default: decrease by 5*).
 
 
 ``` python
@@ -258,8 +258,8 @@ Simply create a variable ` player = media.player`
 
 # Volume 🔊
 >>> player.volume(50) # set media volume to 50
->>> player.volumeDown(5) # set media volume down 5 steps
->>> player.volumeUp(5) # set media volume up 5 steps
+>>> player.volume_up(5) # set media volume up 5 steps
+>>> player.volume_down(5) # set media volume down 5 steps
 
 ```
 
@@ -279,7 +279,7 @@ Simply create a variable ` player = media.player`
 
  > ## Download Album
 
-  -	 **media.downloadAlbum**
+  -	 **media.download_album**
         - __params__: `output`
 
             - *__output__* : directory to save song. *(default: current directory)*
@@ -293,7 +293,7 @@ Simply create a variable ` player = media.player`
 
 
 #Download full album
->>> media.downloadAlbum(output='directory_to_save_album')
+>>> media.download_album(output='directory_to_save_album')
 ```
 
 --- ---
