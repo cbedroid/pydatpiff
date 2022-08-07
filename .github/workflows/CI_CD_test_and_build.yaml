@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install apt prerequisites
-        run: sudo apt-get install python-dev libpq-dev vlc mpv
+        run: sudo apt-get install python-dev libpq-dev
       - name: Install Tox
         run: |
           pip install --upgrade tox setuptools
