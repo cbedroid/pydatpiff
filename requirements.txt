@@ -1,5 +1,4 @@
 bs4==0.0.1
-ipython
 mutagen==1.45.1
 pip-chill==1.0.1
 pylint==2.14.5

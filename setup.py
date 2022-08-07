@@ -21,7 +21,15 @@ setup(
         exclude=["pydatpiff.tests"],  # empty by default
     ),
     tests_require=["pytest==5.2.4"],
-    install_requires=open("requirements.txt").readlines(),
+    install_requires=[
+        "bs4",
+        "mutagen",
+        "pylint",
+        "pytest-cov",
+        "python-vlc",
+        "pyyaml",
+        "requests",
+    ],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 5 - Production/Stable",
