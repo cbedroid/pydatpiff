@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install apt prerequisites
-        run: apt-get install python-dev libpq-dev
+        run: sudo apt-get install python-dev libpq-dev
 
       - uses: actions/setup-python@v2
         with:
