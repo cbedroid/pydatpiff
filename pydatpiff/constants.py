@@ -1,0 +1,76 @@
+# base player state management keys
+# see: pydatpiff.backend.audio.baseplayer.BasePlayer.state
+player_state_keys = {
+    "loaded": "loaded",
+    "playing": "playing",
+    "paused": "paused",
+    "stopped": "stopped",
+    "system_stopped": "system_stopped",
+}
+
+# base player state symbols
+music_symbols = {
+    "playing": chr(9199),  # |>
+    "paused": chr(9208),  # ||
+    "stopped": chr(9209),  # []
+    "music": chr(9836),  # music note
+    "autoplay": chr(9871),  # loop
+}
+
+
+# Html unicode characters
+ampersands = [
+    "&quot;",  # ""
+    "&amp;",  # &
+    "&lt;",  # <
+    "&gt;",  # >
+    "&nbsp;",  # space
+    "&iexcl;",  # ¡
+    "&cent;",  # ¢
+    "&pound;",  # £
+    "&curren;",  # ¤
+    "&yen;",  # ¥
+    "&brvbar;",  # ¦
+    "&sect;",  # §
+    "&uml;",  # ¨
+    "&copy;",  # ©
+    "&ordf;",  # ª
+    "&laquo;",  # «
+    "&not;",  # ¬
+    "&shy;",  #
+    "&reg;",  # ®
+    "&macr;",  # ¯
+    "&deg;",  # °
+    "&plusmn;",  # ±
+    "&sup2",  #
+    "&sup3;",  # ³
+    "&acute;",  # ´
+    "&micro;",  # µ
+    "&para;",  # ¶
+    "&middot;",  # ·
+    "&cedil;",  # ¸
+    "&sup1;",  # ¹
+    "&ordm;",  # º
+    "&raquo;",  # »
+    "&frac14;",  # ¼
+    "&frac12;",  # ½
+    "&frac34;",  # ¾
+    "&iquest;",  # ¿
+    "&times;",  # ×
+    "&divide;",  # ÷
+    "&ETH;",  # Ð
+    "&eth;",  # ð
+    "&THORN;",  # Þ
+    "&thorn;",  # þ
+    "&AElig;",  # Æ
+    "&aelig;",  # æ
+    "&OElig;",  # Ø
+    "&oelig;",  # ø
+    "&Aring;",  # Å
+    "&Oslash;",  # Ø
+    "&Ccedil;",  # Ç
+    "&ccedil;",  # ç
+    "&szlig;",  # ß
+    "&Ntilde;",  # Ñ
+    "&ntilde;",  # ñ
+]
