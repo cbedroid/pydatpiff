@@ -1,60 +1,8 @@
 import os
 import sys
 
-from setuptools import find_packages, setup
+import setuptools
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pydatpiff"))
 
-setup(
-    name="Pydatpiff",
-    version="2.0.0",
-    author="cbedroid",
-    author_email="cbedroid1614@example.com",
-    url="https://pypi.org/project/pydatpiff/",
-    description="Unofficial Datpiff Mixtape player - Download and play the newest Hip-Hop and RnB Songs.",
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    license="MIT",
-    packages=find_packages(
-        where=".",
-        include=["pydatpiff*"],  # ["*"] by default
-        exclude=["pydatpiff.tests"],  # empty by default
-    ),
-    tests_require=[
-        "pytest",
-        "pytest-cov",
-        "pytest-mock",
-        "requests",
-        "bs4",
-        "flake8",
-        "black",
-        "isort",
-        "pre-commit",
-    ],
-    install_requires=[
-        "bs4",
-        "mutagen",
-        "pylint",
-        "pytest-cov",
-        "python-vlc",
-        "pyyaml",
-        "requests",
-    ],
-    classifiers=[
-        "License :: OSI Approved :: MIT License",
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "Intended Audience :: End Users/Desktop",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 4.0",
-        "Operating System :: OS Independent",
-        "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Multimedia :: Sound/Audio :: Players",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-    ],
-    zip_safe=False,
-)
+setuptools.setup()
