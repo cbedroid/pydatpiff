@@ -6,13 +6,13 @@
 
 **PyDatpiff**   -   🎶 Unofficial [Datpiff](https://www.datpiff.com) Music Application. Play and download the latest Hip-Hop and RnB songs.
   - supports windows, mac, and linux
-  - python 3.6 - above
+  - python 3.7 - above
 
 ## Dependencies
 
 **PyDatpiff requires:**
  - see requirements:  [requirements.txt](https://github.com/cbedroid/pydatpiff/blob/master/requirements.txt)
-- *python >= 3.6*
+- *python >= 3.7*
 
 ## Installation
 
