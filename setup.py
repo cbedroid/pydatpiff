@@ -3,7 +3,7 @@ import sys
 
 from setuptools import find_packages, setup
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pydatpiff"))
 
 setup(
     name="Pydatpiff",
