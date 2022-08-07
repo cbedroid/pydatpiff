@@ -21,8 +21,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Install apt prerequisites
+      - name: Install apt prerequisites for ubuntu
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install python-dev libpq-dev
+      - name: Install apt prerequisites for macos
+        if: matrix.os == 'macos-latest'
+        run : brew install python-dev libpq-dev
+      - name: Install apt prerequisites for windows
+        if : matrix.os == 'windows-latest'
+        run : choco install python-dev libpq-dev
 
       - uses: actions/setup-python@v2
         with:
