@@ -1,0 +1,9 @@
+bs4
+mutagen
+pip-chill
+pylint
+pylint
+pytest-cov
+python-vlc
+pyyaml
+requests

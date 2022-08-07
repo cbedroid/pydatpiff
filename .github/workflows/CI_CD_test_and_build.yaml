@@ -36,6 +36,6 @@ jobs:
         run: |
           pip install --upgrade tox setuptools
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
       - name: Run Tox tests
         run: tox -e tests
