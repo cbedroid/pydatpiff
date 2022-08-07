@@ -10,17 +10,28 @@ on:
 
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os:
           - ubuntu-latest
           - macos-latest
         python-version: [ '3.7', '3.8', '3.9']
-
-    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
+      - name: Install Ubuntu OS dependencies
+        if: ${{ matrix.os }} == "ubuntu-latest"
+        run: |
+            echo "Installing Ubuntu OS dependencies" && \
+            sudo apt-get update && sudo apt-get install -y python3-pip vlc libvlc-dev
+      - name: Install Mac OS dependencies
+        if: ${{ matrix.os }} == "macos-latest"
+        run: |
+                brew install python3
+                brew install python3-pip
+                brew install vlc
+                brew install libvlc
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Tox
