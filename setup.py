@@ -1,6 +1,9 @@
-#!/usr/bin/env python
+import os
+import sys
 
 from setuptools import find_packages, setup
+
+sys.path.insert(0, os.path.dirname(__file__))
 
 setup(
     name="Pydatpiff",
