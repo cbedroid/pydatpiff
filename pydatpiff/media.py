@@ -392,6 +392,8 @@ class Media:
         if isinstance(track, int):
             if track > len(self):
                 track = len(self)
+        else:
+            track = self.__index_of_song(track) + 1
 
         try:
             content = self._write_audio(track).read()

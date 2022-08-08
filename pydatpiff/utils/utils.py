@@ -112,7 +112,7 @@ class Select:
                 return min([val for val in options if choice in Object.strip_and_lower(val)])
 
             elif Object.is_string(options):
-                return options if choice == Object.strip_and_lower(options) else fallback
+                return options if choice in Object.strip_and_lower(options) else fallback
 
         except ValueError:
             if fallback:  # no value found, then return fallback
@@ -146,8 +146,23 @@ class Select:
 
     @classmethod
     def get_index_of(cls, choice, options):
+        """
+        Performs a per option, case-insensitive search on each option and return index of options that matches partial
+        or whole string.
+        e,g:
+            options = ['apple', 'orange', 'grape']
+            choice = 'org' or "orange"
+            return 1
+
+        :params:: choice,options
+            choice - user choice. datatype: str
+            options - list or dict object
+
+        Returns:
+            index of options
+        """
         for option in options:
             value = cls.by_choices(choice, option)
             if value:
-                return option.index(value)
+                return options.index(value)
         raise ValueError("Choice not found")
