@@ -3,10 +3,10 @@ from unittest.mock import Mock
 
 from pydatpiff.backend import scraper
 from pydatpiff.urls import Urls
-from tests.test_utils import BaseTest
+from tests.utils import BaseTest
 
 
-class Testscaper(BaseTest, TestCase):
+class TestScraper(BaseTest, TestCase):
     def setUp(self):
         content = self.get_request_content("mixtape")
         method = scraper.Session.method = Mock(autospec=True)

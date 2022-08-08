@@ -100,7 +100,8 @@ class Mixtapes(MixtapeScraper):
 
             self._user_selected = category  # capture user category input
             choice = Select.by_choices(category, Urls.category)
-            body = self._session.method("GET", choice)
+            url = Urls.category[choice]  # get the url for the category
+            body = self._session.method("GET", url)
         self._request_response = body
         return body
 

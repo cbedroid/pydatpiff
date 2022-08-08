@@ -4,18 +4,6 @@ import re
 import tempfile
 
 
-def get_human_readable_file_size(buf_size):
-    """Convert file size and returns user readable size"""
-    if buf_size == 0:
-        return "0B"
-
-    size_name = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-    change = int(math.floor(math.log(buf_size, 1024)))
-    power = math.pow(1024, change)
-    result = round(buf_size / power, 2)
-    return "%s %s" % (result, size_name[change])
-
-
 class Tmp(object):
     """
     Handle all temporary files created by the media player.
@@ -67,11 +55,23 @@ class File:
         return os.path.join(path, to)
 
     @staticmethod
-    def standardize_name(name):
+    def standardize_file_name(name):
         return re.sub(r"[^\w_\s\-.]", "", name)
 
     @staticmethod
     def write_to_file(filename, content, mode="wb"):
         with open(filename, mode) as f:
             f.write(content)
-            return True
+
+    @staticmethod
+    def get_human_readable_file_size(buf_size):
+        """Convert file size and returns user readable size"""
+        if buf_size == 0:
+            return "0B"
+
+        ext = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+        change = int(math.floor(math.log(buf_size, 1024)))
+        power = math.pow(1024, change)
+        calc = buf_size / power
+        file_size = round(calc, 2) if buf_size > 999 else int(calc)
+        return "%s%s" % (file_size, ext[change])

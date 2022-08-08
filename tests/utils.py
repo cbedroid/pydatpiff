@@ -1,7 +1,23 @@
 import os
+from functools import wraps
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest.mock import Mock
 
 PATH = os.path.dirname(os.path.abspath(__file__))
+
+
+def tmp_wrapper(func):
+    """Temp file wrapper that crates temporary directory and file"""
+
+    @wraps(func)
+    def inner(*args, **kwargs):
+        with TemporaryDirectory() as tempdir:
+            with NamedTemporaryFile(dir=tempdir, delete=False) as temp_file:
+                temp_file.write(b"Hello World")
+                temp_file.close()
+                return func(temp_file=temp_file.name, *args, **kwargs)
+
+    return inner
 
 
 class BaseTest:

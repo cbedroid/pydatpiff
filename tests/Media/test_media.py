@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 from pydatpiff import media, mixtapes
 from pydatpiff.errors import MediaError
-from tests.test_utils import BaseTest
+from tests.utils import BaseTest
 
 
 class TestMedia(BaseTest, TestCase):

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from pydatpiff import mixtapes
 from pydatpiff.errors import MixtapesError
-from tests.test_utils import BaseTest
+from tests.utils import BaseTest
 
 
 class TestMixtapes(BaseTest, TestCase):

@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 from pydatpiff.urls import Urls
 from pydatpiff.utils import request
 from pydatpiff.utils.request import Session
-from tests.test_utils import BaseTest
+from tests.utils import BaseTest
 
 
 class TestRequest(BaseTest, TestCase):

@@ -1,7 +1,7 @@
 import io
 import os
 
-from pydatpiff.utils.filehandler import File, Tmp, get_human_readable_file_size
+from pydatpiff.utils.filehandler import File, Tmp
 from pydatpiff.utils.utils import Object, Select, ThreadQueue, threader_wrapper
 
 from .backend.audio.player import Player
@@ -92,9 +92,11 @@ class Media:
         # We map an integer to an artist and str to a mixtape.
         if hasattr(self, "mixtapes"):
             if isinstance(choice, int):
-                selection = Select.get_index(choice, options=self.mixtapes.artists)
+                selection = Select.get_leftmost_index(choice, options=self.mixtapes.artists)
             else:
-                options = [self.mixtapes.artists, self.mixtapes.mixtapes]
+                options = self.mixtapes.artists.copy()
+                options.extend(self.mixtapes.mixtapes)
+
                 selection = Select.get_index_of(choice, options=options)
             return selection
 
@@ -174,7 +176,7 @@ class Media:
         results = ThreadQueue(Album.lookup_song, links).execute(song_name)
         if not results:
             Verbose("No song was found with the name: %s " % song_name)
-        results = Object.remove_none_value(results)
+        results = Object.remove_list_null_value(results)
         return results
 
     def __index_of_song(self, select):
@@ -186,7 +188,7 @@ class Media:
         """
         try:
             if isinstance(select, int):
-                return Select.get_index(select, self.songs)
+                return Select.get_leftmost_index(select, self.songs)
             return Select.get_index_of(select, self.songs)
         except MediaError:
             raise MediaError(5)
@@ -411,7 +413,7 @@ class Media:
             buffer = int(track_size / 5)
             start = int(buffer / 5)
             chunk = content[start : buffer + start]
-        size = get_human_readable_file_size(buffer)
+        size = File.get_human_readable_file_size(buffer)
 
         # write song to file
         File.write_to_file(self.__temp_file.name, chunk, mode="wb")
@@ -450,11 +452,11 @@ class Media:
         else:
             title = " - ".join((self.artist, song.strip() + ".mp3"))
 
-        title = File.standardize_name(title)
+        title = File.standardize_file_name(title)
         song_name = File.join(output, title)
 
         content = self._write_audio(song).read()
-        size = get_human_readable_file_size(len(content))
+        size = File.get_human_readable_file_size(len(content))
         File.write_to_file(song_name, content, mode="wb")
         screen.display_download_message(title, size)
 
@@ -471,7 +473,7 @@ class Media:
             return
 
         formatted_title = " - ".join((self.artist, self.album))
-        title = File.standardize_name(formatted_title)
+        title = File.standardize_file_name(formatted_title)
         filename = File.join(output, title)
 
         # make a directory to store all the album's songs

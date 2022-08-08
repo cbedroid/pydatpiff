@@ -52,20 +52,7 @@ class Object:
 
     @staticmethod
     def is_list(_type):
-        return isinstance(_type, list)
-
-    @classmethod
-    def remove_none_value(cls, _list):
-        return list(filter(None, _list))
-
-    @classmethod
-    def enumerate_it(cls, data, start=0):
-        """Return enumerate object"""
-        if cls.is_dict(data) or cls.is_list(data):
-            if cls.is_dict(data):
-                data = data.items()
-            return list(enumerate(data, start=start))
-        raise NotImplementedError("datatype is not a dictionary or list ")
+        return isinstance(_type, (list, tuple))
 
     @staticmethod
     def strip_and_lower(string):
@@ -73,22 +60,17 @@ class Object:
         return str(string).lower().strip()
 
     @classmethod
-    def lowered_dict(cls, data):
-        """Strip and lower keys in dictionary"""
-        if not cls.is_dict(data):
-            raise NotImplementedError("datatype is not a dictionary")
-
-        item = {}
-        for key, val in data.items():
-            item[cls.strip_and_lower(key)] = val
-        return item
+    def remove_list_null_value(cls, _list):
+        return list(filter(None, _list))
 
     @classmethod
-    def lowered_list(cls, data):
-        """Strip and lower string in list"""
-        if not cls.is_list(data):
-            raise NotImplementedError("datatype is not a List")
-        return [cls.strip_and_lower(x) for x in data]
+    def enumerate_options(cls, data, start=0):
+        """Return enumerate object"""
+        if cls.is_dict(data) or cls.is_list(data):
+            if cls.is_dict(data):
+                data = data.items()
+            return list(enumerate(data, start=start))
+        raise NotImplementedError("datatype is not a dictionary or list ")
 
 
 class Select:
@@ -102,43 +84,32 @@ class Select:
                                           is not found.
         """
         choice = Object.strip_and_lower(choice)
-
+        val = None
         try:
-
             if Object.is_dict(options):
-                return min([val for key, val in options.items() if choice in Object.strip_and_lower(key)])
+                val = min([key for key, val in options.items() if choice in Object.strip_and_lower(key)])
 
             elif Object.is_list(options):
-                return min([val for val in options if choice in Object.strip_and_lower(val)])
+                val = min([val for val in options if choice in Object.strip_and_lower(val)])
 
             elif Object.is_string(options):
-                return options if choice in Object.strip_and_lower(options) else fallback
+                val = options if choice in Object.strip_and_lower(options) else fallback
 
+            assert val is not None
         except ValueError:
             if fallback:  # no value found, then return fallback
-                return cls.by_choices(fallback, options=options, fallback=None)
+                return cls.by_choices(choice=fallback, options=options, fallback=None)
             raise ValueError("No value found for {}".format(choice))
-
-    @staticmethod
-    def by_int(choice, data):
-        """
-        Select choices by integer
-        :params:: choice,data
-            choice - user choice. datatype: str
-            data - list or dict object
-        """
-        try:
-            choice = int(choice)
-            results = Object.enumerate_it(data)
-            if Object.is_dict(data):
-                return results[choice][1][1]
-            return results[choice][1]
-        except:
-            pass
+        return val
 
     @classmethod
-    def get_index(cls, index, options):
-        """Select options by an index."""
+    def get_leftmost_index(cls, index, options):
+        """
+        Select options by its index and return the left most index, or index minus 1.
+        e.g. if index is 2 and options are [a,b,c,d,e] then return 1 (index 1).
+               [a, b, c, d, e] , so index 2 = `c`, so leftmost is 1.
+
+        """
         options_size = len(options)
         index -= 1
         index = 0 if (0 >= index or index > options_size) else index
@@ -161,8 +132,10 @@ class Select:
         Returns:
             index of options
         """
-        for option in options:
-            value = cls.by_choices(choice, option)
-            if value:
-                return options.index(value)
+        value = cls.by_choices(choice, options)
+        if value:
+            if Object.is_dict(options):
+                options = list(options)
+            return options.index(value)
+
         raise ValueError("Choice not found")
