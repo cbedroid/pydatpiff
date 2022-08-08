@@ -7,7 +7,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 def tmp_wrapper(func):
-    """Temp file wrapper that crates temporary directory and file"""
+    """wrapper function used to create a temporary directory and file for testing"""
 
     @wraps(func)
     def inner(*args, **kwargs):
