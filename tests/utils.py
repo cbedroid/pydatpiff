@@ -1,6 +1,7 @@
 import os
 from functools import wraps
 from tempfile import NamedTemporaryFile, TemporaryDirectory
+from unittest import TestCase
 from unittest.mock import Mock
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -20,7 +21,7 @@ def tmp_wrapper(func):
     return inner
 
 
-class BaseTest:
+class BaseTest(TestCase):
     # mixtapes and artists that are included in "mixtape" fixtures. see fixture/mixtape.html
     mixtape_list = ["A Gangsta's Pain: Reloaded", "Folarin II", "The Butterfly Effect"]
     artist_list = ["Moneybagg Yo", "Wale", "Fetty Wap"]
@@ -45,7 +46,8 @@ class BaseTest:
     # mixtape's search testing parameter
     mixtape_search_parameter = {"search": "Jay-Z"}
 
-    def get_request_content(self, namespace="mixtape", mode="r"):
+    @classmethod
+    def get_request_content(cls, namespace="mixtape", mode="r"):
         """Return testing web page content
 
         Raises:
@@ -60,7 +62,8 @@ class BaseTest:
         with open(file, mode) as pf:
             return pf.read()
 
-    def mocked_response(self, status=200, content="", json=None, **kwargs):
+    @classmethod
+    def mocked_response(cls, status=200, content="", json=None, **kwargs):
         session = Mock()
         session.raise_for_status = Mock()
         session.status_code = status

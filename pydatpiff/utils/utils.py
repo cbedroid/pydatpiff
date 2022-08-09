@@ -9,7 +9,7 @@ import threading
 from functools import wraps
 
 
-class ThreadPool:
+class ThreadPool:  # pragma: no cover
     pool = []
 
 
@@ -24,7 +24,7 @@ def threader_wrapper(f):
     return inner
 
 
-class ThreadQueue:
+class ThreadQueue:  # pragma: no cover
     def __init__(self, main_job, input_work, *args, **kwargs):
         self.input = input_work  # work to put in queue
         self.main_job = main_job  # job to perform with work

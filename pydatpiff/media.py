@@ -33,6 +33,9 @@ class Media:
             MediaError: Raises MediaError if mixtapes is not a subclass of pydatpiff.Mixtapes.
         """
         self.__setup(player)
+        # Check if mixtape is valid
+        self.__is_valid_mixtape(mixtapes)
+
         self._album_cover = None
         self.bio = None
         self._Mp3 = None
@@ -45,9 +48,6 @@ class Media:
         self._current_index = None
         self._selected_song = None
         self.__cache_storage = {}
-
-        # Check if mixtape is valid
-        self.__is_valid_mixtape(mixtapes)
 
         Verbose("Media initialized")
 
@@ -73,7 +73,7 @@ class Media:
 
     def __setup(self, player=None):
         if not hasattr(self, "__temp_file"):
-            Tmp.removeTmpOnStart()
+            Tmp.remove_temp_file_on_startup()
             self.__temp_file = Tmp.create()
 
         # Set the initial player. fallback to mpv if not specified
@@ -90,15 +90,16 @@ class Media:
         """
         # Map user selection according to the incoming datatype.
         # We map an integer to an artist and str to a mixtape.
-        if hasattr(self, "mixtapes"):
-            if isinstance(choice, int):
-                selection = Select.get_leftmost_index(choice, options=self.mixtapes.artists)
-            else:
-                options = self.mixtapes.artists.copy()
-                options.extend(self.mixtapes.mixtapes)
+        selection = None
+        if isinstance(choice, int):
+            selection = Select.get_leftmost_index(choice, options=self.mixtapes.artists)
+        else:
+            options = self.mixtapes.artists.copy()
+            options.extend(self.mixtapes.mixtapes)
 
-                selection = Select.get_index_of(choice, options=options)
-            return selection
+            selection = Select.get_index_of(choice, options=options)
+        assert selection is not None, "Invalid selection"
+        return selection
 
     def setMedia(self, mixtape):  # noqa
         """

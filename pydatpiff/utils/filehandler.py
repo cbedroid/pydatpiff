@@ -1,10 +1,13 @@
+import logging
 import math
 import os
 import re
 import tempfile
 
+logger = logging.getLogger(__name__)
 
-class Tmp(object):
+
+class Tmp(object):  # pragma: no cover
     """
     Handle all temporary files created by the media player.
 
@@ -23,19 +26,18 @@ class Tmp(object):
         return tempfile.NamedTemporaryFile(suffix="_datpiff", delete=False)
 
     @staticmethod
-    def removeTmpOnStart():
+    def remove_temp_file_on_startup():
         """remove all temporary file created by Datpiff on start up"""
         # every tmp file using media player will have this suffix
         suffix = "_datpiff"
         tmp_dir = tempfile.gettempdir()
-        if os.path.isdir(tmp_dir):
-            for lf in os.listdir(tmp_dir):
-                if suffix in lf:
-                    try:
-                        lf = "/".join((tmp_dir, lf))
-                        os.remove(lf)
-                    except:  # noqa
-                        pass
+        for filename in os.listdir(tmp_dir):
+            if suffix in filename:
+                try:
+                    filename = os.path.join(tmp_dir, filename)
+                    os.remove(filename)
+                except FileNotFoundError:
+                    logger.warning("File not found: %s", filename)
 
 
 class File:

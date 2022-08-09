@@ -44,6 +44,7 @@ class TestSelect(TestCase):
         self.assertEqual(Select.by_choices("a", {"a": "a", "b": "b"}), "a")
         self.assertEqual(Select.by_choices("a", {"a": "a", "b": "b"}, fallback="c"), "a")
         self.assertEqual(Select.by_choices("c", {"a": "a", "b": "b"}, fallback="b"), "b")
+        self.assertEqual(Select.by_choices("c", "aabbddd", fallback="b"), "b")
 
     def test_select_by_choices_method_raise_value_error(self):
         with self.assertRaises(ValueError):
@@ -69,6 +70,9 @@ class TestSelect(TestCase):
         self.assertEqual(Select.get_index_of("app", ["program", "application"]), 1)
         self.assertEqual(Select.get_index_of("a", {"a": "a", "b": "b"}), 0)
         self.assertEqual(Select.get_index_of("orange", {"apple": "apple", "orange": "peel"}), 1)
+
+        with self.assertRaises(ValueError):
+            Select.get_index_of("c", ["a", "b"])
 
 
 class TestFileClass(TestCase):
@@ -107,6 +111,7 @@ class TestFileClass(TestCase):
             self.assertEqual(f.read(), file_content)
 
     def test_file_human_readable_file_size_return_correct_size(self):
+        self.assertEqual(File.get_human_readable_file_size(0), "0B")
         self.assertEqual(File.get_human_readable_file_size(1), "1B")
         self.assertEqual(File.get_human_readable_file_size(255), "255B")
         self.assertEqual(File.get_human_readable_file_size(2555), "2.5KB")

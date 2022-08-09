@@ -35,7 +35,7 @@ class TestRequest(BaseTest, TestCase):
         cache = self.session.get_from_cache(url)
         self.assertEqual(cache, self.response)
 
-    @patch.object(request.Session, "put_in_cache", autospec=True)
+    @patch.object(request.Session, "put_in_cache")
     def test_request_clear_cache_when_MemoryError_occurs(self, put_in_cache):
         self.session._CACHE = {"some_url", "some_response"}
         put_in_cache.side_effect = MemoryError()

@@ -7,30 +7,57 @@ from pydatpiff.errors import MediaError
 from tests.utils import BaseTest
 
 
+class VLCPlayer:
+    pass
+
+
+class MPV:
+    pass
+
+
+class IncompatiblePlayerError(Exception):
+    pass
+
+
 class TestMedia(BaseTest, TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         # mocked mixtapes
-        mix_content = self.get_request_content("mixtape")
+        mix_content = cls.get_request_content("mixtape")
         mix_method = mixtapes.Session.method = Mock(autospec=True)
-        mix_method.return_value = self.mocked_response(content=mix_content)
-        self.mix = mixtapes.Mixtapes()
+        mix_method.return_value = cls.mocked_response(content=mix_content)
+        cls.mix = mixtapes.Mixtapes()
 
         # mocked media
-        self.content = self.get_request_content("media")
-        self.method = media.Session.method = Mock(autospec=True)
-        self.method.return_value = self.mocked_response(content=self.content)
-        self.media = media.Media(self.mix)
-        self.media.setMedia(1)
+        cls.content = cls.get_request_content("media")
+        cls.method = media.Session.method = Mock(autospec=True)
+        cls.method.return_value = cls.mocked_response(content=cls.content)
+        cls.media = media.Media(cls.mix)
+        cls.media.setMedia(1)
 
         # Add test artist and album (mixtape)
-        self.test_artist = self.artist_list[0]
-        self.test_album = self.mixtape_list[0]
+        cls.test_artist = cls.artist_list[0]
+        cls.test_album = cls.mixtape_list[0]
 
-    def test_media_init_method_parameter(self):
-
-        # Test init throws MediaError if mixtapes is not Mixtape  object
+    def test_media_raises_an_exception_when_mixtape_is_not_a_valid_mixtape_type(self):
         with self.assertRaises(MediaError):
             media.Media(object)
+
+    @patch.object(media.Player, "getPlayer")
+    def test_media_player_parameters_is_a_valid_media_player_type(self, mocked_get_player):
+        mocked_get_player.return_value = VLCPlayer()
+        my_media = media.Media(self.mix, player="vlc")
+        self.assertEqual(mocked_get_player.call_count, 1)
+        self.assertEqual(my_media.player.__class__, VLCPlayer)
+
+        mocked_get_player.return_value = MPV()
+        my_media = media.Media(self.mix, player="mpv")
+        self.assertEqual(mocked_get_player.call_count, 2)
+        self.assertEqual(my_media.player.__class__, MPV)
+
+    def test_media_len_method_return_correct_length(self):
+        self.assertEqual(len(self.media), len(self.song_list))
 
     @patch.object(media.ThreadQueue, "execute", autospec=True)
     def test_media_find_song_return_albums(self, queue):
