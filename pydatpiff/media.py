@@ -77,7 +77,6 @@ class Media:
             self.__temp_file = Tmp.create()
 
         # Set the initial player. fallback to mpv if not specified
-        player = player or "mpv"
         self.player = Player.getPlayer(player)
 
     def _select(self, choice):
