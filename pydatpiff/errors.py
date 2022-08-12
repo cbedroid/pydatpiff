@@ -71,6 +71,8 @@ class MediaError(Error):
         5: "song selection error",
         6: "unsupported media player",
         7: "media player not found",
+        8: "song not found",
+        9: "song unavailable",
     }
 
 
