@@ -27,7 +27,8 @@ class BaseTest(TestCase):
         "A Gangsta's Pain: Reloaded",
         "Folarin II",
         "WEIGHT OF THE WORLD",
-        "The Butterfly Effect" "Keys To The Streets",
+        "The Butterfly Effect",
+        "Keys To The Streets",
         "Comethazine The Album",
         "Kawhi Leonard Presents: Culture",
         "City Lyfe Da Ep",
@@ -67,6 +68,7 @@ class BaseTest(TestCase):
         "A Gangsta's Pain",
     ]
     # fmt: on
+    mp3_file = os.path.join(PATH, "fixtures", "test_song.mp3")
 
     # mixtape's search testing parameter
     mixtape_search_parameter = {"search": "Jay-Z"}
@@ -98,3 +100,11 @@ class BaseTest(TestCase):
         for k, v in kwargs.items():
             setattr(session, k, v)
         return session
+
+    @classmethod
+    def get_song_content(cls):
+        """Return mp3 sample file path"""
+        if not os.path.isfile(cls.mp3_file):
+            raise FileExistsError("{} sample file not found".format(cls.mp3_file))
+        with open(cls.mp3_file, "rb") as mp3:
+            return mp3.read()

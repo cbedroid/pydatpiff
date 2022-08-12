@@ -77,15 +77,15 @@ class TestSelect(TestCase):
 
 class TestFileClass(TestCase):
     @tmp_wrapper
-    def test_file_is_dir_return_whether_path_is_dir(self, temp_file=None):
+    def test_file_is_dir_method_return_whether_path_is_dir(self, temp_file=None):
         dir_name = os.path.dirname(temp_file)
         self.assertTrue(File.is_dir(dir_name))
 
     @tmp_wrapper
-    def test_file_is_file_return_whether_path_is_file(self, temp_file=None):
+    def test_file_is_file_method_return_whether_path_is_file(self, temp_file=None):
         self.assertTrue(File.is_file(temp_file))
 
-    def test_file_join_join_path_correctly(self, temp_file=None):
+    def test_file_join_method_join_path_correctly(self, temp_file=None):
         work_dir = os.getcwd()
         file_name = "some-mp3-file"
         expected = os.path.join(work_dir, file_name)
@@ -95,14 +95,14 @@ class TestFileClass(TestCase):
         self.assertNotEqual(File.join(path=work_dir, to=file_name), not_expected)
         self.assertEqual(File.join(path="work_dir", to=file_name), expected)
 
-    def test_file_standardize_file_name_correctly(self):
+    def test_file_standardize_method_file_name_correctly(self):
         self.assertEqual(File.standardize_file_name("(#*^some-file"), "some-file")
         unwanted_charaters = '!@#$%^&*()+{}|:"<>?`~'
         for char in unwanted_charaters:
             self.assertEqual(File.standardize_file_name(f"({char}some-file.mp3"), "some-file.mp3")
 
     @patch("builtins.open", new_callable=mock_open, read_data=b"some-mp3-content")
-    def test_write_to_file_write_mp3_content_to_file_correctly(self, mocked_file):
+    def test_write_to_file_method_write_mp3_content_to_file_correctly(self, mocked_file):
         file_name = "some-file.mp3"
         file_content = b"some-mp3-content"
 
@@ -110,7 +110,7 @@ class TestFileClass(TestCase):
         with open(file_name, "rb") as f:
             self.assertEqual(f.read(), file_content)
 
-    def test_file_human_readable_file_size_return_correct_size(self):
+    def test_file_human_readable_file__method_returns_correct_file_size(self):
         self.assertEqual(File.get_human_readable_file_size(0), "0B")
         self.assertEqual(File.get_human_readable_file_size(1), "1B")
         self.assertEqual(File.get_human_readable_file_size(255), "255B")
