@@ -60,8 +60,8 @@ class File:
     def standardize_file_name(name):
         return re.sub(r"[^\w_\s\-.]", "", name)
 
-    @staticmethod
-    def write_to_file(filename, content, mode="wb"):
+    @classmethod
+    def write_to_file(cls, filename, content, mode="wb"):
         with open(filename, mode) as f:
             f.write(content)
 
