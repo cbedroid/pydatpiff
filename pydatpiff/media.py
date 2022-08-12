@@ -6,6 +6,7 @@ from pydatpiff.utils.utils import Object, Select, ThreadQueue, threader_wrapper
 
 from .backend.audio.player import Player
 from .backend.mediasetup import Album, Mp3
+from .constants import verbose_message
 from .errors import MediaError
 from .frontend import screen
 from .mixtapes import Mixtapes
@@ -49,7 +50,7 @@ class Media:
         self._selected_song = None
         self.__cache_storage = {}
 
-        Verbose("Media initialized")
+        Verbose(verbose_message["MEDIA_INITIALIZED"])
 
         if pre_select:  # Run setMedia with argument here
             # This step is optional for users, but can save an extra setup
@@ -90,7 +91,12 @@ class Media:
         # Map user selection according to the incoming datatype.
         # We map an integer to an artist and str to a mixtape.
         selection = None
+
         if isinstance(choice, int):
+            # Adjust the selection to the correct index.
+            total_mixtape = len(self.mixtapes)
+            if choice > total_mixtape:
+                choice = total_mixtape
             selection = Select.get_leftmost_index(choice, options=self.mixtapes.artists)
         else:
             options = self.mixtapes.artists.copy()
@@ -118,15 +124,9 @@ class Media:
 
         mixtape_index = self._select(mixtape)
 
-        # set up all Album's Info
-        total_mixtape = len(self.mixtapes) - 1
-        if mixtape_index > total_mixtape:
-            mixtape_index = total_mixtape
-
         # set Media's Mixtapes object attributes
         url = self.mixtapes._links[mixtape_index]  # noqa
         self.url = "".join((Urls.datpiff["base"], url))
-
         self.artist = self.mixtapes.artists[mixtape_index]
         self.album_cover = self.mixtapes.album_covers[mixtape_index]
 
@@ -137,13 +137,13 @@ class Media:
         # get the album's uploader and bio
         self.uploader = getattr(self.album, "uploader", "unknown uploader")
         self.bio = getattr(self.album, "uploader", "no bio")
-        Verbose("Setting Media to %s - %s" % (self.artist, self.album))
+        Verbose(verbose_message["MEDIA_SET"] % " - ".join((self.artist, self.album)))
 
     def __is_valid_mixtape(self, instance):
-        """Verify subclass is an instance of mixtapes' class
+        """Verify media mixtape subclass is an instance of mixtapes' class
 
         Args:
-            instance {instance class} -- pydatpiff's Mixtapes instance
+            instance {instance class} -- Pydatpiff Mixtapes instance
 
         Returns:
             Boolean -- True or False if instance is subclass of pydatpiff Mixtape class
@@ -170,12 +170,12 @@ class Media:
         # https://www.youtube.com/watch?v=R2ipPgrWypI&t=1748s at 55:00.
 
         song_name = Object.strip_and_lower(name)
-        Verbose("\nSearching for song: %s ..." % song_name)
+        Verbose("\n" + verbose_message["SEARCH_SONG"] % song_name)
         links = self.mixtapes.links
         links = list(enumerate(links, start=1))
         results = ThreadQueue(Album.lookup_song, links).execute(song_name)
         if not results:
-            Verbose("No song was found with the name: %s " % song_name)
+            Verbose(verbose_message["SONG_NOT_FOUND"] % song_name)
         results = Object.remove_list_null_value(results)
         return results
 
@@ -243,7 +243,7 @@ class Media:
             songs = self.songs
             [Verbose("%s: %s" % (a + 1, b)) for a, b in enumerate(songs)]
         except TypeError:
-            Verbose("Please set Media first\nNo Artist name")
+            Verbose(verbose_message["MEDIA_NOT_SET"])
 
     @property
     def song(self):
@@ -261,7 +261,7 @@ class Media:
             self._selected_song = self.songs[index]
             self._current_index = index
         else:
-            Verbose("\n\t song was not found")
+            Verbose(verbose_message["SONG_NOT_FOUND"] % name)
 
     def _cache_song(self, song, content):
         """
@@ -349,12 +349,12 @@ class Media:
         if self.autoplay:
             total_songs = len(self)
             if not self.song:
-                Verbose("Must play a song before setting autoplay")
+                Verbose(verbose_message["AUTO_PLAY_NO_SONG"])
                 return
 
             track_number = self.__index_of_song(self.song) + 2
             if track_number > total_songs:
-                Verbose("AutoPlayError: The current track is the last track on the album")
+                Verbose(verbose_message["AUTO_PLAY_LAST_SONG"])
                 self.autoplay = False
                 return
 
@@ -365,12 +365,11 @@ class Media:
                     next_track = current_track + 1
 
                     if next_track > total_songs:
-                        Verbose("No more songs to play")
+                        Verbose(verbose_message["AUTO_PLAY_LAST_SONG"])
                         self.autoplay = False
                         break
 
-                    Verbose("Loading next track")
-                    Verbose("AUTO PLAY ON")
+                    Verbose(verbose_message["AUTO_PLAY_NEXT_SONG"])
                     self.play(next_track)
                     while self.player._state["stopped"]:  # noqa
                         pass
@@ -469,7 +468,7 @@ class Media:
         if not output:
             output = os.getcwd()
         elif not os.path.isdir(output):
-            Verbose("Invalid directory: %s" % output)
+            Verbose(verbose_message["INVALID_DIRECTORY"])
             return
 
         formatted_title = " - ".join((self.artist, self.album))
@@ -480,4 +479,4 @@ class Media:
         if not os.path.isdir(filename):
             os.mkdir(filename)
         ThreadQueue(self.download, self.songs, filename).execute()
-        Verbose("\n%s %s saved" % (self.artist, self.album))
+        Verbose("\n" + verbose_message["SAVE_SONG"] % (self.artist + " " + self.album))

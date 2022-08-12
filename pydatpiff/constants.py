@@ -74,3 +74,16 @@ ampersands = [
     "&Ntilde;",  # Ñ
     "&ntilde;",  # ñ
 ]
+
+verbose_message = {
+    "MEDIA_INITIALIZED": "Media initialized",
+    "MEDIA_SET": "Setting media to %s",
+    "MEDIA_NOT_SET": "Media not set.\nPlease `setMedia` to display songs",
+    "SEARCH_SONG": "Searching for song: %s ...",
+    "SONG_NOT_FOUND": "No song was found with the name: %s was found",
+    "INVALID_DIRECTORY": "Invalid directory: %s",
+    "SAVE_SONG": "Saving song: %s ...",
+    "AUTO_PLAY_NO_SONG": "Play a song first to enable autoplay",
+    "AUTO_PLAY_NEXT_SONG": "Playing next song",
+    "AUTO_PLAY_LAST_SONG": "No more songs left to autoplay",
+}
