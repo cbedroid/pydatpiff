@@ -23,8 +23,33 @@ def tmp_wrapper(func):
 
 class BaseTest(TestCase):
     # mixtapes and artists that are included in "mixtape" fixtures. see fixture/mixtape.html
-    mixtape_list = ["A Gangsta's Pain: Reloaded", "Folarin II", "The Butterfly Effect"]
-    artist_list = ["Moneybagg Yo", "Wale", "Fetty Wap"]
+    mixtape_list = [
+        "A Gangsta's Pain: Reloaded",
+        "Folarin II",
+        "WEIGHT OF THE WORLD",
+        "The Butterfly Effect" "Keys To The Streets",
+        "Comethazine The Album",
+        "Kawhi Leonard Presents: Culture",
+        "City Lyfe Da Ep",
+        "LP!",
+        "Grown Man Axis",
+        "Resurrected Rituals",
+        "Sleep When You're Dead",
+    ]
+    artist_list = [
+        "Moneybagg Yo",
+        "Wale",
+        "Maxo Kream",
+        "Fetty Wap",
+        "Luh Soldier & Zaytoven",
+        "Comethazine",
+        "Culture Jam",
+        "CeOMr.stunna",
+        "JPEGMAFIA",
+        "Blackdice",
+        "Lord Infamous",
+        "J2CooL",
+    ]
 
     # fmt: off
     # songs from MoneyBagg Yo - A Gangsta's Pain: Reloaded
