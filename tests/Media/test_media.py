@@ -1,6 +1,6 @@
 import os
 import re
-from unittest import TestCase
+from tempfile import TemporaryDirectory as TempDir
 from unittest.mock import Mock, PropertyMock, patch
 
 from pydatpiff import media, mixtapes
@@ -17,7 +17,7 @@ class MPV:
     pass
 
 
-class TestMedia(BaseTest, TestCase):
+class BaseMediaTest(BaseTest):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -32,15 +32,11 @@ class TestMedia(BaseTest, TestCase):
         cls.method = media.Session.method = Mock(autospec=True)
         cls.method.return_value = cls.mocked_response(content=cls.media_request_content)
 
+        # Un-mocked media
+        cls.unmocked_media = media.Media(cls.mix)
+        cls.unmocked_media.setMedia(1)
+
         cls.media = media.Media(cls.mix)
-
-        """
-        Mocked media write_to_file method - prevent writing to file on tester actual machine
-
-        Mocked by default to prevent actual writing to file. Probing this method should be
-        done at the function level using additional `patches` or `Mocks`.
-        """
-        cls.media.write_to_file = Mock(return_value=cls.get_song_content(), autospec=True)
 
         # Mocked retrieving song name and song content
         cls.mock_get_audio = cls.media._get_audio_track = Mock(
@@ -55,9 +51,15 @@ class TestMedia(BaseTest, TestCase):
         cls.test_artist = cls.artist_list[0]
         cls.test_album = cls.mixtape_list[0]
 
+
+class TestMedia(BaseMediaTest):
     def test_media_raises_an_exception_when_mixtape_is_not_a_valid_mixtape_type(self):
         with self.assertRaises(MediaError):
             media.Media(object)
+
+        with self.assertRaises(MediaError) as context:
+            media.Media()
+            self.assertEqual(context.exception.code, 1)
 
     @patch.object(media.Player, "getPlayer")
     def test_media_player_parameters_is_a_valid_media_player_type(self, mocked_get_player):
@@ -156,6 +158,28 @@ class TestMedia(BaseTest, TestCase):
         # test songs total is correct
         self.assertCountEqual(self.song_list, songs)
 
+    @patch.object(media, "Verbose", autospec=True)
+    def test_media_song_is_set_properly(self, mocked_verbose):
+        media_player = media.Media(self.mix)
+        media_player.setMedia(self.test_album)
+
+        media_player.song = self.song_list[0]
+        self.assertEqual(media_player.song, self.song_list[0])
+
+        # test error message when song is not found
+        media_player.song = "some-unknown-song"
+        mocked_verbose.assert_called_with(verbose_message["SONG_NOT_FOUND"] % "some-unknown-song")
+
+    @patch.object(media, "Verbose", autospec=True)
+    def test_show_songs_method_print_all_songs(self, mocked_verbose):
+        self.media.show_songs()
+        self.assertEqual(mocked_verbose.call_count, len(self.song_list))
+
+        # test verbose message when media is not set to an album
+        media_player = media.Media(self.mix)
+        media_player.show_songs()
+        mocked_verbose.assert_called_with(verbose_message["MEDIA_NOT_SET"])
+
     @patch.object(media.Media, "song", new_callable=PropertyMock)
     def test_play_song_by_index_plays_correct_song(self, mocked_song):
         # test play song by referencing song index
@@ -229,15 +253,19 @@ class TestMedia(BaseTest, TestCase):
     @patch.object(media.Media, "song", new_callable=PropertyMock)
     @patch.object(media.File, "write_to_file", autospec=True)
     @patch.object(media, "Verbose", autospec=True)
-    def test_download_song_with_parameters_downloads_correct_song(self, mocked_verbose, mocked_write_file, mocked_song):
-        # test download song by referencing partial song mame
+    @patch.object(media.screen, "display_download_message", autospec=True)
+    @patch.object(media.File, "get_human_readable_file_size", autospec=True)
+    def test_download_song_with_parameters_downloads_correct_song(
+        self, mocked_size, mocked_screen, mocked_verbose, mocked_write_file, mocked_song
+    ):
+        mocked_write_file.return_value = ""
         mocked_song.return_value = self.song_list[0]
+        mocked_size.return_value = "3MB"
         self.media.download(self.song_list[0], rename="new_name.mp3")
-        self.assertEqual(self.media.song, self.song_list[0])
 
-        song_full_path = os.path.join(os.getcwd(), "new_name.mp3")
-        mocked_write_file.assert_called_with(song_full_path, self.get_song_content(), mode="wb")
+        self.assertEqual(self.media.song, self.song_list[0])
         mocked_verbose.assert_not_called()
+        mocked_screen.assert_called_with(f"{self.artist_list[0]} - new_name.mp3", "3MB")
 
     @patch.object(media.Media, "song", new_callable=PropertyMock)
     @patch.object(media.File, "write_to_file", autospec=True)
@@ -264,3 +292,52 @@ class TestMedia(BaseTest, TestCase):
         self.media.download(self.song_list[0][:3].upper())
         self.assertEqual(self.media.song, self.song_list[0])
         mocked_verbose.assert_not_called()
+
+    def test_download_album_downloads_correct_songs(self):
+        mp = media.Media(self.mix)
+        mp.setMedia(1)
+        tmp_dir = TempDir()
+        mp.download_album(output=tmp_dir.name)
+        self.assertEqual(mp.songs, self.song_list)
+        songs_in_tmp_dir = os.listdir(tmp_dir.name)
+        self.assertEqual(len(songs_in_tmp_dir), len(self.song_list))
+
+    def test_write_audio_method_return_correct_song_content(self):
+        # test write audio method returns correct song content
+        song_content = self.media._write_audio(self.song_list[0])
+        self.assertEqual(song_content, self.get_song_content())
+
+        song_content = self.media._write_audio(0)
+        self.assertEqual(song_content, self.get_song_content())
+
+    def test_write_audio_method_return_empty_result_when_track_not_found(self):
+        # test write audio method raise MediaError when track not found by imdex
+        results = self.unmocked_media._write_audio("abcdefg")
+        self.assertIsNone(results)
+
+    @patch.object(media.Media, "mp3_urls", new_callable=PropertyMock)
+    @patch.object(media.Media, "_index_of_song", return_value=100, autospec=True)
+    def test_write_audio_method_return_None_when_track_not_found(self, mocked_index, mocked_urls):
+        mocked_urls.return_value = []
+        audio = self.unmocked_media._write_audio(10)
+        self.assertIsNone(audio)
+
+    def test_media_cache_songs_that_have_already_been_played_or_download(self):
+        cached_key = "-".join((self.artist_list[0], self.song_list[0]))
+        self.media._cache_song(cached_key, self.get_song_content())
+
+        cached_song = self.media._retrieve_song_from_cache(cached_key)
+        self.assertEqual(cached_song, self.get_song_content())
+
+
+class TestMediaPrivateMethod(BaseMediaTest):
+    def test_media_index_of_song_method_with_integer_type(self):
+        # test media index of song method with integer type
+        self.assertEqual(self.media._index_of_song(1), 0)
+
+    def test_media_index_of_song_method_raises_media_error_when_called_with_invalid_type(
+        self,
+    ):
+        with self.assertRaises(MediaError) as context:
+            self.media._index_of_song(object)
+            self.assertEqual(context.exception.code, 5)

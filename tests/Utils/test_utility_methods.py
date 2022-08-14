@@ -89,11 +89,12 @@ class TestFileClass(TestCase):
         work_dir = os.getcwd()
         file_name = "some-mp3-file"
         expected = os.path.join(work_dir, file_name)
-        self.assertEqual(File.join(to=file_name), expected)
+        self.assertEqual(File.join(path=work_dir, to=file_name), expected)
 
-        not_expected = "some-random-dir/" + file_name
-        self.assertNotEqual(File.join(path=work_dir, to=file_name), not_expected)
-        self.assertEqual(File.join(path="work_dir", to=file_name), expected)
+    def test_file_join_method_raise_FileNotFound_when_directory_is_not_found(self):
+        invalid_directory = "some-random-dir/"
+        with self.assertRaises(FileNotFoundError):
+            File.join(path=invalid_directory, to="some-file")
 
     def test_file_standardize_method_file_name_correctly(self):
         self.assertEqual(File.standardize_file_name("(#*^some-file"), "some-file")
