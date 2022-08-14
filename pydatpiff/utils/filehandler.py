@@ -51,9 +51,10 @@ class File:
         return os.path.isfile(path)
 
     @classmethod
-    def join(cls, path="", to=""):
+    def join(cls, path=None, to=""):
+        path = path or os.getcwd()
         if not cls.is_dir(path):
-            path = os.getcwd()
+            raise FileNotFoundError(f"{path} is not a directory")
         return os.path.join(path, to)
 
     @staticmethod

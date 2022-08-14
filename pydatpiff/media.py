@@ -67,9 +67,10 @@ class Media:
         return "{}({})".format(self.__class__.__name__, self.mixtapes.__class__)
 
     def __len__(self):
-        if hasattr(self, "songs"):
+        try:
             return len(self.songs)
-        else:
+        except MediaError:
+            Verbose(verbose_message["MEDIA_NOT_SET"])
             return 0
 
     def __setup(self, player=None):
@@ -174,7 +175,7 @@ class Media:
         Verbose("\n" + verbose_message["SEARCH_SONG"] % song_name)
         links = self.mixtapes.links
         links = list(enumerate(links, start=1))
-        results = ThreadQueue(Album.lookup_song, links).execute(song_name)
+        results = ThreadQueue(Album.lookup_song, links).execute(song=song_name)
         if not results:
             Verbose(verbose_message["SONG_NOT_FOUND"] % song_name)
         results = Object.remove_list_null_value(results)
@@ -191,7 +192,7 @@ class Media:
             if isinstance(select, int):
                 return Select.get_leftmost_index(select, self.songs)
             return Select.get_index_of(select, self.songs)
-        except MediaError:
+        except ValueError:
             raise MediaError(5)
 
     @property
@@ -228,8 +229,8 @@ class Media:
     @property
     def songs(self):
         """Return all songs from album."""
-        if not hasattr(self, "_Mp3"):
-            extra_message = '\nSet media by calling -->  Media.setMedia("some_mixtape_name")'
+        if self._Mp3 is None:
+            extra_message = '\nSet media by calling -->  Media.setMedia("album-name")'
             raise MediaError(3, extra_message)
         return self._Mp3.songs
 
@@ -241,9 +242,9 @@ class Media:
     def show_songs(self):
         """Pretty way to Print all song names"""
         try:
-            songs = self.songs
-            [Verbose("%s: %s" % (a + 1, b)) for a, b in enumerate(songs)]
-        except TypeError:
+            for index, song in enumerate(self.songs, start=1):
+                Verbose("%s: %s" % (index, song))
+        except MediaError:
             Verbose(verbose_message["MEDIA_NOT_SET"])
 
     @property
@@ -254,14 +255,14 @@ class Media:
     @song.setter
     def song(self, name):
         """
-        Set current song
-        name - name of song or song's index
+        Set the current song to the song name or index.
+        :param name: - song name or index of song
         """
-        index = self._index_of_song(name)
-        if index is not None:
+        try:
+            index = self._index_of_song(name)
             self._selected_song = self.songs[index]
             self._current_index = index
-        else:
+        except (ValueError, MediaError):
             Verbose(verbose_message["SONG_NOT_FOUND"] % name)
 
     def _cache_song(self, song, content):
@@ -289,9 +290,8 @@ class Media:
             Http response : A http response containing the song's audio contents.
         """
         requested_song = "-".join((self.artist, song))
-        if hasattr(self, "__cache_storage"):
-            if requested_song in self.__cache_storage:
-                return self.__cache_storage.get(requested_song)
+        if requested_song in self.__cache_storage:
+            return self.__cache_storage.get(requested_song)
 
     def _write_audio(self, track):
         """Write mp3 audio content to IO Bytes stream.
@@ -307,10 +307,10 @@ class Media:
             if selection is None:
                 raise MediaError("Song not found")
 
-            self._song_index = selection
             link = self.mp3_urls[selection]
             song_name = self.songs[selection]
-        except (IndexError, ValueError):
+            self._song_index = selection
+        except:  # noqa
             return
 
         self.song = selection + 1
@@ -469,16 +469,14 @@ class Media:
 
         # Handles song's renaming
         if rename:
-            title, _ = os.path.splitext(rename)
-            title = title.strip() + ".mp3"
-        else:
-            title = " - ".join((self.artist, song.strip() + ".mp3"))
+            song, _ = os.path.splitext(rename)
+        title = " - ".join((self.artist, song.strip() + ".mp3"))
 
-        title = File.standardize_file_name(title)
-        song_name = File.join(output, title)
+        file_name = File.standardize_file_name(title)
+        file_name = File.join(output, file_name)
 
         size = File.get_human_readable_file_size(len(content))
-        File.write_to_file(song_name, content, mode="wb")
+        File.write_to_file(file_name, content, mode="wb")
         screen.display_download_message(title, size)
 
     def download_album(self, output=None):
@@ -490,15 +488,12 @@ class Media:
         if not output:
             output = os.getcwd()
         elif not os.path.isdir(output):
-            Verbose(verbose_message["INVALID_DIRECTORY"])
+            Verbose(verbose_message["INVALID_DIRECTORY"] % output)
             return
 
-        formatted_title = " - ".join((self.artist, self._album_name))
-        title = File.standardize_file_name(formatted_title)
-        filename = File.join(output, title)
-
-        # make a directory to store all the album's songs
-        if not os.path.isdir(filename):
-            os.mkdir(filename)
-        ThreadQueue(self.download, self.songs, filename).execute()
-        Verbose("\n" + verbose_message["SAVE_SONG"] % (self.artist + " " + self.album))
+        # must follow `download` method's arguments order
+        ThreadQueue(
+            self.download,
+            self.songs,
+        ).execute(rename=None, output=output)
+        Verbose("\n" + verbose_message["SAVE_ALBUM"] % (self.artist + " " + self.album.name, output))

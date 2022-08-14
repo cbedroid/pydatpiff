@@ -3,10 +3,11 @@
     These methods will be used throughout the whole program.
 
 """
-import concurrent.futures as cf
 import sys  # noqa: F401
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
+from typing import List, Tuple, Union
 
 
 class ThreadPool:  # pragma: no cover
@@ -25,19 +26,31 @@ def threader_wrapper(f):
 
 
 class ThreadQueue:  # pragma: no cover
-    def __init__(self, main_job, input_work, *args, **kwargs):
-        self.input = input_work  # work to put in queue
+    def __init__(self, main_job, input_work: Union[Tuple, List], *args, **kwargs):
+        """
+        This class will be used to execute concurrent jobs.
+        The main job will be executed with the input work.
+        The input work will be a list of work to be executed.
+        :param input_work: input work to perform the main job with.
+        """
         self.main_job = main_job  # job to perform with work
+        self.input_work = input_work
 
     def execute(self, *args, **kwargs):
+        """
+        This method will execute the main job with the input work.
+        args and kwargs  are additonal arguments kwargs
+        :param args: args to pass to the main job.
+        :param kwargs: kwargs to pass to the main job.
 
-        with cf.ThreadPoolExecutor() as ex:
+        """
+        with ThreadPoolExecutor() as executor:
             if args or kwargs:
-                args = tuple(args) * len(self.input)
-                kwargs = list(dict(kwargs) for _ in range(len(self.input)))
-                data = ex.map(self.main_job, self.input, args, kwargs)
+                data = executor.map(
+                    lambda work: self.main_job(work, *args, **kwargs), [work for work in self.input_work]
+                )
             else:
-                data = ex.map(self.main_job, self.input)
+                data = executor.map(self.main_job, self.input_work)
         return [x for x in data]
 
 
