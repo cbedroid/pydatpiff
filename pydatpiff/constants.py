@@ -90,3 +90,9 @@ verbose_message = {
     "AUTO_PLAY_NEXT_SONG": "Playing next song",
     "AUTO_PLAY_LAST_SONG": "No more songs left to autoplay",
 }
+
+SERVER_DOWN_MSG = (
+    "\n\t--- UNOFFICIAL DATPIFF MESSAGE --"
+    "\nSorry, we encounter a problem with our server!"
+    " Please try again later."
+)

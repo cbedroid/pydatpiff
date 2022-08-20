@@ -142,7 +142,6 @@ class MixtapeScraper:
         pagination = self._soup.find(class_="pagination")
         if not pagination:
             # cache the first page and return the initial response url
-            print("No pagination found")
             self._parse_mixtape_page(self._base_response.url)
             return [self._base_response.url]
 
@@ -154,19 +153,15 @@ class MixtapeScraper:
             this request, since our `Session` will cache the response if it has already been requested.
         """
         page_links = pagination.find(class_="links").findAll("a")
-        for link in page_links:
+        page_links = [BASE_URL + link.get("href") for link in page_links]
+        for page_number, link in enumerate(page_links, start=1):
             # get the page link and parse it
-            link = link.get("href")
-            if not link:
-                continue
-            # create the full url
-            mixtape_list_url = "".join((BASE_URL, link))
-            self._parse_mixtape_page(mixtape_list_url)
+            self._parse_mixtape_page(link)
 
             # If the max mixtapes is reached, then return the content
             # from the current page
             if self.total_mixtapes >= self._MIXTAPE_LIMIT:
-                return mixtape_list_url
+                return page_links[:page_number]
 
         try:
             # If the max mixtapes is not reached, then return the last page of mixtapes
@@ -174,7 +169,7 @@ class MixtapeScraper:
         except IndexError:
             # if all fails, then return the initial url
             self._parse_mixtape_page(self._base_response.url)
-            return self._base_response.url
+            return [self._base_response.url]
 
     def _request_get(self, url):
         """

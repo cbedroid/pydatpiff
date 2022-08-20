@@ -1,19 +1,13 @@
 import re
 import warnings
 
+from pydatpiff.constants import SERVER_DOWN_MSG
 from pydatpiff.errors import DatpiffError, Mp3Error
 from pydatpiff.urls import Urls
 from pydatpiff.utils.request import Session
 from pydatpiff.utils.utils import Object
 
 from .scraper import MediaScraper
-
-SERVER_DOWN_MSG = (
-    "\n\t--- UNOFFICIAL DATPIFF MESSAGE --"
-    "\nSorry, Its seems that Datpiff's server is down."
-    " Please check back later "
-)
-# warnings.
 
 
 class DatpiffPlayer:
@@ -79,11 +73,7 @@ class DatpiffPlayer:
         #      If the url endpoint is found in the cached, the request
         #      will NOT be recalled.  Instead, the cached response will be returned.
         url = self.build_album_url(self.album_ID)
-        try:
-            return self._session.method("GET", url).text
-        except:
-            warnings.warn(SERVER_DOWN_MSG)
-            raise DatpiffError(1, "\nPlease check back later.")
+        return self._session.method("GET", url).text
 
     @property
     def album_ID(self):
@@ -114,14 +104,15 @@ class Album(DatpiffPlayer):
         Album's name and songs
     """
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "_session"):
-            cls._session = Session()
-        return super(Album, cls).__new__(cls)
+    _session = Session()
 
     def __init__(self, link):
         self.link = "".join((Urls.datpiff["album"], link))
-        super(Album, self).__init__(self.link)
+        try:
+            super(Album, self).__init__(self.link)
+        except TypeError:
+            warnings.warn(SERVER_DOWN_MSG)
+            raise DatpiffError(1, SERVER_DOWN_MSG)
 
     def __str__(self):
         return self.name
