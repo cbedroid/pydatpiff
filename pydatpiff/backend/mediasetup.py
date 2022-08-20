@@ -1,5 +1,4 @@
 import re
-import warnings
 
 from pydatpiff.constants import SERVER_DOWN_MSG
 from pydatpiff.errors import DatpiffError, Mp3Error
@@ -11,39 +10,66 @@ from .scraper import MediaScraper
 
 
 class DatpiffPlayer:
-    """Datpiff's frontend media player object"""
+    """
+    Datpiff's frontend media player object
+    """
 
     # Flag for mobile's version.
     # Fallback if desktop version is not working ('website issue')
     _USE_MOBILE = False
 
     def __init__(self, link):
+        raise NotImplementedError("This class is not yet implemented")
+
+    @property
+    def name(self):
+        # for desktop version issue we will use the mobile version
+        try:
+            return (
+                re.search(r'og:title"\s*content\="(.*[\w\s]*)Mixtape*"', self.embedded_player_content).group(1).strip()
+            )
+        except AttributeError:
+            return re.search(r'title">(.*[\w\s]*)</div', self.embedded_player_content).group(1).strip()
+        except:
+            raise Mp3Error(3, "Could not find album's name")
+
+    @property
+    def embedded_player_content(self):
+        """Returns Datpiff embedded player response text"""
+        # Note: Request Sessions are being cached for every request.
+        #      If the url endpoint is found in the cached, the request
+        #      will NOT be recalled.  Instead, the cached response will be returned.
+        url = self.build_album_url(self.album_ID)
+        try:
+            return self._session.method("GET", url).text
+        except:  # noqa
+            raise DatpiffError(1, SERVER_DOWN_MSG)
+
+    @property
+    def album_ID(self):
+        """Album ID Number"""
+        return MediaScraper.get_album_suffix_number(self.link)
+
+    @property
+    def bio(self):
+        return MediaScraper.get_uploader_bio(self.embedded_player_content)
+
+    def _check_datpiff_version(self):
         """
-        Media player frontend for pydatpiff
-        """
-        # Setting  '_album_link' from "link", although the parent class
-        # will set this on __init__ --> parent class "Album"
-        # ... no biggie doe.. we're just making sure its set
-        self._album_link = link
-        # self.build_album_url(link)
-        self.__checkVersion()
+        function that will check program and determine
+         which version ( desktop or mobile ) to use.
 
-    def __checkVersion(self):
-        """
-        Private function that will check program and determine
-        which version ( desktop or mobile ) to use.
+         As of July 10, 2020, Datpiff's desktop's version is broken,
+         and is not populating album data.
 
-        As of July 10, 2020, Datpiff's desktop's version is broken,
-        and is not populating album data.
+         Data that is NOT being populated are ONLY the followings:
+           - Album.name
+           - Mp3.songs
 
-        Data that is NOT being populated are ONLY the followings:
-          - Album.name
-          - Mp3.songs
+         All others function still work as expected.
 
-        All others function still work as intended.
-
-        This function will check if an album name is populated correct.
-        if not then mobile version will be used as a fallback
+         This function will check if an album name is populated correct.
+         if not then mobile version will be used as a fallback
         """
         # we check if Album.name attribute exists.
         # If it doesn't, we switch to mobile version
@@ -66,34 +92,6 @@ class DatpiffPlayer:
             )
         )
 
-    @property
-    def embedded_player_content(self):
-        """Returns Datpiff embedded player response text"""
-        # Note: Request Sessions are being cached for every request.
-        #      If the url endpoint is found in the cached, the request
-        #      will NOT be recalled.  Instead, the cached response will be returned.
-        url = self.build_album_url(self.album_ID)
-        return self._session.method("GET", url).text
-
-    @property
-    def album_ID(self):
-        """Album ID Number"""
-        return MediaScraper.get_album_suffix_number(self._album_link)
-
-    @property
-    def bio(self):
-        return MediaScraper.get_uploader_bio(self.embedded_player_content)
-
-    @property
-    def name(self):
-        # for desktop version issue we will use the mobile version
-        if self._USE_MOBILE:
-            name = re.search(r'og:title"\s*content\="(.*[\w\s]*)"', self.embedded_player_content).group(1)
-        else:
-            # desktop only
-            name = re.search(r'title">(.*[\w\s]*)\</div', self.embedded_player_content).group(1)
-        return name
-
 
 class Album(DatpiffPlayer):
     """
@@ -107,12 +105,18 @@ class Album(DatpiffPlayer):
     _session = Session()
 
     def __init__(self, link):
+        """
+        Media player Album object constructor.
+        :param link: Link to the media player page.
+        """
+        self._check_datpiff_version()
         self.link = "".join((Urls.datpiff["album"], link))
-        try:
-            super(Album, self).__init__(self.link)
-        except TypeError:
-            warnings.warn(SERVER_DOWN_MSG)
-            raise DatpiffError(1, SERVER_DOWN_MSG)
+
+        # try:
+        #     super(Album, self).__init__(self.link)
+        # except TypeError:
+        #     warnings.warn(SERVER_DOWN_MSG)
+        #     raise DatpiffError(1, SERVER_DOWN_MSG)
 
     def __str__(self):
         return self.name
@@ -120,8 +124,8 @@ class Album(DatpiffPlayer):
     @property
     def album_html(self):
         """
-        Return the requests' response from the current Mixtapes link
-            See __init__ or mixtapes.Mixtapes.links.
+        Return the requests' response from the current Mixtape link
+            See __init__ or mixtapes.Mixtape.links.
         """
         # we don't have to worry about recalling this requests method
         # multiple times,because the session will return the cache response if

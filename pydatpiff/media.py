@@ -9,7 +9,7 @@ from .backend.mediasetup import Album, Mp3
 from .constants import verbose_message
 from .errors import MediaError
 from .frontend import screen
-from .mixtapes import Mixtapes
+from .mixtapes import Mixtape
 from .urls import Urls
 from .utils.request import Session
 
@@ -17,25 +17,25 @@ Verbose = screen.Verbose
 
 
 class Media:
-    """A media player that control the songs selected from Mixtapes"""
+    """A media player that control the songs selected from Mixtape"""
 
     player = None
 
-    def __init__(self, mixtapes=None, pre_select=None, player="mpv", **kwargs):
+    def __init__(self, mixtape=None, pre_select=None, player="mpv", **kwargs):
         """
         Initialize a media player and load all mixtapes.
 
         Args:
-            mixtapes (instance class) -- pydatpiff.Mixtapes instance (default: {None})
+            mixtape (instance class) -- pydatpiff.Mixtape instance (default: {None})
             pre_select (Integer,String) --  pre-selected mixtape's album, artist,or mixtapes.
                     See media.setMedia for more info (default: None - Optional)
 
         Raises:
-            MediaError: Raises MediaError if mixtapes is not a subclass of pydatpiff.Mixtapes.
+            MediaError: Raises MediaError if mixtapes is not a subclass of pydatpiff.Mixtape.
         """
         self.__setup(player)
         # Check if mixtape is valid
-        self.__is_valid_mixtape(mixtapes)
+        self.__is_valid_mixtape(mixtape)
 
         self._album_cover = None
         self.bio = None
@@ -43,7 +43,7 @@ class Media:
         self.url = None
         self.uploader = None
         self._session = Session()
-        self.mixtapes = mixtapes
+        self.mixtape = mixtape
         self._artist_name = None
         self._album_name = None
         self._current_index = None
@@ -61,10 +61,7 @@ class Media:
         album_name = self._album_name
         if album_name:
             return "{} Mixtape".format(album_name)
-        return str(self.mixtapes)
-
-    def __repr__(self):
-        return "{}({})".format(self.__class__.__name__, self.mixtapes.__class__)
+        return str(self.mixtape)
 
     def __len__(self):
         try:
@@ -95,13 +92,13 @@ class Media:
 
         if isinstance(choice, int):
             # Adjust the selection to the correct index.
-            total_mixtape = len(self.mixtapes)
+            total_mixtape = len(self.mixtape)
             if choice >= total_mixtape:
                 choice = total_mixtape
-            selection = Select.get_leftmost_index(choice, options=self.mixtapes.artists)
+            selection = Select.get_leftmost_index(choice, options=self.mixtape.artists)
         else:
-            options = self.mixtapes.artists.copy()
-            options.extend(self.mixtapes.mixtapes)
+            options = self.mixtape.artists.copy()
+            options.extend(self.mixtape.mixtapes)
 
             selection = Select.get_index_of(choice, options=options)
         assert selection is not None, "Invalid selection"
@@ -113,23 +110,23 @@ class Media:
         A pydatpiff.mixtapes.Mixtape's album will be load to the media player.
 
         Args:
-            selection - pydatpiff.Mixtapes album's name or artist's name.
+            selection - pydatpiff.Mixtape album's name or artist's name.
                 int - will return the Datpiff.Mixtape artist at that index.
-                str - will search for an artist from Mixtapes.artists (default)
-                    or album from Mixtapes.album.
+                str - will search for an artist from Mixtape.artists (default)
+                    or album from Mixtape.album.
 
-                See pydatpiff.mixtape.Mixtapes for a mixtape album or artist selection
+                See pydatpiff.mixtape.Mixtape for a mixtape album or artist selection
         """
 
         # Mixtape's class will handle errors and None value
 
-        mixtape_index = min(self._select(mixtape), len(self.mixtapes) - 1)
+        mixtape_index = min(self._select(mixtape), len(self.mixtape) - 1)
 
-        # set Media's Mixtapes object attributes
-        url = self.mixtapes._links[mixtape_index]  # noqa
+        # set Media's Mixtape object attributes
+        url = self.mixtape._links[mixtape_index]  # noqa
         self.url = "".join((Urls.datpiff["base"], url))
-        self.artist = self.mixtapes.artists[mixtape_index]
-        self.album_cover = self.mixtapes.album_covers[mixtape_index]
+        self.artist = self.mixtape.artists[mixtape_index]
+        self.album_cover = self.mixtape.album_covers[mixtape_index]
 
         # set Media's Album detail attributes
         self.album = Album(url)
@@ -145,7 +142,7 @@ class Media:
         """Verify media mixtape subclass is an instance of mixtapes' class
 
         Args:
-            instance {instance class} -- Pydatpiff Mixtapes instance
+            instance {instance class} -- Pydatpiff Mixtape instance
 
         Returns:
             Boolean -- True or False if instance is subclass of pydatpiff Mixtape class
@@ -153,8 +150,8 @@ class Media:
         if not instance:
             raise MediaError(1)
 
-        if not issubclass(instance.__class__, Mixtapes):
-            raise MediaError(2, '"mixtape" must be Mixtapes object ')
+        if not issubclass(instance.__class__, Mixtape):
+            raise MediaError(2, '"mixtape" must be Mixtape object')
 
     def find_song(self, name):
         """
@@ -173,7 +170,7 @@ class Media:
 
         song_name = Object.strip_and_lower(name)
         Verbose("\n" + verbose_message["SEARCH_SONG"] % song_name)
-        links = self.mixtapes.links
+        links = self.mixtape.links
         links = list(enumerate(links, start=1))
         results = ThreadQueue(Album.lookup_song, links).execute(song=song_name)
         if not results:

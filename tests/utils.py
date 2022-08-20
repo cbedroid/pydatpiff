@@ -37,6 +37,7 @@ class BaseTest(TestCase):
         "Resurrected Rituals",
         "Sleep When You're Dead",
     ]
+
     artist_list = [
         "Moneybagg Yo",
         "Wale",
@@ -67,6 +68,17 @@ class BaseTest(TestCase):
         "Change Da Subject", "Least Ian Lie", "Bipolar Virgo",
         "A Gangsta's Pain",
     ]
+
+    mixtape_links = [
+        '/Moneybagg-Yo-A-Gangstas-Pain-Reloaded-mixtape.1015177.html', '/Wale-Folarin-II-mixtape.1015203.html',
+        '/Maxo-Kream-WEIGHT-OF-THE-WORLD-mixtape.1015046.html', '/Fetty-Wap-The-Butterfly-Effect-mixtape.1015204.html',
+        '/Luh-Soldier-Zaytoven-Keys-To-The-Streets-mixtape.1015180.html',
+        '/Comethazine-Comethazine-The-Album-mixtape.1015179.html',
+        '/Culture-Jam-Kawhi-Leonard-Presents-Culture-Jam-Vol-1-mixtape.1015178.html',
+        '/CeOMrstunna-City-Lyfe-Da-Ep-mixtape.1015153.html', '/JPEGMAFIA-LP-mixtape.1015181.html',
+        '/Blackdice-Grown-Man-Axis-mixtape.1015014.html', '/Lord-Infamous-Resurrected-Rituals-mixtape.1015016.html',
+        '/J2CooL-Sleep-When-Youre-Dead-mixtape.1015023.html'
+    ]
     # fmt: on
 
     # mixtape's search testing parameter
@@ -75,6 +87,8 @@ class BaseTest(TestCase):
     @classmethod
     def get_request_content(cls, namespace="mixtape", mode="r"):
         """Return testing web page content
+        :param namespace: the name of the fixture file
+        :param mode: the mode of the file
 
         Raises:
             FileNotFound: test html file not found

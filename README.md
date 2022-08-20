@@ -51,27 +51,27 @@ Category reference a mixtapes level or ratings. Visit [**Datapiff**](https://dat
 ---
  | Category                           |      Description                           |
 |-------------------------------------|--------------------------------------------|
-|[__hot__][hot]                       | Mixtapes that are hot for the week.
-|[__new__][new]                       | Mixtapes that are brand-new or just release.
-|[__top__][top]                       | Mixtapes that are top-ranking.
+|[__hot__][hot]                       | Mixtape that are hot for the week.
+|[__new__][new]                       | Mixtape that are brand-new or just release.
+|[__top__][top]                       | Mixtape that are top-ranking.
 |[__celebrated__][celebrated]         | Top ranking celebrity mixtapes.
 |[__popular__][popular]               | Popular mixtapes  available.
 |[__exclusive__][exclusive]           | Exclusive mixtapes.
 |[__most download__][most-download]   | Most downloaded mixtapes.
 |[__most listen__][most-listen]       | Most listen mixtapes.
 |[__most favorite__][most-favorite]   | Favorite mixtapes.
-|[__highest rating__][highest-rating] | Mixtapes with the highest rating.
+|[__highest rating__][highest-rating] | Mixtape with the highest rating.
 
 --- ---
 
 
-## Mixtapes
+## Mixtape
 
-**pydatpiff.Mixtapes** - PyDatpiff Mixtapes class is query for the latest music by either referencing a `category` or by searching for a particular `artist` or `mixtape`.
+**pydatpiff.Mixtape** - PyDatpiff Mixtape class is query for the latest music by either referencing a `category` or by searching for a particular `artist` or `mixtape`.
 
- __Import PyDatpiff module and Intialize Mixtapes class__
+ __Import PyDatpiff module and Intialize Mixtape class__
 
-Mixtapes can accept up to three arguments:  __category__ , __search__ and __limit__.
+Mixtape can accept up to three arguments:  __category__ , __search__ and __limit__.
 
 Either argument __category__ or __search__ should be used at a given time. If no arguments are pass,  **"category"** will be set to   __"hot"__ by default.
 
@@ -90,14 +90,14 @@ Either argument __category__ or __search__ should be used at a given time. If no
 
 
 
-*Create an Instance of the Mixtapes class*
+*Create an Instance of the Mixtape class*
 ```python
->>> from pydatpiff.mixtapes import Mixtapes
+>>> from pydatpiff.mixtapes import Mixtape
 
->>> mix = Mixtapes(category='hot')
+>>> mix = Mixtape(category='hot')
 #OR
 #Search for an artist's mixtape
->>> mix = Mixtapes(search='Jay-Z')
+>>> mix = Mixtape(search='Jay-Z')
 
 # To view all available mixtapes
 >>> mix.mixtapes
@@ -128,7 +128,7 @@ Here are somethings you can do with **`Pydtapiff Media`**
 
 ```python
 
-#We initialized Media with a mixtape object from Mixtapes class
+#We initialized Media with a mixtape object from Mixtape class
 >> from pydatpiff.media import Media
 >>> media = Media(mix)
 

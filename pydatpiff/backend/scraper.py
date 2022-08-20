@@ -44,7 +44,7 @@ class MixtapeScraper:
 
     @property
     def _attribute_list(self):
-        """Mixtapes dunder Attributes"""
+        """Mixtape dunder Attributes"""
         return [
             "_artists",
             "_mixtapes",
@@ -55,7 +55,7 @@ class MixtapeScraper:
         ]
 
     def _initialize_attributes(self):
-        """Invoke  mixtape's attributes. See: pydatpiff.mixtapes.Mixtapes"""
+        """Invoke  mixtape's attributes. See: pydatpiff.mixtapes.Mixtape"""
         for attr in self._attribute_list:
             setattr(self, attr, [])
 
@@ -114,7 +114,7 @@ class MixtapeScraper:
         # fmt: off
         content_container_id = "leftColumnWide"  # Datpiff Mixtape's main content wrapper
         content_wrapper_class = 'contentListing'
-        mixtapes_content_items = "contentItem"  # Mixtapes' Content Wrapper
+        mixtapes_content_items = "contentItem"  # Mixtape' Content Wrapper
         # fmt: on
         try:
             # Using BeautifulSoap
@@ -126,7 +126,7 @@ class MixtapeScraper:
                 # Set total mixtapes found
                 self.total_mixtapes = len(mixtape_items)
 
-                # set attribute for Mixtapes Class
+                # set attribute for Mixtape Class
                 self._setMedias_attributes(content_listing)
         except:
             logger.exception("CacheContentError")
@@ -134,7 +134,7 @@ class MixtapeScraper:
 
     def _get_page_links(self):
         """
-        Return a list of html page links from mixtapes. Mixtapes._selectMixtape method.
+        Return a list of html page links from mixtapes. Mixtape._select_mixtape method.
         """
         BASE_URL = Urls.datpiff["base"]
 

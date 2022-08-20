@@ -25,7 +25,7 @@ class BaseMediaTest(BaseTest):
         mix_content = cls.get_request_content("mixtape")
         mix_method = mixtapes.Session.method = Mock(autospec=True)
         mix_method.return_value = cls.mocked_response(content=mix_content)
-        cls.mix = mixtapes.Mixtapes()
+        cls.mix = mixtapes.Mixtape()
 
         # mocked media
         cls.media_request_content = cls.get_request_content("media")
@@ -134,7 +134,7 @@ class TestMedia(BaseMediaTest):
         self.media.find_song(song_name)
         mocked_verbose.assert_called_with(verbose_message["SONG_NOT_FOUND"] % song_name)
 
-    def test_media_album_is_correct(self):
+    def test_media_album_name_is_correct(self):
         album = self.test_album
         self.assertEqual(album, self.media.album.name)
 

@@ -2,23 +2,23 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 from pydatpiff import mixtapes
-from pydatpiff.errors import MixtapesError
+from pydatpiff.errors import MixtapeError
 from tests.utils import BaseTest
 
 
-class TestMixtapes(BaseTest, TestCase):
+class TestMixtape(BaseTest, TestCase):
     def setUp(self):
         content = self.get_request_content("mixtape")
         request = mixtapes.Session.method = Mock(autospec=True)
         request.return_value = self.mocked_response(content=content)
-        self.mix = mixtapes.Mixtapes()
+        self.mix = mixtapes.Mixtape()
 
     def test_mixtape_initialization_method(self):
 
         content = self.get_request_content("mixtape")
         session = mixtapes.Session.method = Mock(autospec=True)
         session.return_value = self.mocked_response(content=content)
-        mix = mixtapes.Mixtapes(category="some_random_category", limit=20)
+        mix = mixtapes.Mixtape(category="some_random_category", limit=20)
 
         # test mocked session was called
         mix._session.method.assert_called()
@@ -114,7 +114,7 @@ class TestMixtapes(BaseTest, TestCase):
         content = self.get_request_content("mixtape")
         request = mixtapes.Session.method = Mock(autospec=True)
         request.return_value = self.mocked_response(content=content)
-        mix = mixtapes.Mixtapes("some_invalid_category")
+        mix = mixtapes.Mixtape("some_invalid_category")
         self.assertEqual(mix._user_selected, "hot")
 
     def test_mixtape_initialized_with_valid_categories(self):
@@ -122,25 +122,25 @@ class TestMixtapes(BaseTest, TestCase):
         request = mixtapes.Session.method = Mock(autospec=True)
         request.return_value = self.mocked_response(content=content)
 
-        for category in mixtapes.Mixtapes.valid_categories:
-            mix = mixtapes.Mixtapes(category=category)
+        for category in mixtapes.Mixtape.valid_categories:
+            mix = mixtapes.Mixtape(category=category)
             self.assertEqual(mix._user_selected, category)
 
 
-class TestMixtapesSearch(BaseTest, TestCase):
+class TestMixtapeSearch(BaseTest, TestCase):
     def setUp(self):
         content = self.get_request_content("mixtape_search")
         method = mixtapes.Session.method = Mock(autospec=True)
         method.return_value = self.mocked_response(content=content)
         search = self.mixtape_search_parameter
-        self.mix = mixtapes.Mixtapes(**search)
+        self.mix = mixtapes.Mixtape(**search)
 
     def test_mixtape_validate_search_method(self):
-        with self.assertRaises(MixtapesError):
-            # test validate_search minimum character raise MixtapesError
+        with self.assertRaises(MixtapeError):
+            # test validate_search minimum character raise MixtapeError
             self.mix._validate_search("ab")
 
-        with self.assertRaises(MixtapesError):
+        with self.assertRaises(MixtapeError):
             # test validate search throw error when enter wrong datatype
             self.mix._validate_search({"hello": "world"})
 
