@@ -136,40 +136,45 @@ class MixtapeScraper:
         """
         Return a list of html page links from mixtapes. Mixtapes._selectMixtape method.
         """
-        try:
-            BASE_URL = Urls.datpiff["base"]
+        BASE_URL = Urls.datpiff["base"]
 
-            # Check if pagination links are available
-            pagination = self._soup.find(class_="pagination")
-            if not pagination:
-                # cache the first page and return the initial response url
-                self._parse_mixtape_page(self._base_response.url)
-                return [self._base_response.url]
-
-            # Next get all pagination links anchor href.
-
-            # Since this class (MixtapeScraper) has to be initialized with a mixtape
-            # request's content (base_response), we should already have the content
-            # from the first page link (Active Page). Although we already processed this content,
-            # we still include it to accurately count to total mixtapes found.
-            # No Worries about recalling this request, Session cache will reject
-            # the request and return the cached response.
-            page_link_urls = ["".join((BASE_URL, link)) for link in pagination.find(class_="links").findAll("a")]
-
-            # iterate through each response (anchor link response)
-            for page_number, link in enumerate(page_link_urls):
-                self._parse_mixtape_page(link)
-                # It mixtapes limit is reached, then return the content
-                # from all previous page link
-                if self.total_mixtapes <= self._MIXTAPE_LIMIT:
-                    return page_link_urls[:page_number]
-
-            # if forloop don't break then return all anchor urls
-            return page_link_urls
-        except:
-            # Cache the first page and return the initial response url
+        # Check if pagination links are available
+        pagination = self._soup.find(class_="pagination")
+        if not pagination:
+            # cache the first page and return the initial response url
+            print("No pagination found")
             self._parse_mixtape_page(self._base_response.url)
             return [self._base_response.url]
+
+        # Next get all pagination links anchor href.
+        """
+            Since this class (MixtapeScraper) has to be initialized with a mixtape, we should already have the
+            content from the first page link (Active Page). Although we already processed this content,
+            we still include it to accurately count to total mixtapes found. We should not be worried about recalling
+            this request, since our `Session` will cache the response if it has already been requested.
+        """
+        page_links = pagination.find(class_="links").findAll("a")
+        for link in page_links:
+            # get the page link and parse it
+            link = link.get("href")
+            if not link:
+                continue
+            # create the full url
+            mixtape_list_url = "".join((BASE_URL, link))
+            self._parse_mixtape_page(mixtape_list_url)
+
+            # If the max mixtapes is reached, then return the content
+            # from the current page
+            if self.total_mixtapes >= self._MIXTAPE_LIMIT:
+                return mixtape_list_url
+
+        try:
+            # If the max mixtapes is not reached, then return the last page of mixtapes
+            return "".join((BASE_URL, page_links[-1].get("href")))
+        except IndexError:
+            # if all fails, then return the initial url
+            self._parse_mixtape_page(self._base_response.url)
+            return self._base_response.url
 
     def _request_get(self, url):
         """
