@@ -37,5 +37,6 @@ jobs:
           pip install --upgrade tox setuptools
           python -m pip install --upgrade pip
           pip install --no-cache -r requirements.txt
+          export PYTHONDONTWRITEBYTECODE=1
       - name: Run Tox tests
         run: tox -e tests
