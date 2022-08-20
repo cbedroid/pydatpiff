@@ -68,7 +68,6 @@ class BaseTest(TestCase):
         "A Gangsta's Pain",
     ]
     # fmt: on
-    mp3_file = os.path.join(PATH, "fixtures", "test_song.mp3")
 
     # mixtape's search testing parameter
     mixtape_search_parameter = {"search": "Jay-Z"}
@@ -104,7 +103,8 @@ class BaseTest(TestCase):
     @classmethod
     def get_song_content(cls):
         """Return mp3 sample file path"""
-        if not os.path.isfile(cls.mp3_file):
-            raise FileExistsError("{} sample file not found".format(cls.mp3_file))
-        with open(cls.mp3_file, "rb") as mp3:
+        mp3_file = os.path.join(PATH, "fixtures", "test_song.mp3")
+        if not os.path.isfile(mp3_file):
+            raise FileExistsError("test mp3 file `{}` was not found".format(mp3_file))
+        with open(mp3_file, "rb") as mp3:
             return mp3.read()
