@@ -5,6 +5,7 @@ from functools import wraps
 import bs4
 
 from pydatpiff.constants import ampersands
+from pydatpiff.errors import Mp3Error
 from pydatpiff.urls import Urls
 from pydatpiff.utils.request import Session
 
@@ -165,7 +166,7 @@ class MixtapeScraper:
 
         try:
             # If the max mixtapes is not reached, then return the last page of mixtapes
-            return "".join((BASE_URL, page_links[-1].get("href")))
+            return page_links  # return [<initial-url>]]
         except IndexError:
             # if all fails, then return the initial url
             self._parse_mixtape_page(self._base_response.url)
@@ -205,19 +206,20 @@ class MediaScraper:
     def get_uploader_name(string):
         """Return the name of the person whom upload the mixtape"""
         try:
-            return re.search(r'.*profile/(.*\w*.*)"', string).group(1)
-        except:
-            return " "
+            return re.search(r'<a.*href="/profile.*>(.*)</a>', string).group(1)
+        except AttributeError:
+            pass
+        return ""
 
     @staticmethod
     def get_uploader_bio(string):
         try:
-            desc = re.findall('description"\scontent="(.*)"', string)
+            desc = re.findall(r'og:description".*content\="(.*)"', string)
             if desc:
                 return escape_html_characters(desc[-1])[0].strip()
-        except:  # noqa
+        except AttributeError:
             pass
-        return " "
+        return ""
 
     @staticmethod
     def get_album_suffix_number(string):
@@ -238,4 +240,7 @@ class MediaScraper:
         return re.findall(r'"duration">(.*\d*)<', text)
 
     def get_mp3_urls(text):
-        return re.findall(r"fix.concat\(\s\'(.*\w*)\'", text)  # noqa
+        try:
+            return re.findall(r"fix.concat\(\s\'(.*\w*)\'", text)  # noqa
+        except AttributeError:
+            raise Mp3Error(4)
