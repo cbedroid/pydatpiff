@@ -4,6 +4,8 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import Mock
 
+import requests
+
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -56,21 +58,40 @@ class BaseTest(TestCase):
     # fmt: off
     # songs from MoneyBagg Yo - A Gangsta's Pain: Reloaded
     song_list = [
-        "Switches  Dracs (feat. Lil Durk  EST Gee)", "Wat Be Wrong", "Gave It (feat. Big Homiie G)",
-        "This Feeling (feat. Yung Bleu  Ja'niyah)", "Scorpio", "Another One (feat. DJ Khaled)",
-        "Wockesha (Remix) (feat. Lil Wayne  Ashanti)", "Memphganistan (feat. Kaash Paige)", "Just Say Det",
-        "GO! (feat. BIG30)", "Wockesha", "Shottas (Lala)",
-        "Hard For The Next (feat. Future)", "If Pain Was A Person", "I Believe U (feat. TripStar)",
-        "Time Today", "Interlude", "Free Promo (feat. Polo G  Lil Durk)",
-        "Hate It Here", "Love It Here", "Clear Da Air",
-        "Projects", "One Of Dem Nights (feat. Jhene Aiko)", "FR",
+        "Switches  Dracs (feat. Lil Durk  EST Gee)",
+        "Wat Be Wrong",
+        "Gave It (feat. Big Homiie G)",
+        "This Feeling (feat. Yung Bleu  Ja'niyah)",
+        "Scorpio",
+        "Another One (feat. DJ Khaled)",
+        "Wockesha (Remix) (feat. Lil Wayne  Ashanti)",
+        "Memphganistan (feat. Kaash Paige)",
+        "Just Say Det",
+        "GO! (feat. BIG30)",
+        "Wockesha",
+        "Shottas (Lala)",
+        "Hard For The Next (feat. Future)",
+        "If Pain Was A Person",
+        "I Believe U (feat. TripStar)",
+        "Time Today",
+        "Interlude",
+        "Free Promo (feat. Polo G  Lil Durk)",
+        "Hate It Here",
+        "Love It Here",
+        "Clear Da Air",
+        "Projects",
+        "One Of Dem Nights (feat. Jhene Aiko)",
+        "FR",
         "Certified Neptunes (feat. Pharrell Williams)",
-        "Change Da Subject", "Least Ian Lie", "Bipolar Virgo",
+        "Change Da Subject",
+        "Least Ian Lie",
+        "Bipolar Virgo",
         "A Gangsta's Pain",
     ]
 
     mixtape_links = [
-        '/Moneybagg-Yo-A-Gangstas-Pain-Reloaded-mixtape.1015177.html', '/Wale-Folarin-II-mixtape.1015203.html',
+        '/Moneybagg-Yo-A-Gangstas-Pain-Reloaded-mixtape.1015177.html',
+        '/Wale-Folarin-II-mixtape.1015203.html',
         '/Maxo-Kream-WEIGHT-OF-THE-WORLD-mixtape.1015046.html', '/Fetty-Wap-The-Butterfly-Effect-mixtape.1015204.html',
         '/Luh-Soldier-Zaytoven-Keys-To-The-Streets-mixtape.1015180.html',
         '/Comethazine-Comethazine-The-Album-mixtape.1015179.html',
@@ -104,8 +125,8 @@ class BaseTest(TestCase):
 
     @classmethod
     def mocked_response(cls, status=200, content="", json=None, **kwargs):
-        session = Mock()
-        session.raise_for_status = Mock()
+        session = requests.Session = Mock(autospec=True)
+        session.raise_for_status = Mock(autospec=True)
         session.status_code = status
         session.text = content
         session.content = str(content).strip().encode("utf-8")

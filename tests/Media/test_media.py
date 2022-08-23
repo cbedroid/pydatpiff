@@ -4,8 +4,10 @@ from tempfile import TemporaryDirectory as TempDir
 from unittest.mock import Mock, PropertyMock, patch
 
 from pydatpiff import media, mixtapes
+from pydatpiff.backend import mediasetup
 from pydatpiff.constants import verbose_message
 from pydatpiff.errors import MediaError, PlayerError
+from pydatpiff.utils.filehandler import File
 from tests.utils import BaseTest
 
 
@@ -23,14 +25,18 @@ class BaseMediaTest(BaseTest):
         super().setUpClass()
         # mocked mixtapes
         mix_content = cls.get_request_content("mixtape")
-        mix_method = mixtapes.Session.method = Mock(autospec=True)
-        mix_method.return_value = cls.mocked_response(content=mix_content)
+        mixtapes.Session.method = Mock(autospec=True, return_value=cls.mocked_response(content=mix_content))
         cls.mix = mixtapes.Mixtape()
 
         # mocked media
         cls.media_request_content = cls.get_request_content("media")
         cls.method = media.Session.method = Mock(autospec=True)
         cls.method.return_value = cls.mocked_response(content=cls.media_request_content)
+
+        # mock mediasetup Album's embed player response
+        mocked_embed_player_response = cls.get_request_content("embed_player")
+        mediasetup_session = mediasetup.Session.method = Mock(autospec=True)
+        mediasetup_session.return_value = cls.mocked_response(content=mocked_embed_player_response)
 
         # Un-mocked media
         cls.unmocked_media = media.Media(cls.mix)
@@ -50,6 +56,11 @@ class BaseMediaTest(BaseTest):
         # Add test artist and album (mixtape)
         cls.test_artist = cls.artist_list[0]
         cls.test_album = cls.mixtape_list[0]
+
+    def tearDown(self):
+        # Prevent pytest from hanging due sto `while loop` in player
+        self.media.player.stop
+        self.unmocked_media.player.stop
 
 
 class TestMedia(BaseMediaTest):
@@ -293,13 +304,19 @@ class TestMedia(BaseMediaTest):
         self.assertEqual(self.media.song, self.song_list[0])
         mocked_verbose.assert_not_called()
 
-    def test_download_album_downloads_correct_songs(self):
+    def test_download_album_method_downloads_correct_songs(self):
         mp = media.Media(self.mix)
         mp.setMedia(1)
         tmp_dir = TempDir()
         mp.download_album(output=tmp_dir.name)
         self.assertEqual(mp.songs, self.song_list)
-        songs_in_tmp_dir = os.listdir(tmp_dir.name)
+
+        album_dirname = " - ".join([self.artist_list[0], self.mixtape_list[0]])
+        album_dirname = File.standardize_file_name(album_dirname)
+        expected_dir = os.path.join(tmp_dir.name, album_dirname)
+
+        self.assertTrue(os.path.isdir(expected_dir))
+        songs_in_tmp_dir = os.listdir(expected_dir)
         self.assertEqual(len(songs_in_tmp_dir), len(self.song_list))
 
     def test_write_audio_method_return_correct_song_content(self):

@@ -7,11 +7,13 @@ from tests.utils import BaseTest
 
 
 class TestMixtape(BaseTest, TestCase):
-    def setUp(self):
-        content = self.get_request_content("mixtape")
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        content = cls.get_request_content("mixtape")
         request = mixtapes.Session.method = Mock(autospec=True)
-        request.return_value = self.mocked_response(content=content)
-        self.mix = mixtapes.Mixtape()
+        request.return_value = cls.mocked_response(content=content)
+        cls.mix = mixtapes.Mixtape()
 
     def test_mixtape_initialization_method(self):
 
@@ -30,57 +32,34 @@ class TestMixtape(BaseTest, TestCase):
         mix_len = len(mix)
         self.assertEqual(mix_len, 0)
 
-        # testing len method with artists attribute
-        del mix._artists
-        mix_len = len(mix)
-        self.assertEqual(mix_len, 0)
-
     def test_mixtape_mixtapes_were_set(self):
         mixtapes = self.mix.mixtapes
         total_mixtapes = len(mixtapes or [])
-        self.assertGreater(total_mixtapes, 0)
-
-        del self.mix._mixtapes
-        self.assertIsNone(self.mix.mixtapes)
+        self.assertEqual(total_mixtapes, len(self.mix))
 
     def test_mixtape_artists_were_set(self):
         artists = self.mix.artists
         total_artists = len(artists or [])
-        self.assertGreater(total_artists, 0)
-
-        del self.mix._artists
-        self.assertIsNone(self.mix.artists)
+        self.assertEqual(total_artists, len(self.mix))
 
     def test_mixtape_links_were_set(self):
         links = self.mix.links
         total_links = len(links or [])
-        self.assertGreater(total_links, 0)
-
-        del self.mix._links
-        self.assertIsNone(self.mix.links)
+        self.assertEqual(total_links, len(self.mix))
 
     def test_mixtape_views_were_set(self):
         views = self.mix.views
         total_views = len(views or [])
-        self.assertGreater(total_views, 0)
-
-        del self.mix._views
-        self.assertIsNone(self.mix.views)
+        self.assertEqual(total_views, len(self.mix))
 
     def test_mixtape_rating_were_set(self):
         total_ratings = len(self.mix.ratings or [])
-        self.assertGreater(total_ratings, 0)
-
-        del self.mix._ratings
-        self.assertIsNone(self.mix.ratings)
+        self.assertEqual(total_ratings, len(self.mix))
 
     def test_mixtape_album_cover_were_set(self):
         album_covers = self.mix.album_covers
         total_covers = len(album_covers or [])
-        self.assertGreater(total_covers, 0)
-
-        del self.mix._album_covers
-        self.assertIsNone(self.mix.album_covers)
+        self.assertEqual(total_covers, len(self.mix))
 
     def test_mixtape_attributes_size_maps_to_artist_attribute_size(self):
         mixtapes_attributes = ["mixtapes", "links", "views", "album_covers"]
@@ -127,13 +106,15 @@ class TestMixtape(BaseTest, TestCase):
             self.assertEqual(mix._user_selected, category)
 
 
-class TestMixtapeSearch(BaseTest, TestCase):
-    def setUp(self):
-        content = self.get_request_content("mixtape_search")
+class TestMixtapeSearch(BaseTest):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        content = cls.get_request_content("mixtape_search")
         method = mixtapes.Session.method = Mock(autospec=True)
-        method.return_value = self.mocked_response(content=content)
-        search = self.mixtape_search_parameter
-        self.mix = mixtapes.Mixtape(**search)
+        method.return_value = cls.mocked_response(content=content)
+        search = cls.mixtape_search_parameter
+        cls.mix = mixtapes.Mixtape(**search)
 
     def test_mixtape_validate_search_method(self):
         with self.assertRaises(MixtapeError):
