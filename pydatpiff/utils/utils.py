@@ -10,10 +10,6 @@ from functools import wraps
 from typing import List, Tuple, Union
 
 
-class ThreadPool:  # pragma: no cover
-    pool = []
-
-
 def threader_wrapper(f):
     @wraps(f)
     def inner(*a, **kw):
@@ -39,18 +35,19 @@ class ThreadQueue:  # pragma: no cover
     def execute(self, *args, **kwargs):
         """
         This method will execute the main job with the input work.
-        args and kwargs  are additonal arguments kwargs
+        args and kwargs are additional arguments kwargs
         :param args: args to pass to the main job.
         :param kwargs: kwargs to pass to the main job.
 
         """
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             if args or kwargs:
                 data = executor.map(
-                    lambda work: self.main_job(work, *args, **kwargs), [work for work in self.input_work]
+                    lambda work: self.main_job(work, *args, **kwargs), [work for work in self.input_work], timeout=10
                 )
             else:
                 data = executor.map(self.main_job, self.input_work)
+            executor.shutdown(wait=True)
         return [x for x in data]
 
 
