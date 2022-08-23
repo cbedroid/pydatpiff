@@ -80,7 +80,6 @@ class BasePlayer(metaclass=BaseMeta):
         self._track_paused = False
         self._track_stopped = False
         self._system_stopped = False
-        self.auto_manage_state()
 
     def __len__(self):
         # duration will be forced to be implemented by Meta class
@@ -164,14 +163,14 @@ class BasePlayer(metaclass=BaseMeta):
     @classmethod
     @threader_wrapper
     def auto_manage_state(cls, *args, **kwargs):
+        state = dict(
+            loaded=False,
+            playing=False,
+            paused=False,
+            stopped=False,
+            system_stopped=False,
+        )
         while True:
-            state = dict(
-                loaded=False,
-                playing=False,
-                paused=False,
-                stopped=False,
-                system_stopped=False,
-            )
             if cls._track_loaded and not cls._track_playing:
                 if cls.current_time > 0:
                     state.update(dict(loaded=True, paused=True))
@@ -194,6 +193,8 @@ class BasePlayer(metaclass=BaseMeta):
                 cls.stop
 
             cls.state = state
+            if cls.state.get("stopped", True):
+                break
 
     def set_track(self, *args, **kwargs):
         # Media class method needed on all player

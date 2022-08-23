@@ -1,0 +1,575 @@
+<script>console.log('mysql 1');</script><script>console.log('checkpoint 0');</script><!doctype html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Gangsta's Pain: Reloaded - DatPiff Embed</title>
+<meta name="title" content="A Gangsta's Pain: Reloaded Mixtape by Moneybagg Yo ">
+<meta name="description" content="Stream A Gangsta's Pain: Reloaded Mixtape by Moneybagg Yo ">
+<meta name="keywords" content="free mixtapes, datpiff mixtapes, stream hiphop, download mixtapes">
+<meta name="medium" content="audio" />
+<!-- Facebook -->
+<meta property="og:url" content="https://www.datpiff.com/Moneybagg-Yo-A-Gangstas-Pain-Reloaded-mixtape.1015177.html">
+<meta property="og:title" content="A Gangsta's Pain: Reloaded Mixtape by Moneybagg Yo " />
+<meta property="og:description" content="A Gangsta's Pain: Reloaded Mixtape by Moneybagg Yo " />
+<meta property="og:image" content="http://hw-img.datpiff.com/m9ccca1d/Moneybagg_Yo_A_Gangstas_Pain_Reloaded-front-large.jpg" />
+<meta property="og:image:width" content="500" />
+<meta property="og:image:height" content="500" />
+<meta property="og:type" content="video">
+<!-- Twitter -->
+<meta name="twitter:card" content="player"/>
+<meta name="twitter:player:width" content="500">
+<meta name="twitter:player:height" content="300">
+<meta name="twitter:player" content="https://embeds.datpiff.com/1015177/">
+<meta name="twitter:description" content="A Gangsta's Pain: Reloaded Mixtape by Moneybagg Yo "/>
+<meta name="twitter:title" content="A Gangsta's Pain: Reloaded Mixtape by Moneybagg Yo "/>
+<meta name="twitter:site" content="@DatPiff"/>
+<meta name="twitter:domain" content="datpiff"/>
+<meta name="twitter:creator" content="@DatPiff"/>
+<meta name="twitter:image:src" content="http://hw-img.datpiff.com/m9ccca1d/Moneybagg_Yo_A_Gangstas_Pain_Reloaded-front-large.jpg"/>
+<meta name="twitter:app:url:iphone" content="https://mobile.datpiff.com/mixtape/1015177">
+<!-- app links -->
+<meta name="al:ios:url" content="https://mobile.datpiff.com/mixtape/1015177">
+
+<script defer src="/js/fontawesome-all.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" media="all" href="/css/reset.css">
+<link rel="stylesheet" media="all" href="/css/standard.css">
+</head>
+
+<body>
+<noscript>
+    <div>Enable Javascript to view this content</div>
+</noscript>
+<section id="share">
+	<div>
+    	Share Mixtape
+        <div id="shareClose"><i class="fas fa-times"></i></div>
+        <div class="buttons">
+        	<a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fpiff.me%2F9ccca1d" target="_blank" class="facebook"><i class="fab fa-facebook-f"></i></a>
+        	<a href="https://twitter.com/home?status=http%3A%2F%2Fpiff.me%2F9ccca1d" target="_blank" class="twitter"><i class="fab fa-twitter"></i></a>
+        	<a href="https://plus.google.com/share?url=http%3A%2F%2Fpiff.me%2F9ccca1d" target="_blank" class="google"><i class="fab fa-google-plus-g"></i></a>
+        </div>
+        <div class="link">http://piff.me/9ccca1d</div>
+    </div>
+</section>
+<section id="chromestart">
+	<div>
+		<div><i class="fab fa-chrome"></i> Chrome has blocked the start of the playback</div>
+		<button id="chromeStartButton"><i class="fas fa-play-circle"></i></button>
+		<div>Click the button above to begin</div>
+	</div>
+</section>
+<section id="underconstruction">
+	<div>
+		<div><i class="fas fa-exclamation-circle"></i> Advertisement Playing</div>
+		<div class="timeleft" id="timeleft">30</div>
+		<div>Playback will resume shortly...</div>
+	</div>
+</section>
+<div id="embed">
+    <section id="top_area">
+        <span class="artbg" style="background-image:url(http://hw-img.datpiff.com/m9ccca1d/Moneybagg_Yo_A_Gangstas_Pain_Reloaded-front-large.jpg);"></span>
+        <section class="mainContent">
+            <div class="artwork"><img id="artwork" src="http://hw-img.datpiff.com/m9ccca1d/Moneybagg_Yo_A_Gangstas_Pain_Reloaded-front.jpg"></div>
+            <section class="metadata">
+                <div class="title">A Gangsta's Pain: Reloaded</div>
+                <div class="artist">Moneybagg Yo</div>
+                <div class="track" id="currentTrack">&nbsp;</div>
+                <div class="scrubarea">
+                    <section class="scrubbar scrubbackground"></section>
+                    <section class="scrubbar scrubLoaded" id="scrubLoaded"></section>
+                    <section class="scrubbar scrubprogress" id="scrubProgress"></section>
+                    <section class="scrubbar scrubHit" id="scrubHit"></section>
+                    <button class="scrubber" id="scrubButton"></button>
+                </div>
+                <div class="timers">
+                    <div id="trackPosition">00:00</div>
+                    <div id="trackDuration">00:00</div>
+               </div>
+           </section>
+        </section>
+        <section class="buttonbar">
+            <section class="controls">
+                <button class="prev" id="btnPrev"><i class="fas fa-step-backward"></i></button>
+                <button class="play" id="btnPlay"><i class="fas fa-play" id="playIcon"></i></button>
+                <button class="next" id="btnNext"><i class="fas fa-step-forward"></i></button>
+            </section>
+            <section class="actions">
+                <button id="btnShare"><i class="fas fa-share-alt"></i></button>
+                <button id="btnLink" title="View mixtape on DatPiff"><i class="fas fa-link"></i></button>
+                                <button id="btnShuffle"><i class="fas fa-random"></i></button>
+                <button id="btnVolume"><i class="fas fa-volume-up"></i></button>
+           </section>
+        </section>
+    </section>
+    <section id="track_area" style="overflow:auto;">
+                <div class="track" data-id="15139730">
+            <span class="position">1</span>
+            <span class="title">
+                <span>Switches  Dracs </span>
+                <span>(feat. Lil Durk  EST Gee)</span>
+            </span>
+            <span class="duration">02:14</span>
+        </div>
+                <div class="track" data-id="15139431">
+            <span class="position">2</span>
+            <span class="title">
+                <span>Wat Be Wrong</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">02:11</span>
+        </div>
+                <div class="track" data-id="15139432">
+            <span class="position">3</span>
+            <span class="title">
+                <span>Gave It </span>
+                <span>(feat. Big Homiie G)</span>
+            </span>
+            <span class="duration">02:52</span>
+        </div>
+                <div class="track" data-id="15139433">
+            <span class="position">4</span>
+            <span class="title">
+                <span>This Feeling </span>
+                <span>(feat. Yung Bleu  Ja'niyah)</span>
+            </span>
+            <span class="duration">03:29</span>
+        </div>
+                <div class="track" data-id="15139434">
+            <span class="position">5</span>
+            <span class="title">
+                <span>Scorpio</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">02:46</span>
+        </div>
+                <div class="track" data-id="15139435">
+            <span class="position">6</span>
+            <span class="title">
+                <span>Another One </span>
+                <span>(feat. DJ Khaled)</span>
+            </span>
+            <span class="duration">03:40</span>
+        </div>
+                <div class="track" data-id="15139436">
+            <span class="position">7</span>
+            <span class="title">
+                <span>Wockesha (Remix) </span>
+                <span>(feat. Lil Wayne  Ashanti)</span>
+            </span>
+            <span class="duration">03:38</span>
+        </div>
+                <div class="track" data-id="15139437">
+            <span class="position">8</span>
+            <span class="title">
+                <span>Memphganistan </span>
+                <span>(feat. Kaash Paige)</span>
+            </span>
+            <span class="duration">01:18</span>
+        </div>
+                <div class="track" data-id="15139438">
+            <span class="position">9</span>
+            <span class="title">
+                <span>Just Say Det</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">02:24</span>
+        </div>
+                <div class="track" data-id="15139439">
+            <span class="position">10</span>
+            <span class="title">
+                <span>GO! </span>
+                <span>(feat. BIG30)</span>
+            </span>
+            <span class="duration">02:04</span>
+        </div>
+                <div class="track" data-id="15139440">
+            <span class="position">11</span>
+            <span class="title">
+                <span>Wockesha</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">03:01</span>
+        </div>
+                <div class="track" data-id="15139441">
+            <span class="position">12</span>
+            <span class="title">
+                <span>Shottas (Lala)</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">02:03</span>
+        </div>
+                <div class="track" data-id="15139442">
+            <span class="position">13</span>
+            <span class="title">
+                <span>Hard For The Next </span>
+                <span>(feat. Future)</span>
+            </span>
+            <span class="duration">02:46</span>
+        </div>
+                <div class="track" data-id="15139443">
+            <span class="position">14</span>
+            <span class="title">
+                <span>If Pain Was A Person</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">04:01</span>
+        </div>
+                <div class="track" data-id="15139444">
+            <span class="position">15</span>
+            <span class="title">
+                <span>I Believe U </span>
+                <span>(feat. TripStar)</span>
+            </span>
+            <span class="duration">02:39</span>
+        </div>
+                <div class="track" data-id="15139445">
+            <span class="position">16</span>
+            <span class="title">
+                <span>Time Today</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">02:17</span>
+        </div>
+                <div class="track" data-id="15139446">
+            <span class="position">17</span>
+            <span class="title">
+                <span>Interlude</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">01:18</span>
+        </div>
+                <div class="track" data-id="15139447">
+            <span class="position">18</span>
+            <span class="title">
+                <span>Free Promo </span>
+                <span>(feat. Polo G  Lil Durk)</span>
+            </span>
+            <span class="duration">02:59</span>
+        </div>
+                <div class="track" data-id="15139448">
+            <span class="position">19</span>
+            <span class="title">
+                <span>Hate It Here</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">01:45</span>
+        </div>
+                <div class="track" data-id="15139449">
+            <span class="position">20</span>
+            <span class="title">
+                <span>Love It Here</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">01:30</span>
+        </div>
+                <div class="track" data-id="15139450">
+            <span class="position">21</span>
+            <span class="title">
+                <span>Clear Da Air</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">03:12</span>
+        </div>
+                <div class="track" data-id="15139451">
+            <span class="position">22</span>
+            <span class="title">
+                <span>Projects</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">02:48</span>
+        </div>
+                <div class="track" data-id="15139452">
+            <span class="position">23</span>
+            <span class="title">
+                <span>One Of Dem Nights </span>
+                <span>(feat. Jhene Aiko)</span>
+            </span>
+            <span class="duration">02:24</span>
+        </div>
+                <div class="track" data-id="15139453">
+            <span class="position">24</span>
+            <span class="title">
+                <span>FR</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">02:28</span>
+        </div>
+                <div class="track" data-id="15139454">
+            <span class="position">25</span>
+            <span class="title">
+                <span>Certified Neptunes </span>
+                <span>(feat. Pharrell Williams)</span>
+            </span>
+            <span class="duration">02:34</span>
+        </div>
+                <div class="track" data-id="15139455">
+            <span class="position">26</span>
+            <span class="title">
+                <span>Change Da Subject</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">01:48</span>
+        </div>
+                <div class="track" data-id="15139456">
+            <span class="position">27</span>
+            <span class="title">
+                <span>Least Ian Lie</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">01:46</span>
+        </div>
+                <div class="track" data-id="15139457">
+            <span class="position">28</span>
+            <span class="title">
+                <span>Bipolar Virgo</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">02:32</span>
+        </div>
+                <div class="track" data-id="15139458">
+            <span class="position">29</span>
+            <span class="title">
+                <span>A Gangsta's Pain</span>
+                <span>Moneybagg Yo</span>
+            </span>
+            <span class="duration">01:54</span>
+        </div>
+            </section>
+</div>
+<script src="/js/player.js"></script>
+<script>
+$(function() {
+	if( $('#artwork').width() ) $('#artwork').height( $('#artwork').width());
+	$( '#top_area .mainContent' ).css( 'height', $( '#top_area .mainContent' ).height() + 'px' );
+	$(".controls button").each(function(index, element) {
+		//var size = Math.round( $(element).height() );
+		var size = Math.max( $(element)[0].offsetWidth, $(element)[0].offsetHeight );
+		//$(element).width(size);
+		$(element).css('width', size + 'px' );
+		$(element).css('minWidth', size + 'px' );
+		$(element).css('minHeight', size + 'px' );
+		var fontSize = Math.max( Math.round( size * .4 ), 12 );
+		$(element).css('fontSize',fontSize + 'px');
+	});
+		dpPlayer.playTrackByID( 15139730 );
+	});
+
+// player data
+var playerData = {
+	"artwork":"//hw-img.datpiff.com/m9ccca1d/Moneybagg_Yo_A_Gangstas_Pain_Reloaded-front-large.jpg",
+	"tracks":[],
+	"mediaid":"1015177",
+	"artist":"Moneybagg Yo",
+	"title":"A Gangsta's Pain: Reloaded"
+}
+// add the tracks
+var trackPrefix = 'https://hw-mp3.datpiff.com/mixtapes/1/m9ccca1d/';
+playerData.tracks.push( {"id":15139730, "title":"Switches  Dracs (feat. Lil Durk  EST Gee)", "artist":playerData.artist,"mfile":trackPrefix.concat( '01 - Switches  Dracs (feat Lil Durk  EST Gee).mp3' ), "duration":134} );
+playerData.tracks.push( {"id":15139431, "title":"Wat Be Wrong", "artist":playerData.artist,"mfile":trackPrefix.concat( '02 - Wat Be Wrong.mp3' ), "duration":131} );
+playerData.tracks.push( {"id":15139432, "title":"Gave It (feat. Big Homiie G)", "artist":playerData.artist,"mfile":trackPrefix.concat( '03 - Gave It (feat Big Homiie G).mp3' ), "duration":172} );
+playerData.tracks.push( {"id":15139433, "title":"This Feeling (feat. Yung Bleu  Ja'niyah)", "artist":playerData.artist,"mfile":trackPrefix.concat( '04 - This Feeling (feat Yung Bleu  Janiyah).mp3' ), "duration":209} );
+playerData.tracks.push( {"id":15139434, "title":"Scorpio", "artist":playerData.artist,"mfile":trackPrefix.concat( '05 - Scorpio.mp3' ), "duration":166} );
+playerData.tracks.push( {"id":15139435, "title":"Another One (feat. DJ Khaled)", "artist":playerData.artist,"mfile":trackPrefix.concat( '06 - Another One (feat DJ Khaled).mp3' ), "duration":220} );
+playerData.tracks.push( {"id":15139436, "title":"Wockesha (Remix) (feat. Lil Wayne  Ashanti)", "artist":playerData.artist,"mfile":trackPrefix.concat( '07 - Wockesha (Remix) (feat Lil Wayne  Ashanti).mp3' ), "duration":218} );
+playerData.tracks.push( {"id":15139437, "title":"Memphganistan (feat. Kaash Paige)", "artist":playerData.artist,"mfile":trackPrefix.concat( '08 - Memphganistan (feat Kaash Paige).mp3' ), "duration":78} );
+playerData.tracks.push( {"id":15139438, "title":"Just Say Det", "artist":playerData.artist,"mfile":trackPrefix.concat( '09 - Just Say Det.mp3' ), "duration":144} );
+playerData.tracks.push( {"id":15139439, "title":"GO! (feat. BIG30)", "artist":playerData.artist,"mfile":trackPrefix.concat( '10 - GO (feat BIG30).mp3' ), "duration":124} );
+playerData.tracks.push( {"id":15139440, "title":"Wockesha", "artist":playerData.artist,"mfile":trackPrefix.concat( '11 - Wockesha.mp3' ), "duration":181} );
+playerData.tracks.push( {"id":15139441, "title":"Shottas (Lala)", "artist":playerData.artist,"mfile":trackPrefix.concat( '12 - Shottas (Lala).mp3' ), "duration":123} );
+playerData.tracks.push( {"id":15139442, "title":"Hard For The Next (feat. Future)", "artist":playerData.artist,"mfile":trackPrefix.concat( '13 - Hard For The Next (feat Future).mp3' ), "duration":166} );
+playerData.tracks.push( {"id":15139443, "title":"If Pain Was A Person", "artist":playerData.artist,"mfile":trackPrefix.concat( '14 - If Pain Was A Person.mp3' ), "duration":241} );
+playerData.tracks.push( {"id":15139444, "title":"I Believe U (feat. TripStar)", "artist":playerData.artist,"mfile":trackPrefix.concat( '15 - I Believe U (feat TripStar).mp3' ), "duration":159} );
+playerData.tracks.push( {"id":15139445, "title":"Time Today", "artist":playerData.artist,"mfile":trackPrefix.concat( '16 - Time Today.mp3' ), "duration":137} );
+playerData.tracks.push( {"id":15139446, "title":"Interlude", "artist":playerData.artist,"mfile":trackPrefix.concat( '17 - Interlude.mp3' ), "duration":78} );
+playerData.tracks.push( {"id":15139447, "title":"Free Promo (feat. Polo G  Lil Durk)", "artist":playerData.artist,"mfile":trackPrefix.concat( '18 - Free Promo (feat Polo G  Lil Durk).mp3' ), "duration":179} );
+playerData.tracks.push( {"id":15139448, "title":"Hate It Here", "artist":playerData.artist,"mfile":trackPrefix.concat( '19 - Hate It Here.mp3' ), "duration":105} );
+playerData.tracks.push( {"id":15139449, "title":"Love It Here", "artist":playerData.artist,"mfile":trackPrefix.concat( '20 - Love It Here.mp3' ), "duration":90} );
+playerData.tracks.push( {"id":15139450, "title":"Clear Da Air", "artist":playerData.artist,"mfile":trackPrefix.concat( '21 - Clear Da Air.mp3' ), "duration":192} );
+playerData.tracks.push( {"id":15139451, "title":"Projects", "artist":playerData.artist,"mfile":trackPrefix.concat( '22 - Projects.mp3' ), "duration":168} );
+playerData.tracks.push( {"id":15139452, "title":"One Of Dem Nights (feat. Jhene Aiko)", "artist":playerData.artist,"mfile":trackPrefix.concat( '23 - One Of Dem Nights (feat Jhene Aiko).mp3' ), "duration":144} );
+playerData.tracks.push( {"id":15139453, "title":"FR", "artist":playerData.artist,"mfile":trackPrefix.concat( '24 - FR.mp3' ), "duration":148} );
+playerData.tracks.push( {"id":15139454, "title":"Certified Neptunes (feat. Pharrell Williams)", "artist":playerData.artist,"mfile":trackPrefix.concat( '25 - Certified Neptunes (feat Pharrell Williams).mp3' ), "duration":154} );
+playerData.tracks.push( {"id":15139455, "title":"Change Da Subject", "artist":playerData.artist,"mfile":trackPrefix.concat( '26 - Change Da Subject.mp3' ), "duration":108} );
+playerData.tracks.push( {"id":15139456, "title":"Least Ian Lie", "artist":playerData.artist,"mfile":trackPrefix.concat( '27 - Least Ian Lie.mp3' ), "duration":106} );
+playerData.tracks.push( {"id":15139457, "title":"Bipolar Virgo", "artist":playerData.artist,"mfile":trackPrefix.concat( '28 - Bipolar Virgo.mp3' ), "duration":152} );
+playerData.tracks.push( {"id":15139458, "title":"A Gangsta's Pain", "artist":playerData.artist,"mfile":trackPrefix.concat( '29 - A Gangstas Pain.mp3' ), "duration":114} );
+var hasInitialized = false;
+dpPlayer.setMixtapeData( playerData );
+dpPlayer.addEventListener( dpPlayer.EVENT_DURATION_CHANGED, function(){
+	$('#trackDuration').text( dpPlayer.formatTime( dpPlayer.currentTrack.duration ) );
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_BUFFER_LOADED_CHANGED, function(){
+	//console.log( dpPlayer.bufferedPercent, Math.round( dpPlayer.bufferedPercent * 100 ));
+	$('#scrubLoaded').css( 'width', Math.round( dpPlayer.bufferedPercent * 100 ) + '%' );
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_POSITION_CHANGED, function(){
+	$('#trackPosition').text( dpPlayer.formatTime( dpPlayer.currentTrack.position ) );
+	$('#scrubProgress').css( 'width', (dpPlayer.currentTrack.position / dpPlayer.currentTrack.duration * 100) + '%' );
+	var btnWidth = $('#scrubButton').css( 'width' ).replace( /[^0-9\.]/gi, '' );
+	//console.log( $('#scrubProgress').width(), btnWidth );
+	if( !isScrubbing ) $('#scrubButton').css( 'left', ( $('#scrubProgress').width() - btnWidth / 2 ) + 'px' );
+
+	// handle audio ads
+	if( dpPlayer.isPlayingAd ){
+		var timeLeft = Math.round( dpPlayer.currentTrack.duration - dpPlayer.currentTrack.position );
+		$('#timeleft').html(timeLeft);
+		//console.log( timeLeft, "seconds left", dpPlayer.currentTrack.duration, dpPlayer.currentTrack.position );
+	}
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_STATE_CHANGED, function(){
+	$('#playIcon').removeClass();
+	$('#playIcon').addClass('fas');
+	if( dpPlayer.isPlaying ){
+		hasInitialized = true;
+		$('#playIcon').addClass('fa-pause');
+	}else{
+		$('#playIcon').addClass('fa-play');
+	}
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_TRACK_CHANGED, function(){
+	$('#scrubLoaded').css( 'width', '0%' );
+	var track = dpPlayer.currentTrack;
+	$('#currentTrack').text( track.title );
+	$("#track_area .track").removeClass('active');
+	var trackElement = $("#track_area .track[data-id='" + track.id + "']");
+	trackElement.addClass('active');
+	trackElement.get(0).scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});
+	$('.scrubarea').removeClass('error');
+	//console.log( "#track_area .track[data-id='" + track.id + "']" );
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_SHUFFLE_CHANGED, function(){
+	if( dpPlayer.shuffle ) $('#btnShuffle').addClass('active');
+	else $('#btnShuffle').removeClass('active');
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_ERROR_PLAYING, function(){
+	if( !hasInitialized ) return;
+	alert( "There was an error playing the file" );
+	//dpPlayer.stop();
+	$('.scrubarea').addClass('error');
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_VOL_CHANGE, function(){
+	var vol = dpPlayer.volume;
+	var icon = $('#btnVolume svg').get();
+	if( !icon ) return;
+
+	// Set our min size
+	var minWidth = Math.max( $('#btnVolume').outerWidth(), $('#btnVolume').css('minWidth' ).replace(/[^0-9]*/,'' ) );
+	$('#btnVolume').css('minWidth', minWidth + 'px' );
+
+	// now change icon
+	if( vol >= .8 ) $(icon).attr( 'data-icon', 'volume-up' );
+	else if( vol >= .4 ) $(icon).attr( 'data-icon', 'volume-down' );
+	else if( vol > 0 ) $(icon).attr( 'data-icon', 'volume-off' );
+	else $(icon).attr( 'data-icon', 'volume-mute' );
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_AD_BEGIN, function(){
+	$('#underconstruction').fadeIn({ "start":function(){ $('#underconstruction').css('display', 'flex' ); }});
+	$.get('/mixtape/audioad/begin?platform=desktop' );
+} );
+dpPlayer.addEventListener( dpPlayer.EVENT_AD_END, function(){
+	$('#underconstruction').fadeOut({ "end":function(){ $('#underconstruction').css( 'display', 'none' ); }});
+	$.get('/mixtape/audioad/end?platform=desktop' );
+} );
+// listen for clicks on buttons
+$('#btnPlay').on('click', function(){ hasInitialized = true; dpPlayer.togglePlay(); } );
+$('#btnPrev').on('click', function(){
+	hasInitialized = true;
+	if( dpPlayer.currentTrack && dpPlayer.currentTrack.position / dpPlayer.currentTrack.duration > .05 ) dpPlayer.seekTo(0);
+	else dpPlayer.previousTrack();
+	clearHover(this);
+} );
+$('#btnNext').on('click', function(){ hasInitialized = true; dpPlayer.nextTrack(); clearHover(this); } );
+$('#btnShuffle').on('click', function(){ dpPlayer.toggleShuffle(); clearHover(this); } );
+$('#scrubHit').on('click', function(e){
+	// if we're not playing, do nada
+	if( !dpPlayer.currentTrack ) return;
+
+	// now seek
+	var position = e.offsetX;
+	var maxPosition = $('#scrubHit').width();
+	var percentage = position / maxPosition;
+	var seekPosition = Math.round(percentage * dpPlayer.currentTrack.duration);
+	dpPlayer.seekTo( seekPosition );
+	//console.log( position, maxPosition, dpPlayer.currentTrack.duration, seekPosition );
+} );
+$('#btnLink').on('click', function(){
+	clearHover(this);
+	window.blur();
+	window.open("https://www.datpiff.com/Moneybagg-Yo-A-Gangstas-Pain-Reloaded-mixtape.1015177.html" );
+} );
+$('#btnVolume').on('click',function(){
+	var vol = dpPlayer.volume;
+	if( vol >= .8 ) dpPlayer.setVolume( 0 );
+	else if( vol >= .4 ) dpPlayer.setVolume( .8 );
+	else if( vol >= .1 ) dpPlayer.setVolume( .4 );
+	else dpPlayer.setVolume( .1 );
+	clearHover(this);
+});
+$('#btnShare').on('click', function(){ $('#share').fadeIn({ "start":function(){ $('#share').css('display', 'flex' ); }}); clearHover(this); } );
+$('#shareClose').on('click', function(){ $('#share').fadeOut(); } );
+$("#track_area .track").on('click', function(){ hasInitialized = true; dpPlayer.playTrackByID( $(this).data('id') ); } );
+//$('#btnShare').on('click', function(){ $('#share').fadeIn({ "start":function(){ $('#share').css('display', 'flex' ); }}); clearHover(this); } );
+
+// progress scrubber
+var isScrubbing = false, maxLeft = 0, maxRight = 0;
+var downEvent, baseLeft;
+$('#scrubButton').on('mousedown', function(e){
+	if( !dpPlayer.currentTrack || !dpPlayer.currentTrack.duration ) return;
+	downEvent = e;
+	console.log(e);
+	try{
+		var topElement = e.originalEvent.srcElement.offsetParent || e.originalEvent.path[1];
+		maxLeft = topElement.offsetWidth;
+		baseLeft = e.currentTarget.offsetLeft;
+	}catch(b){
+		// some browsers may not support this
+		//console.log( e );
+		//console.log(b);
+		return;
+	}
+	//console.log( downEvent, baseLeft );
+
+	$(document).on('mousemove', function(e){
+		if( !isScrubbing ) return;
+		updateScrubbuttonPosition(e);
+	} );
+	$(document).on('mouseup', function(e){
+		updateScrubbuttonPosition(e,true);
+		$(document).off('mousemove');
+		downEvent = null;
+		isScrubbing = false;
+	} );
+
+	isScrubbing = true;
+	updateScrubbuttonPosition(e);
+	return false;
+} );
+
+
+function updateScrubbuttonPosition(e, doSeek){
+	if( !isScrubbing ) return;
+	var btn = $('#scrubButton');
+	var minX = 0;//btn.get(0).offsetWidth / 2 * -1;
+	var maxX = maxLeft - btn.get(0).offsetWidth / 2;
+	var newX = baseLeft + e.clientX - downEvent.clientX;
+	newX = Math.min( maxX, Math.max( minX, newX ) );
+	btn.css( 'left', ( newX ) + 'px' );
+
+	// what percentage are we at?
+	if( doSeek ){
+		//console.log( newX, maxX, newX / maxX );
+		var percentage = newX / maxX;
+		var seekPosition = Math.round(percentage * dpPlayer.currentTrack.duration);
+		dpPlayer.seekTo( seekPosition );
+	}
+}
+function clearHover( element ){
+	setTimeout( function(){
+	$(element).clone(true).insertAfter($(element));
+  	$(element).remove();
+	}, 50 );
+}
+</script>
+</body>
+</html>

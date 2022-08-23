@@ -5,6 +5,7 @@ from functools import wraps
 import bs4
 
 from pydatpiff.constants import ampersands
+from pydatpiff.errors import Mp3Error
 from pydatpiff.urls import Urls
 from pydatpiff.utils.request import Session
 
@@ -44,7 +45,7 @@ class MixtapeScraper:
 
     @property
     def _attribute_list(self):
-        """Mixtapes dunder Attributes"""
+        """Mixtape dunder Attributes"""
         return [
             "_artists",
             "_mixtapes",
@@ -55,7 +56,7 @@ class MixtapeScraper:
         ]
 
     def _initialize_attributes(self):
-        """Invoke  mixtape's attributes. See: pydatpiff.mixtapes.Mixtapes"""
+        """Invoke  mixtape's attributes. See: pydatpiff.mixtapes.Mixtape"""
         for attr in self._attribute_list:
             setattr(self, attr, [])
 
@@ -114,7 +115,7 @@ class MixtapeScraper:
         # fmt: off
         content_container_id = "leftColumnWide"  # Datpiff Mixtape's main content wrapper
         content_wrapper_class = 'contentListing'
-        mixtapes_content_items = "contentItem"  # Mixtapes' Content Wrapper
+        mixtapes_content_items = "contentItem"  # Mixtape' Content Wrapper
         # fmt: on
         try:
             # Using BeautifulSoap
@@ -126,7 +127,7 @@ class MixtapeScraper:
                 # Set total mixtapes found
                 self.total_mixtapes = len(mixtape_items)
 
-                # set attribute for Mixtapes Class
+                # set attribute for Mixtape Class
                 self._setMedias_attributes(content_listing)
         except:
             logger.exception("CacheContentError")
@@ -134,40 +135,40 @@ class MixtapeScraper:
 
     def _get_page_links(self):
         """
-        Return a list of html page links from mixtapes. Mixtapes._selectMixtape method.
+        Return a list of html page links from mixtapes. Mixtape._select_mixtape method.
         """
+        BASE_URL = Urls.datpiff["base"]
+
+        # Check if pagination links are available
+        pagination = self._soup.find(class_="pagination")
+        if not pagination:
+            # cache the first page and return the initial response url
+            self._parse_mixtape_page(self._base_response.url)
+            return [self._base_response.url]
+
+        # Next get all pagination links anchor href.
+        """
+            Since this class (MixtapeScraper) has to be initialized with a mixtape, we should already have the
+            content from the first page link (Active Page). Although we already processed this content,
+            we still include it to accurately count to total mixtapes found. We should not be worried about recalling
+            this request, since our `Session` will cache the response if it has already been requested.
+        """
+        page_links = pagination.find(class_="links").findAll("a")
+        page_links = [BASE_URL + link.get("href") for link in page_links]
+        for page_number, link in enumerate(page_links, start=1):
+            # get the page link and parse it
+            self._parse_mixtape_page(link)
+
+            # If the max mixtapes is reached, then return the content
+            # from the current page
+            if self.total_mixtapes >= self._MIXTAPE_LIMIT:
+                return page_links[:page_number]
+
         try:
-            BASE_URL = Urls.datpiff["base"]
-
-            # Check if pagination links are available
-            pagination = self._soup.find(class_="pagination")
-            if not pagination:
-                # cache the first page and return the initial response url
-                self._parse_mixtape_page(self._base_response.url)
-                return [self._base_response.url]
-
-            # Next get all pagination links anchor href.
-
-            # Since this class (MixtapeScraper) has to be initialized with a mixtape
-            # request's content (base_response), we should already have the content
-            # from the first page link (Active Page). Although we already processed this content,
-            # we still include it to accurately count to total mixtapes found.
-            # No Worries about recalling this request, Session cache will reject
-            # the request and return the cached response.
-            page_link_urls = ["".join((BASE_URL, link)) for link in pagination.find(class_="links").findAll("a")]
-
-            # iterate through each response (anchor link response)
-            for page_number, link in enumerate(page_link_urls):
-                self._parse_mixtape_page(link)
-                # It mixtapes limit is reached, then return the content
-                # from all previous page link
-                if self.total_mixtapes <= self._MIXTAPE_LIMIT:
-                    return page_link_urls[:page_number]
-
-            # if forloop don't break then return all anchor urls
-            return page_link_urls
-        except:
-            # Cache the first page and return the initial response url
+            # If the max mixtapes is not reached, then return the last page of mixtapes
+            return page_links  # return [<initial-url>]]
+        except IndexError:
+            # if all fails, then return the initial url
             self._parse_mixtape_page(self._base_response.url)
             return [self._base_response.url]
 
@@ -205,19 +206,20 @@ class MediaScraper:
     def get_uploader_name(string):
         """Return the name of the person whom upload the mixtape"""
         try:
-            return re.search(r'.*profile/(.*\w*.*)"', string).group(1)
-        except:
-            return " "
+            return re.search(r'<a.*href="/profile.*>(.*)</a>', string).group(1)
+        except AttributeError:
+            pass
+        return ""
 
     @staticmethod
     def get_uploader_bio(string):
         try:
-            desc = re.findall('description"\scontent="(.*)"', string)
+            desc = re.findall(r'og:description".*content\="(.*)"', string)
             if desc:
                 return escape_html_characters(desc[-1])[0].strip()
-        except:  # noqa
+        except AttributeError:
             pass
-        return " "
+        return ""
 
     @staticmethod
     def get_album_suffix_number(string):
@@ -238,4 +240,7 @@ class MediaScraper:
         return re.findall(r'"duration">(.*\d*)<', text)
 
     def get_mp3_urls(text):
-        return re.findall(r"fix.concat\(\s\'(.*\w*)\'", text)  # noqa
+        try:
+            return re.findall(r"fix.concat\(\s\'(.*\w*)\'", text)  # noqa
+        except AttributeError:
+            raise Mp3Error(4)

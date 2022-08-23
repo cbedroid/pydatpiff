@@ -1,22 +1,13 @@
+import logging
 import math
 import os
 import re
 import tempfile
 
-
-def get_human_readable_file_size(buf_size):
-    """Convert file size and returns user readable size"""
-    if buf_size == 0:
-        return "0B"
-
-    size_name = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-    change = int(math.floor(math.log(buf_size, 1024)))
-    power = math.pow(1024, change)
-    result = round(buf_size / power, 2)
-    return "%s %s" % (result, size_name[change])
+logger = logging.getLogger(__name__)
 
 
-class Tmp(object):
+class Tmp(object):  # pragma: no cover
     """
     Handle all temporary files created by the media player.
 
@@ -35,19 +26,18 @@ class Tmp(object):
         return tempfile.NamedTemporaryFile(suffix="_datpiff", delete=False)
 
     @staticmethod
-    def removeTmpOnStart():
+    def remove_temp_file_on_startup():
         """remove all temporary file created by Datpiff on start up"""
         # every tmp file using media player will have this suffix
         suffix = "_datpiff"
         tmp_dir = tempfile.gettempdir()
-        if os.path.isdir(tmp_dir):
-            for lf in os.listdir(tmp_dir):
-                if suffix in lf:
-                    try:
-                        lf = "/".join((tmp_dir, lf))
-                        os.remove(lf)
-                    except:  # noqa
-                        pass
+        for filename in os.listdir(tmp_dir):
+            if suffix in filename:
+                try:
+                    filename = os.path.join(tmp_dir, filename)
+                    os.remove(filename)
+                except FileNotFoundError:
+                    logger.warning("File not found: %s", filename)
 
 
 class File:
@@ -61,17 +51,30 @@ class File:
         return os.path.isfile(path)
 
     @classmethod
-    def join(cls, path="", to=""):
+    def join(cls, path=None, to=""):
+        path = path or os.getcwd()
         if not cls.is_dir(path):
-            path = os.getcwd()
+            raise FileNotFoundError(f"{path} is not a directory")
         return os.path.join(path, to)
 
     @staticmethod
-    def standardize_name(name):
+    def standardize_file_name(name):
         return re.sub(r"[^\w_\s\-.]", "", name)
 
-    @staticmethod
-    def write_to_file(filename, content, mode="wb"):
+    @classmethod
+    def write_to_file(cls, filename, content, mode="wb"):
         with open(filename, mode) as f:
             f.write(content)
-            return True
+
+    @staticmethod
+    def get_human_readable_file_size(buf_size):
+        """Convert file size and returns user readable size"""
+        if buf_size == 0:
+            return "0B"
+
+        ext = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+        change = int(math.floor(math.log(buf_size, 1024)))
+        power = math.pow(1024, change)
+        calc = buf_size / power
+        file_size = round(calc, 2) if buf_size > 999 else int(calc)
+        return "%s%s" % (file_size, ext[change])

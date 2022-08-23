@@ -6,6 +6,8 @@ omit=
     *logging*
     *tests/*
     *venv/*
+    *errors.py
+    *constants.py
 
 [paths]
 source =
@@ -29,6 +31,7 @@ exclude_lines =
     def __repr__
     def __str__
     def __init__
+    if hasattr
     if 0:
     if self\.debug
     raise NotImplementedError

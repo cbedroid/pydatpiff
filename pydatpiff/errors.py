@@ -50,8 +50,8 @@ class Error(Exception):
             return "\n".join((error_name, extra_message))
 
 
-class MixtapesError(Error):
-    """handle all the Mixtapes errors"""
+class MixtapeError(Error):
+    """handle all the Mixtape errors"""
 
     __error__ = {
         1: "Invalid category selected",
@@ -71,12 +71,14 @@ class MediaError(Error):
         5: "song selection error",
         6: "unsupported media player",
         7: "media player not found",
+        8: "song not found",
+        9: "song unavailable",
     }
 
 
 class AlbumError(Error):
     __error__ = {
-        1: "Mixtapes Not Found",
+        1: "Mixtape Not Found",
         2: "Invalid category selected",
     }
 
@@ -84,7 +86,9 @@ class AlbumError(Error):
 class Mp3Error(Error):
     __error__ = {
         1: "invalid player response",
-        2: "no album found",
+        2: "album not found",
+        3: "album name not found",
+        4: "mp3 not found",
     }
 
 

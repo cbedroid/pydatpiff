@@ -158,6 +158,7 @@ class MPV(BasePlayer):
             self._track_loaded = True
             self._track_start_time = time()
             self._volume = self._global_volume
+            self.auto_manage_state()
         else:
             raise MvpError(1)
 

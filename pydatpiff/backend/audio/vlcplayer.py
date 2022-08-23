@@ -39,6 +39,7 @@ class VLCPlayer(BasePlayer):
             self._player.set_mrl(path)
             self._track_loaded = True
             self._volume = self._global_volume
+            self.auto_manage_state()
         else:
             Verbose("No media to play")
 

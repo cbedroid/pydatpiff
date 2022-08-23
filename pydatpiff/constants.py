@@ -74,3 +74,25 @@ ampersands = [
     "&Ntilde;",  # Ñ
     "&ntilde;",  # ñ
 ]
+
+verbose_message = {
+    "MEDIA_INITIALIZED": "Media initialized",
+    "MEDIA_SET": "Setting media to %s",
+    "MEDIA_NOT_SET": "Media not set... Please call `setMedia` first",
+    "SEARCH_SONG": "Searching for song: %s ...",
+    "NO_SONG_SELECTED": "--- No song name was entered --",
+    "SONG_NOT_FOUND": "No song was found with the name: %s",
+    "UNAVAILABLE_SONG": "This song is unavailable",
+    "INVALID_DIRECTORY": "Invalid directory: %s",
+    "SAVE_SONG": "Saving song: %s ...",
+    "SAVE_ALBUM": "Album saved: %s to %s",
+    "AUTO_PLAY_NO_SONG": "Play a song first to enable autoplay",
+    "AUTO_PLAY_NEXT_SONG": "Playing next song",
+    "AUTO_PLAY_LAST_SONG": "No more songs left to autoplay",
+}
+
+SERVER_DOWN_MSG = (
+    "\n\t--- UNOFFICIAL DATPIFF MESSAGE --"
+    "\nSorry, we encounter a problem with our server!"
+    " Please try again later."
+)
