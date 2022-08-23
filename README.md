@@ -156,7 +156,7 @@ Here are somethings you can do with **`Pydtapiff Media`**
 --- ---
 
 &nbsp; &nbsp; &nbsp; <a>
-<img src="https://i.ibb.co/dPVhwXr/gif-mixtapes.gif" alt="gif-mixtapes" border="0" align="center" min-width="300px" width="80%" height="100%"/>
+<img src="https://github.com/cbedroid/pydatpiff/raw/master/github/gif/gif_mixtapes.gif" alt="gif-mixtapes" border="0" align="center" min-width="300px" width="80%" height="100%"/>
 </a>
 
 --- ---
@@ -185,7 +185,7 @@ Song's name __do not__ have to be an exact match.
 
 
 &nbsp; &nbsp; &nbsp; <a>
-<img src="https://i.ibb.co/mX1x250/gif-media.gif" alt="gif-media" border="0" align="center" min-width="300px" width="80%" height="100%"/>
+<img src="https://github.com/cbedroid/pydatpiff/raw/master/github/gif/gif_media.gif " alt="gif-media" border="0" align="center" min-width="300px" width="80%" height="100%"/>
 </a>
 --- ---
 
