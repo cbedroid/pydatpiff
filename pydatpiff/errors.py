@@ -88,6 +88,7 @@ class Mp3Error(Error):
         1: "invalid player response",
         2: "album not found",
         3: "album name not found",
+        4: "mp3 not found",
     }
 
 
