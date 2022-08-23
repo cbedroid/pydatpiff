@@ -11,8 +11,8 @@ logging.getLogger("requests").setLevel(logging.CRITICAL)
 logging.getLogger("urllib3").setLevel(logging.CRITICAL)
 
 
-class Session:
-    """Dynamic way to way to keep requests.Session through out whole programs."""
+class Session:  # pragma: no cover
+    """Dynamic way to keep requests.Session throughout whole programs."""
 
     # private
     _TOTAL_TIMEOUT = 0
@@ -20,7 +20,7 @@ class Session:
     _CACHE = {}
 
     # public
-    TIMEOUT = 3  # 5 secs
+    TIMEOUT = 3
     session = requests.Session()
 
     def __init__(self, *arg, **kwargs):

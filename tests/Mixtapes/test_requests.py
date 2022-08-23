@@ -16,7 +16,7 @@ class TestRequest(BaseTest, TestCase):
         cls.response = cls.mocked_response(content=content, url=url)
         request.Session.session.get = Mock(autospec=True, return_value=cls.response)
 
-    def test_request_response_are_cached(self):
+    def test_request_response_are_cached_after_request_completes(self):
         # put response in cache
         url = Urls.category["hot"]
         session = request.Session()
@@ -27,9 +27,10 @@ class TestRequest(BaseTest, TestCase):
         self.assertEqual(cache, self.response)
 
     @patch.object(request.Session, "put_in_cache", autospec=True)
-    def test_request_clear_cache_when_MemoryError_occurs(self, mocked_put_in_cache):
+    def test_cache_is_cleared_when_MemoryError_occurs(self, mocked_put_in_cache):
         mocked_put_in_cache.side_effect = MemoryError()
         args = ("some_url", "dokeooeoeokeook")
+
         with self.assertRaises(MemoryError):
             request.Session.put_in_cache(*args)
         self.assertEqual(request.Session._CACHE, {})

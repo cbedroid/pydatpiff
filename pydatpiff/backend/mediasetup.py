@@ -26,9 +26,8 @@ class DatpiffPlayer:
         super().__init__(*args, **kwargs)
 
     def _verify_version(self):
-        album_name = None
         try:
-            album_name = (
+            self.name = (
                 re.search(
                     r"class=\"title\">(.*)<",
                     self.embedded_player_content,
@@ -37,11 +36,8 @@ class DatpiffPlayer:
                 .strip()
             )
         except AttributeError:
-            album_name = re.search(r'title">(.*[\w\s]*)</div', self.embedded_player_content).group(1).strip()
-        except:  # noqa
             raise Mp3Error(3, "Could not find album's name")
-        self.name = album_name
-        return album_name
+        return self.name
 
     @property
     def embedded_player_content(self):

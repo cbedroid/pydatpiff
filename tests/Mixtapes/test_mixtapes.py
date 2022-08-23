@@ -15,7 +15,7 @@ class TestMixtape(BaseTest, TestCase):
         request.return_value = cls.mocked_response(content=content)
         cls.mix = mixtapes.Mixtape()
 
-    def test_mixtape_initialization_method(self):
+    def test_mixtape_initialization_method_initializes_correctly(self):
 
         content = self.get_request_content("mixtape")
         session = mixtapes.Session.method = Mock(autospec=True)
@@ -32,36 +32,36 @@ class TestMixtape(BaseTest, TestCase):
         mix_len = len(mix)
         self.assertEqual(mix_len, 0)
 
-    def test_mixtape_mixtapes_were_set(self):
+    def test_mixtapes_property_method_sets_correct_mixtapes(self):
         mixtapes = self.mix.mixtapes
         total_mixtapes = len(mixtapes or [])
         self.assertEqual(total_mixtapes, len(self.mix))
 
-    def test_mixtape_artists_were_set(self):
+    def test_artists_property_method_contains_all_artists(self):
         artists = self.mix.artists
         total_artists = len(artists or [])
         self.assertEqual(total_artists, len(self.mix))
 
-    def test_mixtape_links_were_set(self):
+    def test_mixtape_links_contains_all_mixtape_links(self):
         links = self.mix.links
         total_links = len(links or [])
         self.assertEqual(total_links, len(self.mix))
 
-    def test_mixtape_views_were_set(self):
+    def test_mixtapes_has_the_correct_views(self):
         views = self.mix.views
         total_views = len(views or [])
         self.assertEqual(total_views, len(self.mix))
 
-    def test_mixtape_rating_were_set(self):
+    def test_mixtapes_has_the_correct_ratings(self):
         total_ratings = len(self.mix.ratings or [])
         self.assertEqual(total_ratings, len(self.mix))
 
-    def test_mixtape_album_cover_were_set(self):
+    def test_mixtape_album_covers_were_set_correctly(self):
         album_covers = self.mix.album_covers
         total_covers = len(album_covers or [])
         self.assertEqual(total_covers, len(self.mix))
 
-    def test_mixtape_attributes_size_maps_to_artist_attribute_size(self):
+    def test_mixtape_attributes_size_matches_artist_attribute_size(self):
         mixtapes_attributes = ["mixtapes", "links", "views", "album_covers"]
         mix = self.mix
         artist_length = len(mix.artists)
@@ -89,14 +89,15 @@ class TestMixtape(BaseTest, TestCase):
         artist_name = artists[artists.index(test_artist)]
         self.assertEqual(artist_name, "Moneybagg Yo")
 
-    def test_category_defaults_to_hot_when_category_is_invalid(self):
+    def test_mixtapes_category_defaults_to_hot_category(self):
+        # Test mixtapes when no category is passed to mixtape class
         content = self.get_request_content("mixtape")
         request = mixtapes.Session.method = Mock(autospec=True)
         request.return_value = self.mocked_response(content=content)
         mix = mixtapes.Mixtape("some_invalid_category")
         self.assertEqual(mix._user_selected, "hot")
 
-    def test_mixtape_initialized_with_valid_categories(self):
+    def test_categories_are_valid_mixtapes_categories(self):
         content = self.get_request_content("mixtape")
         request = mixtapes.Session.method = Mock(autospec=True)
         request.return_value = self.mocked_response(content=content)
@@ -116,7 +117,7 @@ class TestMixtapeSearch(BaseTest):
         search = cls.mixtape_search_parameter
         cls.mix = mixtapes.Mixtape(**search)
 
-    def test_mixtape_validate_search_method(self):
+    def test_mixtapes_validate_search_method_filter_search_properly(self):
         with self.assertRaises(MixtapeError):
             # test validate_search minimum character raise MixtapeError
             self.mix._validate_search("ab")
@@ -128,3 +129,17 @@ class TestMixtapeSearch(BaseTest):
         # test validate search strips whitespace
         result = self.mix._validate_search("abcd    ")
         self.assertEqual(result, "abcd")
+
+    def test_search_method_includes_correct_artist_and_mixtape(self):
+        # mixtapes search method request response is mocked by default.
+        # See: `mixtape_search_parameter` tests/utils file
+        # See: `mixtapes_search.html` in fixtures
+        mix = mixtapes.Mixtape(search="Jay-Z")
+        self.assertIsNotNone(self.mix.mixtapes)
+
+        self.assertTrue(any(artist for artist in mix.artists if "Jay-Z" in artist))
+
+        mix = mixtapes.Mixtape(search="Some Random Artist")
+        self.assertIsNotNone(self.mix.mixtapes)
+
+        self.assertFalse(any(artist for artist in mix.artists if "Random Artist" in artist))

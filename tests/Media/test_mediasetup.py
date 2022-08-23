@@ -2,6 +2,7 @@ from unittest.mock import Mock, PropertyMock, patch
 
 from pydatpiff.backend import mediasetup
 from pydatpiff.backend.mediasetup import Album, DatpiffPlayer
+from pydatpiff.errors import Mp3Error
 from tests.utils import BaseTest
 
 
@@ -33,7 +34,7 @@ class TestAlbum(BaseTest):
         self.assertIsNotNone(self.album.name)
 
     @patch.object(DatpiffPlayer, "_verify_version", autospec=True)
-    def test_datpiff_version_set_version_correctly(self, mocked_get_version):
+    def test_datpiff_get_version_set_version_correctly(self, mocked_get_version):
         mocked_get_version.return_value = None
         album = Album(link=self.mixtape_links[0])
         self.assertEqual(album._USE_MOBILE_VERSION, True)
@@ -41,6 +42,22 @@ class TestAlbum(BaseTest):
         mocked_get_version.return_value = "some-version"
         album = Album(link=self.mixtape_links[0])
         self.assertEqual(album._USE_MOBILE_VERSION, False)
+
+    @patch.object(DatpiffPlayer, "embedded_player_content", new_callable=PropertyMock)
+    def test_datpiff_player_get_version_correctly_from_regex(self, mocked_content):
+        # test exception is_caught
+        mocked_content.return_value = '<div class="title">Test Album Name</div>'
+        album = Album(link=self.mixtape_links[0])
+        album._verify_version()
+        self.assertIsNotNone(album.name)
+        self.assertEqual(album.name, "Test Album Name")
+
+    @patch.object(mediasetup.re, "search", autospec=True)
+    def test_datpiff_player_version_raise_MP3_Error_when_album_name_is_not_be_found(self, mocked_re):
+        mocked_re.side_effect = AttributeError("invalid regex")
+        with self.assertRaises(Mp3Error):
+            album = Album(link=self.mixtape_links[0])
+            album._verify_version()
 
     def test_build_web_player_url_method_creates_embed_player_url_correctly(self):
         album_id = "1015177"
