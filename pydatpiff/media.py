@@ -488,6 +488,9 @@ class Media:
             Verbose(verbose_message["INVALID_DIRECTORY"] % output)
             return
 
+        album_dirname = " - ".join((self.artist, self.album.name))
+        output = os.path.join(output, File.standardize_file_name(album_dirname))
+        os.mkdir(output)
         # must follow `download` method's arguments order
         ThreadQueue(
             self.download,
