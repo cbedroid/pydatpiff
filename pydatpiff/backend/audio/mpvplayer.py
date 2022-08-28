@@ -6,6 +6,7 @@ from pydatpiff.errors import MvpError
 from pydatpiff.frontend.screen import Verbose
 from pydatpiff.utils.filehandler import File
 
+from ...utils.utils import threader_wrapper
 from .audio_engine import Popen
 from .baseplayer import BasePlayer, MetaData
 
@@ -36,7 +37,8 @@ class MPV(BasePlayer):
             "%s" % song,
         ]
 
-    def _pause_handler(self):
+    @threader_wrapper
+    def _handle_pause_event(self):
         """
         Captures the time duration when the track is paused.
         Once track is unpause time will be added back to the original track time
@@ -54,13 +56,6 @@ class MPV(BasePlayer):
             if rollback > self._MAX_INACTIVITY:
                 Verbose('Pydatpiff program was killed due to "Pause Inactivity"...')
                 exit(1)
-
-    def _run_pause_handler(self):
-        import threading
-
-        t = threading.Thread(target=self._pause_handler)
-        t.daemon = True
-        t.start()
 
     @property
     def duration(self):
@@ -166,10 +161,9 @@ class MPV(BasePlayer):
 
     def _write_cmd(self, cmd):
         """
-        Write command to Popen stdin
+        Handle user input and write command to media player( VLC or MPV) stdin.
         param: cmd - string character to write
         """
-
         if getattr(self, "_popen"):
             if self._track_loaded and self._popen.is_alive:
                 self._popen.stdin.write("{}\n".format(cmd).encode("utf8"))
@@ -200,7 +194,7 @@ class MPV(BasePlayer):
                 self._write_cmd(cmd)
                 self._track_playing = False
                 self._track_paused = True
-                self._run_pause_handler()
+                self._handle_pause_event()
             else:
                 Verbose("\nUnpause")
                 self._track_paused = False
@@ -209,20 +203,19 @@ class MPV(BasePlayer):
                 self._write_cmd(cmd)
         else:
             Verbose("No track playing")
+        return
 
     def rewind(self, sec=5):
         """
-        Rewind track.
-
+        Rewind current track.
         :param: pos - time to rewind or fast-forward (in seconds)
         """
-
         sec = "-" + str(sec)
         self._seeker(sec)
 
     def ffwd(self, sec=5):
         """
-        Fast-forward track.
+        Fast-forward current track.
             :param: pos - time to rewind or fast-forward (in seconds)
         """
         sec = str(sec)
@@ -234,6 +227,7 @@ class MPV(BasePlayer):
         self._write_cmd("quit \n")
         self._track_stopped = True
         Popen.unregister()
+        return
 
     @property
     def _volume(self):

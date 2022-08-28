@@ -16,7 +16,7 @@ class Player:
                 player = Object.strip_and_lower(player)
                 selected_player_class = player_options.get(player, None)
                 return selected_player_class.__call__()
-        except:
+        except:  # noqa
             extended_msg = "\nThe player you have chosen is not compatible with your device.\n"
             raise PlayerError(5, extended_msg)
 

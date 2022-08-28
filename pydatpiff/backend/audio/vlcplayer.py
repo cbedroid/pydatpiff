@@ -37,7 +37,6 @@ class VLCPlayer(BasePlayer):
             self._song = name
             self._path = path
             self._player.set_mrl(path)
-            self._track_loaded = True
             self._volume = self._global_volume
             self.auto_manage_state()
         else:
@@ -90,6 +89,7 @@ class VLCPlayer(BasePlayer):
             self._track_playing = True
         else:
             try:
+                self.stop
                 self.set_track(self._song, self._path)
                 self.state["stopped"] = False
                 return self.play
