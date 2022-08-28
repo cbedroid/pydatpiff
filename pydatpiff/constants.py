@@ -80,8 +80,9 @@ verbose_message = {
     "MEDIA_SET": "Setting media to %s",
     "MEDIA_NOT_SET": "Media not set... Please call `setMedia` first",
     "SEARCH_SONG": "Searching for song: %s ...",
-    "NO_SONG_SELECTED": "--- No song name was entered --",
-    "SONG_NOT_FOUND": "No song was found with the name: %s",
+    "NO_SONG_SELECTED": "--- No song was entered --",
+    "SONG_NOT_FOUND": "No song was found",
+    "SONG_NAME_NOT_FOUND": "No song was found with the name: %s",
     "UNAVAILABLE_SONG": "This song is unavailable",
     "INVALID_DIRECTORY": "Invalid directory: %s",
     "SAVE_SONG": "Saving song: %s ...",
@@ -89,6 +90,9 @@ verbose_message = {
     "AUTO_PLAY_NO_SONG": "Play a song first to enable autoplay",
     "AUTO_PLAY_NEXT_SONG": "Playing next song",
     "AUTO_PLAY_LAST_SONG": "No more songs left to autoplay",
+    "AUTO_PLAY_ENABLED": "\t----- AUTO PLAY ON -----",
+    "AUTO_PLAY_DISABLED": "\t----- AUTO PLAY OFF -----",
+    "AUTO_PLAY_INACTIVITY": "\t--- Autoplay stopped due to inactivity ---",
 }
 
 SERVER_DOWN_MSG = (
