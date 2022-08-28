@@ -94,6 +94,7 @@ class BasePlayer(metaclass=BaseMeta):
 
     @property
     def name(self):
+        """Get the current track title"""
         if not hasattr(self, "_song"):
             raise PlayerError(2, "Cannot find song's name ")
         return self._song
@@ -160,9 +161,9 @@ class BasePlayer(metaclass=BaseMeta):
     def _system_stopped(self, state=False):
         self.state["system_stopped"] = bool(state)
 
-    @classmethod
     @threader_wrapper
-    def auto_manage_state(cls, *args, **kwargs):
+    def auto_manage_state(self, *args, **kwargs):
+        DEBOUNCE_TIME = 1000 * 2  # two seconds
         state = dict(
             loaded=False,
             playing=False,
@@ -171,29 +172,33 @@ class BasePlayer(metaclass=BaseMeta):
             system_stopped=False,
         )
         while True:
-            if cls._track_loaded and not cls._track_playing:
-                if cls.current_time > 0:
+
+            # Handle system stop
+            # Automatically stop track - mainly used for media.autoplay feature.
+            if self.current_time > 0 and self.current_time >= (self.duration - DEBOUNCE_TIME):
+                self.stop
+                state.update(dict(stopped=False, system_stopped=True))
+
+            if self._track_loaded and not self._track_playing:
+                if self.current_time > 0:
                     state.update(dict(loaded=True, paused=True))
                 else:
                     state.update(dict(loaded=True))
 
-            elif cls._track_playing:
+            elif self._track_playing:
                 state.update(dict(loaded=True, playing=True))
 
-            elif cls._track_paused:
+            elif self._track_paused:
                 state.update(dict(loaded=True, paused=True))
 
-            elif cls._track_stopped:
-                cls._paused_time = 0
-                cls._track_start_time = 0
-                state.update(dict(stopped=True))
+            elif self._track_stopped:
+                self.stop
+                self._paused_time = 0
+                self._track_start_time = 0
+                state.update(dict(system_stopped=True))
 
-            elif cls.current_time > cls.duration:
-                state.update(dict(stopped=True, system_stopped=True))
-                cls.stop
-
-            cls.state = state
-            if cls.state.get("stopped", True):
+            self.state = state
+            if self.state.get("stopped", True):
                 break
 
     def set_track(self, *args, **kwargs):

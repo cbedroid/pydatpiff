@@ -10,7 +10,7 @@ from pydatpiff.utils.utils import threader_wrapper
 logger = logging.getLogger(__name__)
 
 
-class Popen(subprocess.Popen):
+class Popen(subprocess.Popen):  # pragma: no cover
     registered_popen = []
     _player_PID = None
 
