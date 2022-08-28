@@ -6,7 +6,7 @@ on:
     - 'release-*'
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,5 +20,5 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_KEY }}
 
         run: |
-          pip install tox keyring
+          pip install tox keyring.alt
           tox -e release,upload
