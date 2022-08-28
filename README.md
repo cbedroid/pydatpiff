@@ -1,6 +1,6 @@
  [![PyPI](https://img.shields.io/pypi/v/pydatpiff.svg?color=blue)](https://pypi.python.org/pypi/pydatpiff)  ![Build](https://api.travis-ci.org/cbedroid/pydatpiff.svg?branch=master)
 
-<img src="https://user-images.githubusercontent.com/54720725/96840060-f872ab80-1417-11eb-93ac-c964217b98b1.png" width="800" height="200">
+<img src="https://user-images.githubusercontent.com/54720725/96840060-f872ab80-1417-11eb-93ac-c964217b98b1.png" width="100%" height="300">
 
 # Pydatpiff
 
@@ -127,12 +127,12 @@ Here are somethings you can do with **`Pydtapiff Media`**
   Index starts at __one (1)__  not __~~zero (0)~~__ .
 
 ```python
-from pydatpiff.media import Media
 from pydatpiff.mixtapes import Mixtape
+from pydatpiff.media import Media
 
 mix = Mixtape(search="Jay-Z")
 
-# Initialized Media with the Mixtape's object
+# Initialize Media with the Mixtape's object
 media = Media(mix)
 
 # Set the media player to a particular mixtapes.
@@ -189,7 +189,8 @@ media.play(3)
 </a>
 --- ---
 
-### FIND A SONG
+
+## FIND A SONG
 
 <img src="https://user-images.githubusercontent.com/54720725/97070237-dbb7ae80-15a4-11eb-9ab1-c27b0a2a64dc.png" width="100" height="100">
 
