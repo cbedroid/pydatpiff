@@ -92,18 +92,18 @@ Either argument __category__ or __search__ should be used at a given time. If no
 
 *Create an Instance of the Mixtape class*
 ```python
->>> from pydatpiff.mixtapes import Mixtape
+from pydatpiff.mixtapes import Mixtape
 
->>> mix = Mixtape(category='hot')
-#OR
-#Search for an artist's mixtape
->>> mix = Mixtape(search='Jay-Z')
+mix = Mixtape(category='hot')
+# -- OR --
+# Search for an artist's mixtape
+mix = Mixtape(search='Jay-Z')
 
 # To view all available mixtapes
->>> mix.mixtapes
-```
+mix.mixtapes
 
-['Creative Control', 'Carter Collection (15th Anniversary)', 'Viva La Hova', 'The Best Of Jay-z                                                                                                : 25th Anniversary', 'Jay-z - If I Should Die Vol. 1 (the Best Of Jay-z)', 'Jay-Z: The Unheard C                                                                                                lassics', 'Jay-z Underground Mixes And Mashes Disk 2', 'Iceburgz Ent Dj Smokeshop Presents -big                                                                                                 Tingz-pt.1 Classic Beefs Nas,jay-z And More', 'The Best Of Jay-z Old Vs New', 'The Best Of Jay-z                                                                                                 & Biggie Smalls', 'Jay-z Live From Glastonbury ', 'Jay-z Underground Mixes And Mashes disk 1',                                                                                                 'Jay-z - Remixes',..etc ]
+```
+['Creative Control', 'Carter Collection (15th Anniversary)', 'Viva La Hova', 'The Best Of Jay-z                                                                                                : 25th Anniversary', 'Jay-z - If I Should Die Vol. 1 (the Best Of Jay-z)', 'Jay-Z: The Unheard C                                                                                                lassics', 'Jay-z Underground Mixes And Mashes Disk 2', 'Iceburgz Ent Dj Smokeshop Presents -big                                                                                                 Tingz-pt.1 Classic Beefs Nas,jay-z And More', 'The Best Of Jay-z Old Vs New', 'The Best Of Jay-z                                                                                                 & Biggie Smalls', 'Jay-z Live From Glastonbury ', 'Jay-z Underground Mixes And Mashes disk 1', 'Jay-z - Remixes',..etc ]
 
 --- ---
 
@@ -114,8 +114,8 @@ Either argument __category__ or __search__ should be used at a given time. If no
 
 Here are somethings you can do with **`Pydtapiff Media`**
  - `find_song` - Find any song made by an artist.
- - `play`  - Plays songs from  current mixtape.
- - `download` - Download current song.
+ - `play`  - Plays songs from a mixtape.
+ - `download` - Download a song from mixtape.
  - `download_album` - Download all songs from an mixtape.
 
 --- ---
@@ -127,18 +127,21 @@ Here are somethings you can do with **`Pydtapiff Media`**
   Index starts at __one (1)__  not __~~zero (0)~~__ .
 
 ```python
+from pydatpiff.media import Media
+from pydatpiff.mixtapes import Mixtape
 
-#We initialized Media with a mixtape object from Mixtape class
->> from pydatpiff.media import Media
->>> media = Media(mix)
+mix = Mixtape(search="Jay-Z")
 
-#Setup the media player to a particular mixtapes.
->>> media.setMedia('Creative Control')
-#OR
->>> media.setMedia(1) # set media by index.  1='Creative Control'
+# Initialized Media with the Mixtape's object
+media = Media(mix)
 
-#TO VIEW ALL AVAILABLE SONGS
->>> media.songs
+# Set the media player to a particular mixtapes.
+media.setMedia('Creative Control')
+# -- OR --
+media.setMedia(1) # set media by index.  1='Creative Control'
+
+# View all songs in current mixtape
+media.songs
 
 [ 'Jay-Z - Intro', 'Jay-Z - Advantage Carter (Prod. By Green Lantern)',
   'Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street'                                                                                         , "Jay-Z - Jay's Back ASAP",
@@ -168,20 +171,17 @@ Song's name __do not__ have to be an exact match.
 
 
 ```python
->>> media.play('Welcome')
+# Play a song from current mixtape.
+media.play('Welcome')
 
-#OR
+# -- OR --
 
->>> media.play(3)
+media.play(3)
+
+# Play Song - ♬♬♬
+# Song: Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street
+# Size:  1.91 MB
 ```
-
-
- #### Play Song -  &#9836;&#9836;&#9836;
-  Artist: Jay-Z
-
-  Song: Jay-Z - Welcome 2 Atlanta V103 Feat. Young Jeezy & DJ Greg Street
-
-  Size:  1.91 MB
 
 
 &nbsp; &nbsp; &nbsp; <a>
@@ -204,15 +204,16 @@ Find any song made by an artist using the **`find_song`** method in **`media`**.
 
  **media.find_song**
 ```python
-   #Search for a song
-   >>> media.find_song('green lan') # returns mixtape's index and name
+# Search for a song
+media.find_song('green lan') # returns mixtape's index and name
 
-   #results
-   [(1, 'Creative Control'),
+# Search results
+[
+    (1, 'Creative Control'),
     (36, 'Headliner & Legends (Jay-Z Freestyles) '),
     (69, 'Power Us Up( Jay-z, Kanye West, Swizz Beatz)'),
     (172, 'J3 Rocnation '),(254, "Bakin' Session")
-   ]
+]
 ```
 --- ---
 
@@ -238,28 +239,27 @@ Simply create a variable ` player = media.player`
 
 
 ``` python
- # create an object of the player class
- >>> player = media.player
+# Create an player object to control the media
+player = media.player
 
- # Rewind ⏪
+# Rewind Song ⏪
+player.rewind()
+player.rewind(10) # rewind 10 sec ago
 
->>> player.rewind()
->>> player.rewind(10) # rewind 10 sec ago
+# Fast-Forward Song ⏩
+player.ffwd()
+player.ffwd(10) # fast-forward 10 sec ahead
 
-# Fast-Forward ⏩
->>> player.ffwd()
->>> player.ffwd(10) # fast-forward 10 sec ahead
+# Pause Song ⏸
+player.pause
 
-# Pause ⏸
->>> player.pause
+# Stop Song ⏹
+player.stop # stop song
 
-# Stop ⏹
->>> player.stop # stop song
-
-# Volume 🔊
->>> player.volume(50) # set media volume to 50
->>> player.volume_up(5) # set media volume up 5 steps
->>> player.volume_down(5) # set media volume down 5 steps
+# Control Volume 🔊
+player.volume(50) # set media volume to 50
+player.volume_up(5) # set media volume up 5 steps
+player.volume_down(5) # set media volume down 5 steps
 
 ```
 
@@ -279,21 +279,19 @@ Simply create a variable ` player = media.player`
 
  > ## Download Album
 
-  -	 **media.download_album**
+  -  **media.download_album**
         - __params__: `output`
-
-            - *__output__* : directory to save song. *(default: current directory)*
+        - *__output__* : directory to save song. *(default: current directory)*
 
 
 ```python
-#Download a single song
->>> media.download(3,output="directory_to_save_song")
-#OR
->>> media.download('Welcome',output="directory_to_save_song")
+# Download a single song
+media.download(3,output="directory_to_save_song")
+# -- OR --
+media.download('Welcome',output="directory_to_save_song")
 
-
-#Download full album
->>> media.download_album(output='directory_to_save_album')
+# Download full album
+media.download_album(output='directory_to_save_album')
 ```
 
 --- ---
