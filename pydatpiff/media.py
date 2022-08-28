@@ -1,5 +1,6 @@
 import io
 import os
+import time
 
 from pydatpiff.utils.filehandler import File, Tmp
 from pydatpiff.utils.utils import Object, Select, ThreadQueue, threader_wrapper
@@ -46,9 +47,9 @@ class Media:
         self.mixtape = mixtape
         self._artist_name = None
         self._album_name = None
-        self._current_index = None
         self._selected_song = None
         self.__cache_storage = {}
+        self.AUTOPLAY_INACTIVITY_TIME = 60 * 5  # 5 minutes
 
         Verbose(verbose_message["MEDIA_INITIALIZED"])
 
@@ -174,7 +175,7 @@ class Media:
         links = list(enumerate(links, start=1))
         results = ThreadQueue(Album.lookup_song, links).execute(song=song_name)
         if not results:
-            Verbose(verbose_message["SONG_NOT_FOUND"] % song_name)
+            Verbose(verbose_message["SONG_NAME_NOT_FOUND"] % song_name)
         results = Object.remove_list_null_value(results)
         return results
 
@@ -258,9 +259,8 @@ class Media:
         try:
             index = self._index_of_song(name)
             self._selected_song = self.songs[index]
-            self._current_index = index
         except (ValueError, MediaError):
-            Verbose(verbose_message["SONG_NOT_FOUND"] % name)
+            Verbose(verbose_message["SONG_NAME_NOT_FOUND"] % name)
 
     def _cache_song(self, song, content):
         """
@@ -338,42 +338,60 @@ class Media:
         self._auto_play = auto  # noqa
         self._continuous_play()
         if auto:
-            Verbose("\t----- AUTO PLAY ON -----")
+            Verbose(verbose_message["AUTO_PLAY_ENABLED"])
         else:
-            Verbose("\t----- AUTO PLAY OFF -----")
+            Verbose(verbose_message["AUTO_PLAY_DISABLED"])
+
+    @property
+    def _is_autoplay_inactive(self):
+        is_paused = self.player.state.get("paused")
+        if is_paused and self._inactive_time == 0:
+            self._inactive_time = time.time()
+        return is_paused and time.time() - self._inactive_time > self.AUTOPLAY_INACTIVITY_TIME
 
     @threader_wrapper
     def _continuous_play(self):
         """
         Automatically play each song from Album when autoplay is enable.
         """
-        if self.autoplay:
-            total_songs = len(self)
-            if not self.song:
-                Verbose(verbose_message["AUTO_PLAY_NO_SONG"])
-                return
 
-            track_number = self._index_of_song(self.song) + 2
-            if track_number > total_songs:
-                Verbose(verbose_message["AUTO_PLAY_LAST_SONG"])
+        if self.song is None:
+            current_track = 1
+            self.play(1)
+        else:
+            current_track = self._index_of_song(self.song)
+
+        if not self.player.state["playing"]:
+            current_track + 1
+
+        while self.autoplay:
+            """
+            If the user di not select a track
+            then set and play the first song from mixtape
+            """
+            # Handle autoplay pause inactivity
+            if self._is_autoplay_inactive:
+                self._inactive_time = 0
+                Verbose(verbose_message["AUTO_PLAY_INACTIVITY"])
                 self.autoplay = False
-                return
+                self.player.stop
+                break
 
-            while self.autoplay:
-                current_track = self._index_of_song(self.song) + 1
-                stopped = self.player._state.get("stopped")  # noqa
-                if stopped:
-                    next_track = current_track + 1
+            # handle track stoppages by system
+            if self.player._state.get("system_stopped"):  # noqa:
+                self.player.state["system_stopped"] = False
+                next_track = current_track + 1
+                if next_track > len(self):
+                    Verbose(verbose_message["AUTO_PLAY_LAST_SONG"])
+                    self.autoplay = False
+                    break
 
-                    if next_track > total_songs:
-                        Verbose(verbose_message["AUTO_PLAY_LAST_SONG"])
-                        self.autoplay = False
-                        break
+                Verbose(verbose_message["AUTO_PLAY_NEXT_SONG"])
+                self.play(next_track)
 
-                    Verbose(verbose_message["AUTO_PLAY_NEXT_SONG"])
-                    self.play(next_track)
-                    while self.player._state["stopped"]:  # noqa
-                        pass
+            # handle stoppage by user
+            elif self.player.state.get("stopped"):
+                break
 
     def _get_audio_track(self, track):
         """
@@ -383,7 +401,7 @@ class Media:
         Args:   track (int,string): Name or index of song.
         Returns:    tuple: (track name, audio content)
         """
-        if not track:
+        if track is None:
             Verbose("\n\t", verbose_message["NO_SONG_SELECTED"])
             raise MediaError(8, verbose_message["NO_SONG_SELECTED"])
 
@@ -391,19 +409,21 @@ class Media:
             if isinstance(track, int):
                 if track > len(self):
                     track = len(self)
-            else:
+            elif isinstance(track, str):
                 track = self._index_of_song(track) + 1
-        except ValueError:  # ^ will throw ValueError if track  name is invalid
-            Verbose(verbose_message["SONG_NOT_FOUND"] % track)
-            raise MediaError(8, verbose_message["SONG_NOT_FOUND"] % track)
+            else:
+                raise ValueError
+        except (MediaError, ValueError):  # ^ will throw ValueError if track  name is invalid
+            Verbose(verbose_message["SONG_NAME_NOT_FOUND"] % track)
+            raise MediaError(8, verbose_message["SONG_NAME_NOT_FOUND"] % track)
 
-        content = self._write_audio(track).read()
+        content = self._write_audio(track)
         if not content:
             Verbose(verbose_message["UNAVAILABLE_SONG"])
             raise MediaError(9, verbose_message["UNAVAILABLE_SONG"])
 
         song_name = self.songs[self._song_index]
-        return song_name, content
+        return song_name, content.read()
 
     def play(self, track=None, demo=False):
         """Play selected mixtape's track
@@ -413,11 +433,6 @@ class Media:
             demo (bool, options) - True: demo buffer of song (default: False).
                 False: play full song
         """
-
-        if self.player is None:
-            extended_msg = "Audio player is incompatible with device"
-            raise MediaError(6, extended_msg)
-
         try:
             song_name, content = self._get_audio_track(track)
         except MediaError:
@@ -457,6 +472,7 @@ class Media:
         try:
             song, content = self._get_audio_track(track)
         except MediaError:
+            # Exception message will be handled from by `_get_audio_track`
             return
 
         # Handles paths
