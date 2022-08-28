@@ -21,5 +21,5 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_KEY }}
 
         run: |
-          pip install tox keyrings.alt
+          pip install tox twine keyrings.alt
           tox -e release,upload
