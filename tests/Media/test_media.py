@@ -1,10 +1,11 @@
 import os
 import re
 from tempfile import TemporaryDirectory as TempDir
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, call, patch
 
 from pydatpiff import media, mixtapes
 from pydatpiff.backend import mediasetup
+from pydatpiff.backend.audio import mpvplayer
 from pydatpiff.constants import verbose_message
 from pydatpiff.errors import MediaError, PlayerError
 from pydatpiff.utils.filehandler import File
@@ -59,6 +60,8 @@ class BaseMediaTest(BaseTest):
 
     def tearDown(self):
         # Prevent pytest from hanging due sto `while loop` in player
+        self.media._song_index = 0
+        self.unmocked_media._song_index = 0
         self.media.player.stop
         self.unmocked_media.player.stop
 
@@ -143,7 +146,7 @@ class TestMedia(BaseMediaTest):
         mocked_queue.return_value = []
         song_name = "unknown song"
         self.media.find_song(song_name)
-        mocked_verbose.assert_called_with(verbose_message["SONG_NOT_FOUND"] % song_name)
+        mocked_verbose.assert_called_with(verbose_message["SONG_NAME_NOT_FOUND"] % song_name)
 
     def test_media_sets_album_name_is_correct(self):
         album = self.test_album
@@ -178,7 +181,7 @@ class TestMedia(BaseMediaTest):
 
         # test error message when song is not found
         media_player.song = "some-unknown-song"
-        mocked_verbose.assert_called_with(verbose_message["SONG_NOT_FOUND"] % "some-unknown-song")
+        mocked_verbose.assert_called_with(verbose_message["SONG_NAME_NOT_FOUND"] % "some-unknown-song")
 
     @patch.object(media, "Verbose", autospec=True)
     def test_show_songs_method_print_all_songs(self, mocked_verbose):
@@ -196,6 +199,28 @@ class TestMedia(BaseMediaTest):
         mocked_song.return_value = self.song_list[0]
         self.media.play(1, demo=True)
         self.assertEqual(self.media.song, self.song_list[0])
+
+    @patch.object(media.Media, "_write_audio", autospec=True)
+    @patch.object(media, "Verbose", autospec=True)
+    def test_media_get_audio_track_method_raises_property_exception(self, mocked_verbose, mocked_write):
+        media = self.unmocked_media
+
+        # test get_audio_track  when track is None
+        with self.assertRaises(MediaError):
+            media._get_audio_track(track=None)
+            mocked_verbose.assert_called_with(verbose_message["NO_SONG_SELECTED"])
+
+        # test get_audio_track raise MediaError when type is not a str or int
+        with self.assertRaises(MediaError):
+            track = ["invalid_type"]
+            media._get_audio_track(track=track)
+            mocked_verbose.assert_called_with(verbose_message["SONG_NAME_NOT_FOUND"] % track)
+
+        mocked_write.return_value = None
+        # test get_audio_track raise MediaError when content is not available
+        with self.assertRaises(MediaError):
+            media._get_audio_track(track=1)
+            mocked_verbose.assert_called_with(verbose_message["UNAVAILABLE_SONG"])
 
     @patch.object(media.Media, "song", new_callable=PropertyMock)
     def test_playing_song_that_is_out_of_range_plays_last_song(self, mocked_song):
@@ -232,6 +257,19 @@ class TestMedia(BaseMediaTest):
         mocked_verbose.assert_not_called()
 
     @patch.object(media.Media, "song", new_callable=PropertyMock)
+    @patch.object(media.Media, "_get_audio_track", side_effect=MediaError)
+    @patch.object(media, "Verbose", autospec=True)
+    def test_media_song_method_catches_MediaError_when_audio_track_is_invalid(
+        self, mocked_verbose, mocked_audio, mocked_song
+    ):
+        # test play song by referencing partial song mame
+        mocked_song.return_value = self.song_list[0]
+        is_playing = self.media.play(1)
+        self.assertEqual(self.media.song, self.song_list[0])
+        self.assertIsNone(is_playing)
+        mocked_verbose.assert_not_called()
+
+    @patch.object(media.Media, "song", new_callable=PropertyMock)
     @patch.object(media.File, "write_to_file", autospec=True)
     def test_download_song_by_index_downloads_correct_song(self, mocked_write_file, mocked_song):
         # test download song by referencing song index
@@ -258,7 +296,6 @@ class TestMedia(BaseMediaTest):
         mocked_song.return_value = self.song_list[0]
         self.media.download(self.song_list[0])
         self.assertEqual(self.media.song, self.song_list[0])
-        mocked_verbose.assert_not_called()
 
     @patch.object(media.Media, "song", new_callable=PropertyMock)
     @patch.object(media.File, "write_to_file", autospec=True)
@@ -285,6 +322,116 @@ class TestMedia(BaseMediaTest):
         self.media.download(self.song_list[0][:3].upper())
         self.assertEqual(self.media.song, self.song_list[0])
         mocked_verbose.assert_not_called()
+
+    @patch.object(media.Media, "song", new_callable=PropertyMock)
+    @patch.object(media.File, "write_to_file", autospec=True)
+    def test_download_song_raises_FileNotFoundError_when_directory_not_found(self, mocked_write_file, mocked_song):
+        # test download song is case-insensitive
+        mocked_write_file.return_value = ""
+        mocked_song.return_value = self.song_list[0]
+        with self.assertRaises(FileNotFoundError) as context:
+            self.media.download(self.song_list[0][:3].upper(), output="some-random-dir")
+            self.assertEqual(context.message, "Invalid directory: some-random-dir")
+
+    @patch.object(media.Media, "song", new_callable=PropertyMock)
+    @patch.object(media.Media, "_get_audio_track", side_effect=MediaError)
+    @patch.object(media.File, "write_to_file", autospec=True)
+    def test_download_song_catches_MediaError_when_audio_track_is_invalid(
+        self, mocked_write_file, mocked_audio, mocked_song
+    ):
+        # test download song is case-insensitive
+        mocked_write_file.return_value = ""
+        mocked_audio.side_effect = MediaError
+        mocked_song.return_value = self.song_list[0]
+        has_download = self.media.download(self.song_list[0])
+        self.assertIsNone(has_download)
+
+    @patch.object(media, "Verbose", autospec=True)
+    def test_auto_play_is_select_first_song_when_not_track_is_selected_by_user(self, mocked_verbose):
+        self.media.autoplay = True
+        self.assertTrue(self.media.autoplay)
+        mocked_verbose.assert_called_with(verbose_message["AUTO_PLAY_ENABLED"])
+
+        self.media.autoplay = False
+        self.assertFalse(self.media.autoplay)
+        mocked_verbose.assert_called_with(verbose_message["AUTO_PLAY_DISABLED"])
+
+    @patch.object(media, "Verbose", autospec=True)
+    @patch.object(media.Media, "song", new_callable=PropertyMock)
+    def test_media_can_auto_play_songs_correctly(self, mocked_song, mocked_verbose):
+        mocked_song.return_value = self.song_list[0]
+        self.media.play(1)
+        self.media.autoplay = True
+        self.assertTrue(self.media.autoplay)
+        mocked_verbose.assert_called_with(verbose_message["AUTO_PLAY_ENABLED"])
+
+        # fast-forward song to next track and verified the next song was loaded
+        self.media.player.ffwd(60 * 5)  # 5 minutes fast-forward
+        mocked_song.return_value = self.song_list[1]
+        self.assertEqual(self.song_list[1], self.media.song)
+
+    @patch.object(media.Media, "song", new_callable=PropertyMock)
+    @patch.object(media.Media, "_index_of_song", autospec=True)
+    @patch.object(mpvplayer.MPV, "current_time", new_callable=PropertyMock)
+    @patch.object(media, "Verbose", autospec=True)
+    def test_auto_play_is_disabled_when_system_stop_song(
+        self, mocked_verbose, mocked_current_time, mocked_song_index, mocked_song
+    ):
+        from time import sleep
+
+        mocked_song.return_value = max(self.song_list)
+        mocked_song_index.return_value = len(self.song_list)
+        mocked_current_time.return_value = 0
+        media = self.media
+        media.play(max(self.song_list))  # play last song
+        media.autoplay = True
+        self.assertTrue(media.autoplay)
+
+        mocked_current_time.return_value = 60 * 5
+        sleep(1.5)  # need time for autoplay to switch
+        self.assertFalse(media.autoplay)
+        calls = [
+            call(verbose_message["AUTO_PLAY_LAST_SONG"]),
+            call(verbose_message["AUTO_PLAY_DISABLED"]),
+        ]
+        mocked_verbose.assert_has_calls(calls, any_order=True)
+
+    @patch.object(media.Media, "song", new_callable=PropertyMock)
+    @patch.object(media.Media, "_is_autoplay_inactive", new_callable=PropertyMock)
+    @patch.object(mpvplayer.MPV, "current_time", new_callable=PropertyMock)
+    @patch.object(media, "Verbose", autospec=True)
+    def test_auto_play_is_disabled_due_to_inactivity_when_paused_for_long_period(
+        self, mocked_verbose, mocked_current_time, mocked_is_inactive, mocked_song
+    ):
+        from time import sleep
+
+        mocked_current_time.return_value = 1
+        mocked_song.return_value = min(self.song_list)
+        mocked_is_inactive.return_value = True
+        media = self.media
+        media.play(1)
+        media.autoplay = True
+
+        sleep(2)  # need time for autoplay to switch
+        media.player.pause
+        sleep(2)
+        self.assertFalse(media.autoplay)
+        calls = [
+            call(verbose_message["AUTO_PLAY_INACTIVITY"]),
+            call(verbose_message["AUTO_PLAY_DISABLED"]),
+        ]
+        mocked_verbose.assert_has_calls(calls, any_order=True)
+
+    @patch.object(media.Media, "song", new_callable=PropertyMock)
+    def test_auto_play_is_still_enabled_when_user_stop_song(self, mocked_song):
+        mocked_song.return_value = self.song_list[0]
+        self.media.play(1)
+        self.media.autoplay = True
+        self.assertTrue(self.media.autoplay)
+
+        self.media.player.stop
+        self.assertTrue(self.media.autoplay)
+        self.assertTrue(self.media.player.state.get("stopped", False))
 
     @patch.object(media.Media, "song", new_callable=PropertyMock)
     @patch.object(media.File, "write_to_file", autospec=True)
