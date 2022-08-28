@@ -1,42 +1,36 @@
+from pydatpiff.errors import InstallationError, PlayerError
+from pydatpiff.utils.utils import Object
+
 from .mpvplayer import MPV
 from .vlcplayer import VLCPlayer
-from ...errors import PlayerError, InstallationError
-from .androidplayer import Android, AndroidError
-from ..config import Datatype
 
 
 class Player:
     @classmethod
-    def getPlayer(cls, *args, **kwargs):
-        player = kwargs.get("player", None)
+    def getPlayer(cls, player=None):
 
-        players_selection = {"vlc": VLCPlayer, "mpv": MPV, "android": Android}
-
+        player_options = {"vlc": VLCPlayer, "mpv": MPV}
+        # return the player specified by the user
         try:
             if player:
-                player = Datatype.strip_lowered(player)
-                chosen = players_selection.get(player)
-                if chosen:
-                    return chosen()
-        except Exception as e:
-            extended_msg = (
-                "\nThe player you choosen" " is not compatible with your device.\n"
-            )
+                player = Object.strip_and_lower(player)
+                selected_player_class = player_options.get(player, None)
+                return selected_player_class.__call__()
+        except:  # noqa
+            extended_msg = "\nThe player you have chosen is not compatible with your device.\n"
             raise PlayerError(5, extended_msg)
 
-        try:
-            return VLCPlayer()
-        except:
-            pass
+        # if no player is specified by the user, then select a default player
+        return cls._getDefaultPlayer()
 
-        try:
-            return MPV()
-        except Exception as e:
-            pass
+    @classmethod
+    def _getDefaultPlayer(cls):
+        # Note: Player order will be respected!
+        default_players = [MPV, VLCPlayer]
+        for player in default_players:
+            try:
+                return player.__call__()
+            except:  # noqa
+                pass
 
-        try:
-            return Android()
-        except:
-            pass
-
-        raise InstallationError(1, MediaError, _extra)
+        raise InstallationError(1)

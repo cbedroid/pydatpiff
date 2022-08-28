@@ -1,205 +1,224 @@
-import os
 import io
-from .urls import Urls
-from .errors import MediaError, InstallationError
-from .utils.request import Session
+import os
+import time
+
+from pydatpiff.utils.filehandler import File, Tmp
+from pydatpiff.utils.utils import Object, Select, ThreadQueue, threader_wrapper
+
 from .backend.audio.player import Player
 from .backend.mediasetup import Album, Mp3
-from .frontend.display import Print, Verbose, Show
-from .backend.filehandler import file_size, Tmp, Path
-from .backend.config import User, Datatype, Queued, Threader
-from .mixtapes import Mixtapes
+from .constants import verbose_message
+from .errors import MediaError
+from .frontend import screen
+from .mixtapes import Mixtape
+from .urls import Urls
+from .utils.request import Session
 
-# TODO NOT finish writig baseplayer method and subclasses
-#   from .backend.audio.player import BasePlayer as player
-#   will cahnge import to another name
-#    change name of player
+Verbose = screen.Verbose
 
 
 class Media:
-    """ Media player that control the songs selected from Mixtapes """
+    """A media player that control the songs selected from Mixtape"""
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "__tmpfile"):
-            Tmp.removeTmpOnstart()
-            cls.__tmpfile = Tmp.create()
+    player = None
 
-        if hasattr(cls, "player"):
-            if kwargs.get("player"):
-                cls.player = Player.getPlayer(**kwargs)
-
-        elif not hasattr(cls, "player"):
-            try:
-                cls.player = Player.getPlayer(**kwargs)
-            except Exception as e:
-                cls.player = None
-
-        if cls.player is None:  # Incase user reinitalize Media class
-            raise MediaError(7, InstallationError._extra)
-
-        return super(Media, cls).__new__(cls)
-
-    def __str__(self):
-        return "%s(%s)" % (self.__class__.__name__, self._Mixtapes)
-
-    def __repr__(self):
-        return "Media(%s)" % (self._Mixtapes)
-
-    def __len__(self):
-        if hasattr(self, "songs"):
-            return len(self.songs)
-        else:
-            return 0
-
-    def __init__(self, mixtape=None, **kwargs):
-        """ 
-        Initialize Media and load all mixtapes.
-
-        :param: mixtape - Datpiff.Mixtapes object
+    def __init__(self, mixtape=None, pre_select=None, player="mpv", **kwargs):
         """
-        if not self.__isMixtapesObject(mixtape):
-            raise MediaError(2, "must pass a mixtape object to Media class")
+        Initialize a media player and load all mixtapes.
 
-        Verbose("Media initialized")
-        if not mixtape:
-            raise MediaError(1)
+        Args:
+            mixtape (instance class) -- pydatpiff.Mixtape instance (default: {None})
+            pre_select (Integer,String) --  pre-selected mixtape's album, artist,or mixtapes.
+                    See media.setMedia for more info (default: None - Optional)
 
+        Raises:
+            MediaError: Raises MediaError if mixtapes is not a subclass of pydatpiff.Mixtape.
+        """
+        self.__setup(player)
+        # Check if mixtape is valid
+        self.__is_valid_mixtape(mixtape)
+
+        self._album_cover = None
+        self.bio = None
+        self._Mp3 = None
+        self.url = None
+        self.uploader = None
         self._session = Session()
-        self._Mixtapes = mixtape
+        self.mixtape = mixtape
         self._artist_name = None
         self._album_name = None
-        self._current_index = None
         self._selected_song = None
-        self.__downloaded_song = None
-        super(Media, self).__init__()
+        self.__cache_storage = {}
+        self.AUTOPLAY_INACTIVITY_TIME = 60 * 5  # 5 minutes
 
-    def __isMixtapesObject(self, obj):
+        Verbose(verbose_message["MEDIA_INITIALIZED"])
+
+        if pre_select:  # Run setMedia with argument here
+            # This step is optional for users, but can save an extra setup
+            # when selecting an album in setMedia.
+            self.setMedia(pre_select)
+
+    def __str__(self):
+        album_name = self._album_name
+        if album_name:
+            return "{} Mixtape".format(album_name)
+        return str(self.mixtape)
+
+    def __len__(self):
         try:
-            if issubclass(obj.__class__, Mixtapes):
-                return True
-        except:
-            pass
-        return False
+            return len(self.songs)
+        except MediaError:
+            Verbose(verbose_message["MEDIA_NOT_SET"])
+            return 0
 
-    def findSong(self, songname):
+    def __setup(self, player=None):
+        if not hasattr(self, "__temp_file"):
+            Tmp.remove_temp_file_on_startup()
+            self.__temp_file = Tmp.create()
+
+        # Set the initial player. fallback to mpv if not specified
+        self.player = Player.getPlayer(player)
+
+    def _select(self, choice):
         """
-        Search through all mixtapes songs and return all songs 
-        with songname
+        Queue and load  a mixtape to media player.
+                            (See pydatpiff.media.Media.setMedia)
 
-        :param: songname - name of the song to search for
+        :param: choice - (int) user selection by indexing an artist name or album name
+                            (str)
         """
+        # Map user selection according to the incoming datatype.
+        # We map an integer to an artist and str to a mixtape.
+        selection = None
 
-        # TODO:look this video with James Powell
-        # https://www.youtube.com/watch?v=R2ipPgrWypI&t=1748s at 55:00.
-        # Implement a generator function , so user dont have to wait on all the results at once
-        # Also thread this main function, to unblock user from still using program while
-        # it wait for result to be finished.
-        songname = Datatype.strip_lowered(songname)
-        Print("\nSearching for song: %s ..." % songname)
-        links = self._Mixtapes.links
-        links = list(enumerate(links, start=1))
-        results = Queued(self.__searchAlbumFor, links).run(songname)
-        if not results:
-            Print("No song was found with the name: %s " % songname)
-        results = Datatype.removeNone(results)
-        return results
+        if isinstance(choice, int):
+            # Adjust the selection to the correct index.
+            total_mixtape = len(self.mixtape)
+            if choice >= total_mixtape:
+                choice = total_mixtape
+            selection = Select.get_leftmost_index(choice, options=self.mixtape.artists)
+        else:
+            options = self.mixtape.artists.copy()
+            options.extend(self.mixtape.mixtapes)
 
-    def __searchAlbumFor(self, links, song, *args, **kwargs):
+            selection = Select.get_index_of(choice, options=options)
+        assert selection is not None, "Invalid selection"
+        return selection
+
+    def setMedia(self, mixtape):  # noqa
         """
-        Search through all Albums and return all Albums
-        that contains similiar songs' title.
+        Initialize and set the Mixtape to Media Player.
+        A pydatpiff.mixtapes.Mixtape's album will be load to the media player.
 
-        :param: song - title of the song to search for
-        :param: links - all mixtapes links
-        """
-        index, link = links
-        album = Album(link)
-        name = album.name
-        tracks = Mp3(album.datpiff_player_response).songs
-        for track in tracks:
-            if song in Datatype.strip_lowered(track):
-                return {"ablumNo": index, "album": name, "song": track}
+        Args:
+            selection - pydatpiff.Mixtape album's name or artist's name.
+                int - will return the Datpiff.Mixtape artist at that index.
+                str - will search for an artist from Mixtape.artists (default)
+                    or album from Mixtape.album.
 
-    def setMedia(self, selection):
-        """
-        Initialize and set the an Album to Media Player.
-        A pydatpiff.mixtapes.Mixtape's ablum will be load to the media player.
-
-        :param: selection - pydatpiff.Mixtapes album's name or artist's name.
-            int - will return the Datpiff.Mixtape artist at that index.
-            str - will search for an artist from Mixtapes.artists (default)
-                  or album from Mixtapes.ablum. 
-
-            note: see pydatpiff.mixtape.Mixtapes for album or artist selection 
+                See pydatpiff.mixtape.Mixtape for a mixtape album or artist selection
         """
 
-        result = self._Mixtapes._select(selection)
-        if result is None:
-            Verbose("SELECTION:", selection)
-            e_msg = '\n--> Mixtape "%s" was not found' % selection
+        # Mixtape's class will handle errors and None value
+
+        mixtape_index = min(self._select(mixtape), len(self.mixtape) - 1)
+
+        # set Media's Mixtape object attributes
+        url = self.mixtape._links[mixtape_index]  # noqa
+        self.url = "".join((Urls.datpiff["base"], url))
+        self.artist = self.mixtape.artists[mixtape_index]
+        self.album_cover = self.mixtape.album_covers[mixtape_index]
+
+        # set Media's Album detail attributes
+        self.album = Album(url)
+        self._Mp3 = Mp3(self.album)
+
+        # get the album's uploader and bio
+        self.uploader = getattr(self.album, "uploader", "unknown uploader")
+        self.bio = getattr(self.album, "uploader", "no bio")
+        formatted_title = " - ".join((self.artist, self.album.name))
+        Verbose(verbose_message["MEDIA_SET"] % formatted_title)
+
+    def __is_valid_mixtape(self, instance):
+        """Verify media mixtape subclass is an instance of mixtapes' class
+
+        Args:
+            instance {instance class} -- Pydatpiff Mixtape instance
+
+        Returns:
+            Boolean -- True or False if instance is subclass of pydatpiff Mixtape class
+        """
+        if not instance:
             raise MediaError(1)
 
-        # set up all Album's Info
-        max_result = len(self._Mixtapes) - 1
-        result = result if result <= max_result else max_result
-        self._artist_name = self._Mixtapes.artists[result]
-        self._album_name = self._Mixtapes.mixtapes[result]
-        self._album_cover = self._Mixtapes.album_covers[result]
+        if not issubclass(instance.__class__, Mixtape):
+            raise MediaError(2, '"mixtape" must be Mixtape object')
 
-        link = self._Mixtapes._links
-
-        self.__setupMedia(link[result])
-        Verbose("Setting Media to %s - %s" % (self.artist, self.album))
-
-    def __setupMedia(self, link):
+    def find_song(self, name):
         """
-        Initial an Album and sets all Mp3 songs'tags
-        
-        param: link - Album's mixtape link
-        """
-        album = Album(link)
-        self._Mp3 = Mp3(album.datpiff_player_response)
-        # get the ablum's uploader
-        self.uploader = album.uploader
-        # get ablum bio
-        self.bio = album.bio
-        self.__cache_storage = {}
+         Search through all mixtapes songs and return all songs
+         with song_name
 
-    def __index_of_song(self, select):
+        Args:
+            song_name {str} -- song to search for.
+
+        Returns:
+            tuple -- returns a tuple containing mixtapes data (index,artist,album) from search.
+        """
+
+        # NOTE: Take a look at this video by James Powell
+        # https://www.youtube.com/watch?v=R2ipPgrWypI&t=1748s at 55:00.
+
+        song_name = Object.strip_and_lower(name)
+        Verbose("\n" + verbose_message["SEARCH_SONG"] % song_name)
+        links = self.mixtape.links
+        links = list(enumerate(links, start=1))
+        results = ThreadQueue(Album.lookup_song, links).execute(song=song_name)
+        if not results:
+            Verbose(verbose_message["SONG_NAME_NOT_FOUND"] % song_name)
+        results = Object.remove_list_null_value(results)
+        return results
+
+    def _index_of_song(self, select):
         """
         Parse all user input and return the correct song index.
-        :param select: -  Media.songs name or index of Media.songs 
+        :param select: -  Media.songs name or index of Media.songs
                datatype: int: must be numerical
                          str: artist,mixtape, or song name
         """
         try:
-            return User.selection(select, self.songs, [x.lower() for x in self.songs])
-        except MediaError as e:
+            if isinstance(select, int):
+                return Select.get_leftmost_index(select, self.songs)
+            return Select.get_index_of(select, self.songs)
+        except ValueError:
             raise MediaError(5)
 
     @property
     def artist(self):
         """Return the current artist name."""
+        if not hasattr(self, "_artist_name"):
+            self._artist_name = None
         return self._artist_name
 
     @artist.setter
     def artist(self, name):
-        self.setMedia(name)
+        self._artist_name = name
 
     @property
     def album(self):
         """Return the current album name."""
+        if not hasattr(self, "_album_name"):
+            self._album_name = None
         return self._album_name
 
     @album.setter
     def album(self, name):
-        self.setMedia(name)
+        self._album_name = name
 
     @property
     def album_cover(self):
         if hasattr(self, "_album_cover"):
             return self._album_cover
-        return ""
 
     @album_cover.setter
     def album_cover(self, url):
@@ -207,24 +226,24 @@ class Media:
 
     @property
     def songs(self):
-        """ Return all songs from album."""
-        if not hasattr(self, "_Mp3"):
-            e_msg = '\nSet media by calling -->  Media.setMedia("Album name")'
-            raise MediaError(3, e_msg)
+        """Return all songs from album."""
+        if self._Mp3 is None:
+            extra_message = '\nSet media by calling -->  Media.setMedia("album-name")'
+            raise MediaError(3, extra_message)
         return self._Mp3.songs
 
     @property
-    def __mp3urls(self):
+    def mp3_urls(self):
         """Returns all parsed mp3 url"""
-        return list(self._Mp3.mp3Urls)
+        return list(self._Mp3.mp3_urls)
 
     def show_songs(self):
         """Pretty way to Print all song names"""
         try:
-            songs = self.songs
-            [Print("%s: %s" % (a + 1, b)) for a, b in enumerate(songs)]
-        except TypeError:
-            Print("Please set Media first\nNo Artist name")
+            for index, song in enumerate(self.songs, start=1):
+                Verbose("%s: %s" % (index, song))
+        except MediaError:
+            Verbose(verbose_message["MEDIA_NOT_SET"])
 
     @property
     def song(self):
@@ -233,244 +252,264 @@ class Media:
 
     @song.setter
     def song(self, name):
-        """ 
-        Set current song
-        :param: name - name of song or song's index
         """
-        songs = self.songs
-        index = self.__index_of_song(name)
-        if index is not None:
-            self._selected_song = songs[index]
-            self._current_index = index
-        else:
-            Print("\n\t song was not found")
+        Set the current song to the song name or index.
+        :param name: - song name or index of song
+        """
+        try:
+            index = self._index_of_song(name)
+            self._selected_song = self.songs[index]
+        except (ValueError, MediaError):
+            Verbose(verbose_message["SONG_NAME_NOT_FOUND"] % name)
 
-    def _cacheSong(self, song, content):
+    def _cache_song(self, song, content):
         """
-         Preserve the data from song and store it for future calls.
-         This prevents calling the requests function again for the same song. 
+        Preserve the data from song and store it for future calls.
+         This prevents calling the requests function again for the same song.
          Each data from a song will be stored in __cache_storage for future access.
 
-        :param: song - name of the song
-        :param: content - song content 
+        Args:
+            song (str):  name of song
+            content (byte): song's audio content
         """
-        name = "-".join((self.artist, song))
+        song = "-".join((self.artist, song))
         try:
-            self.__cache_storage[name] = content
+            self.__cache_storage[song] = content
         except MemoryError:
             self.__cache_storage = {}
 
-    def _checkCache(self, songname):
-        """
-        Check whether song has been download already.
+    def _retrieve_song_from_cache(self, song):
+        """Retrieve song's audio content from cache
+        Args:
+            song (str): name of song
 
-        :param: 
-            
+        Returns:
+            Http response : A http response containing the song's audio contents.
         """
-        requested_song = "-".join((self.artist, songname))
-        if hasattr(self, "__cache_storage"):
-            if requested_song in self.__cache_storage:
-                response = self.__cache_storage.get(requested_song)
-                if not response:
-                    extended_msg = "%s not in cache_storage" % songname
-                    raise MediaError(8, extended_msg)
-                return response
+        requested_song = "-".join((self.artist, song))
+        if requested_song in self.__cache_storage:
+            return self.__cache_storage.get(requested_song)
 
-    def _getMp3Content(self, track):
-        """
-        Return content of the song in IO Bytes object
+    def _write_audio(self, track):
+        """Write mp3 audio content to IO Bytes stream.
+        Args:
+            track (int,string): Name or index of song.
 
-        :param: track - name of song  or song index
+        Returns:
+            BytesIO: A file-like API for reading and writing bytes objects.
         """
 
-        selection = self.__index_of_song(track)
-        if selection is None:
+        try:
+            selection = self._index_of_song(track)
+            if selection is None:
+                raise MediaError("Song not found")
+
+            link = self.mp3_urls[selection]
+            song_name = self.songs[selection]
+            self._song_index = selection
+        except:  # noqa
             return
 
-        self.__song_index = selection
-        link = self.__mp3urls[selection]
-        songname = self.songs[selection]
         self.song = selection + 1
 
-        # Write songname to file
-        # check if song has been already downloaded
-        # if so then get the response from cache
-        response = self._checkCache(songname)
+        # Retrieve song's content in cached
+        response = self._retrieve_song_from_cache(song_name)
         if not response:
             response = self._session.method("GET", link)
-            self._cacheSong(songname, response)
+            self._cache_song(song_name, response)
 
         return io.BytesIO(response.content)
 
     @property
     def autoplay(self):
-        """Continuously play song from current album."""
+        """Continuously play song from current mixtape album."""
         if hasattr(self, "_auto_play"):
             self.player._media_autoplay = self._auto_play
             return self._auto_play
 
     @autoplay.setter
     def autoplay(self, auto=False):
-        """ 
-        Sets the autoplay function.
-       
-       :param: auto - disable or enable autoplay
-                datatype: boolean
-                default: False
-        """
-        self._auto_play = auto
-        self._continousPlay()
-        if auto:
-            Verbose("\t----- AUTO PLAY ON -----")
-        else:
-            Verbose("\t----- AUTO PLAY OFF -----")
+        """Sets the autoplay function.
 
-    @Threader
-    def _continousPlay(self):
-        """ 
+        auto - disable or enable autoplay
+                 datatype: boolean
+                 default: False
+        """
+        self._auto_play = auto  # noqa
+        self._continuous_play()
+        if auto:
+            Verbose(verbose_message["AUTO_PLAY_ENABLED"])
+        else:
+            Verbose(verbose_message["AUTO_PLAY_DISABLED"])
+
+    @property
+    def _is_autoplay_inactive(self):
+        is_paused = self.player.state.get("paused")
+        if is_paused and self._inactive_time == 0:
+            self._inactive_time = time.time()
+        return is_paused and time.time() - self._inactive_time > self.AUTOPLAY_INACTIVITY_TIME
+
+    @threader_wrapper
+    def _continuous_play(self):
+        """
         Automatically play each song from Album when autoplay is enable.
         """
-        if self.autoplay:
-            total_songs = len(self)
-            if not self.song:
-                Verbose("Must play a song before setting autoplay")
-                return
 
-            trackno = self.__index_of_song(self.song) + 2
-            if trackno > total_songs:
-                Print("AutoPlayError: Current track is the last track")
+        if self.song is None:
+            current_track = 1
+            self.play(1)
+        else:
+            current_track = self._index_of_song(self.song)
+
+        if not self.player.state["playing"]:
+            current_track + 1
+
+        while self.autoplay:
+            """
+            If the user di not select a track
+            then set and play the first song from mixtape
+            """
+            # Handle autoplay pause inactivity
+            if self._is_autoplay_inactive:
+                self._inactive_time = 0
+                Verbose(verbose_message["AUTO_PLAY_INACTIVITY"])
                 self.autoplay = False
-                return
+                self.player.stop
+                break
 
-            while self.autoplay:
-                current_track = self.__index_of_song(self.song) + 1
-                stopped = self.player._state.get("stop")
-                if stopped:
-                    next_track = current_track + 1
+            # handle track stoppages by system
+            if self.player._state.get("system_stopped"):  # noqa:
+                self.player.state["system_stopped"] = False
+                next_track = current_track + 1
+                if next_track > len(self):
+                    Verbose(verbose_message["AUTO_PLAY_LAST_SONG"])
+                    self.autoplay = False
+                    break
 
-                    if next_track > total_songs:
-                        Verbose("No more songs to play")
-                        self.autoplay = False
-                        break
+                Verbose(verbose_message["AUTO_PLAY_NEXT_SONG"])
+                self.play(next_track)
 
-                    Verbose("Loading next track")
-                    Verbose("AUTO PLAY ON")
-                    self.play(next_track)
-                    while self.player._state["stop"]:
-                        pass
+            # handle stoppage by user
+            elif self.player.state.get("stopped"):
+                break
 
-    def play(self, track=None, demo=False):
-        """ 
-        Play song (uses vlc media player) 
-
-         :param: track - name or index of song type(str or int)
-         :param: demo  - True: demo sample of song
-                              False: play full song 
-                              *default: False
+    def _get_audio_track(self, track):
         """
-        if self.player is None:
-            extented_msg = "Audio player is incompatible with device"
-            raise MediaError(6, extented_msg)
+        Perform a lookup for song by its index or name and returns
+        full track name and audio content.
 
+        Args:   track (int,string): Name or index of song.
+        Returns:    tuple: (track name, audio content)
+        """
         if track is None:
-            Print("\n\t -- No song was entered --")
-            return
-
-        if isinstance(track, int):
-            if track > len(self):
-                raise MediaError(4)
+            Verbose("\n\t", verbose_message["NO_SONG_SELECTED"])
+            raise MediaError(8, verbose_message["NO_SONG_SELECTED"])
 
         try:
-            content = self._getMp3Content(track).read()
-        except Exception:
-            Print("\n\t-- No song was found --")
+            if isinstance(track, int):
+                if track > len(self):
+                    track = len(self)
+            elif isinstance(track, str):
+                track = self._index_of_song(track) + 1
+            else:
+                raise ValueError
+        except (MediaError, ValueError):  # ^ will throw ValueError if track  name is invalid
+            Verbose(verbose_message["SONG_NAME_NOT_FOUND"] % track)
+            raise MediaError(8, verbose_message["SONG_NAME_NOT_FOUND"] % track)
+
+        content = self._write_audio(track)
+        if not content:
+            Verbose(verbose_message["UNAVAILABLE_SONG"])
+            raise MediaError(9, verbose_message["UNAVAILABLE_SONG"])
+
+        song_name = self.songs[self._song_index]
+        return song_name, content.read()
+
+    def play(self, track=None, demo=False):
+        """Play selected mixtape's track
+
+        Args:
+            track (int,string)- name or index of song.
+            demo (bool, options) - True: demo buffer of song (default: False).
+                False: play full song
+        """
+        try:
+            song_name, content = self._get_audio_track(track)
+        except MediaError:
             return
 
-        songname = self.songs[self.__song_index]
-        track_size = len(content)
+        buffer_size = len(content)
         # play demo or full song
         if not demo:  # demo whole song
             chunk = content
-            samp = int(track_size)
+            buffer = int(buffer_size)
         else:  # demo partial song
-            samp = int(track_size / 5)
-            start = int(samp / 5)
-            chunk = content[start : samp + start]
-        size = file_size(samp)
+            buffer = int(buffer_size / 5)
+            start = int(buffer / 5)
+            chunk = content[start : buffer + start]
+        size = File.get_human_readable_file_size(buffer)
 
         # write song to file
-        Path.writeFile(self.__tmpfile.name, chunk, mode="wb")
+        File.write_to_file(self.__temp_file.name, chunk, mode="wb")
 
         # display message to user
-        Show.mediaPlayMsg(self.artist, songname, size, demo)
+        screen.display_play_message(self.artist, self.album, song_name, size, demo)
 
-        song = " - ".join((self.artist, songname))
-        self.player.setTrack(song, self.__tmpfile.name)
-        self.player.play
+        song = " - ".join((self.artist, song_name))
+        self.player.set_track(song, self.__temp_file.name)
+        self.player.play  # noqa - play song is a property of the player class
 
-    def download(self, track=False, output="", rename=None):
+    def download(self, track=None, rename=None, output=None):
         """
         Download song from Datpiff
 
-        :param: track - name or index of song type(str or int)
-        :param: output - location to save the song (optional)
-        :param: rename - rename the song (optional)
-                default will be song's name 
+        Args:
+            track (int,string) - name or index of song type(str or int)
+            output (string) - location to save the song (optional)
+            rename (string) - rename the song (optional)
+                default will be song's name
         """
-        selection = self.__index_of_song(track)
-        if selection is None:
+        try:
+            song, content = self._get_audio_track(track)
+        except MediaError:
+            # Exception message will be handled from by `_get_audio_track`
             return
 
         # Handles paths
         output = output or os.getcwd()
-        if not Path.is_dir(output):
-            Print("Invalid directory: %s" % output)
-            return
-        link = self.__mp3urls[selection]
-        song = self.songs[selection]
+        if not File.is_dir(output):
+            raise FileNotFoundError("Invalid directory: %s" % output)
 
-        # Handles song's naming
+        # Handles song's renaming
         if rename:
-            title = rename.strip() + ".mp3"
-        else:
-            title = " - ".join((self.artist, song.strip() + ".mp3"))
-        title = Path.standardizeName(title)
-        songname = Path.join(output, title)
+            song, _ = os.path.splitext(rename)
+        title = " - ".join((self.artist, song.strip() + ".mp3"))
 
-        try:
-            response = self._checkCache(song)
-            if response:
-                content = response.content
-            else:
-                response = self._session.method("GET", link)
-                response.raise_for_status()
+        file_name = File.standardize_file_name(title)
+        file_name = File.join(output, file_name)
 
-            size = file_size(len(response.content))
-            Path.writeFile(songname, response.content, mode="wb")
-            Show.mediaDownloadMsg(title, size)
-            self._cacheSong(songname, response)
-        except:
-            Print("Cannot download song %s" % songname)
+        size = File.get_human_readable_file_size(len(content))
+        File.write_to_file(file_name, content, mode="wb")
+        screen.display_download_message(title, size)
 
-    def downloadAlbum(self, output=None):
-        """
-        Download the full ablum.
+    def download_album(self, output=None):
+        """Download all tracks from Mixtape.
 
-        :param: output - directory to save album 
-                :default - current directory
+        Args:
+            output ([type], optional): path to save mixtape.(default: current directory)
         """
         if not output:
             output = os.getcwd()
         elif not os.path.isdir(output):
-            Print("Invalid directory: %s" % output)
+            Verbose(verbose_message["INVALID_DIRECTORY"] % output)
             return
 
-        title = "-".join((self.artist, self.album))
-        title = Path.standardizeName(title)
-        fname = Path.join(output, title)
-
-        # make a directory to store all the ablum's songs
-        if not os.path.isdir(fname):
-            os.mkdir(fname)
-        Queued(self.download, self.songs, fname).run()
-        Print("\n%s %s saved" % (self.artist, self.album))
+        album_dirname = " - ".join((self.artist, self.album.name))
+        output = os.path.join(output, File.standardize_file_name(album_dirname))
+        os.mkdir(output)
+        # must follow `download` method's arguments order
+        ThreadQueue(
+            self.download,
+            self.songs,
+        ).execute(rename=None, output=output)
+        Verbose("\n" + verbose_message["SAVE_ALBUM"] % (self.artist + " " + self.album.name, output))

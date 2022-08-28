@@ -3,9 +3,9 @@
 *swp
 *swo
 *__media*
-*.mp3
-.jpg
-.png 
+*pydatpiff/*.mp3
+*/pydatpiff/*.jpg
+*pydatpiff/*.png
 
 
 # static images and audio
@@ -147,7 +147,7 @@ dmypy.json
 .pyre/
 
 
-#my files 
+#my files
 *.sw*
 *__pycache__*
 *.map*

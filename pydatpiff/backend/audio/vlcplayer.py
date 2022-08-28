@@ -1,11 +1,13 @@
 import vlc
-import re
-from ...errors import PlayerError
+
+from pydatpiff.errors import PlayerError
+from pydatpiff.frontend.screen import Verbose
+
 from .baseplayer import BasePlayer
+
 
 class VLCPlayer(BasePlayer):
     def __init__(self, *args, **kwargs):
-        super(VLCPlayer, self).__init__(*args, **kwargs)
         try:
             self._vlc = vlc.Instance("-q")
             self._player = self._vlc.media_player_new()
@@ -13,81 +15,8 @@ class VLCPlayer(BasePlayer):
             extended_msg = "Please check if your device supports VLC"
             raise PlayerError(1, extended_msg)
 
-    @property
-    def _stateof(self):
-        """Current state of the song being played"""
-        state = re.match(r"[\w.]*\.(\w*)", str(self._player.get_state())).group(1)
-        if state == "NothingSpecial":
-            # set all player value to False
-            for k, v in self._state.items():
-                self._state[k] = False
-        elif "pause" in state.lower():
-            self._isTrackPaused = True
-            self._isTrackPlaying = False
-        else:
-            self._isTrackPlaying = True
-            self._isTrackPaused = False
-        return self.state
-
-    def setTrack(self, name, path=None):
-        if path:
-            self._song = name
-            self._path = path
-            self._player.set_mrl(path)
-        else:
-            Print("No media to play")
-
-    def _set_volume(self, vol=5, way="down"):
-        """Turn the media volume up or down"""
-        if isinstance(vol, (int, str)):
-            if not str(vol).isnumeric():
-                return
-
-            vol = int(vol)
-            min_vol = 0
-            max_vol = 100
-            try:
-                current_volume = int(self._volumeLevel)
-                if way == "down":
-                    if current_volume - vol < min_vol:
-                        vol = min_vol
-                    else:
-                        vol = current_volume - vol
-                elif way == "up":
-                    if current_volume + vol > max_vol:
-                        vol = max_vol
-                    else:
-                        vol = current_volume + vol
-                elif way == "exact":
-                    vol = 0 if vol < min_vol else vol
-                    vol = 100 if vol > max_vol else vol
-                Print("volume: %s" % vol)
-            except:
-                pass
-        self._player.audio_set_volume(vol)
-
-    @property
-    def _volumeLevel(self):
-        """ Current media _player volume"""
-        return self._player.audio_get_volume()
-
-    def volumeUp(self, vol=5):
-        """Turn the media volume up"""
-        self._set_volume(vol, way="up")
-
-    def volumeDown(self, vol=5):
-        """Turn the media volume down"""
-        self._set_volume(vol, way="down")
-
-    def volume(self, vol=None):
-        """Set the volume to exact number"""
-        if vol is None:
-            return
-        self._set_volume(vol, way="exact")
-
-    @property
-    def current_position(self):
-        return self._player.get_time()
+        self._volume = self._global_volume
+        super().__init__(*args, **kwargs)
 
     @property
     def duration(self):
@@ -100,36 +29,84 @@ class VLCPlayer(BasePlayer):
         return mins, secs
 
     @property
+    def current_time(self):
+        return self._player.get_time()
+
+    def set_track(self, name, path=None):
+        if path:
+            self._song = name
+            self._path = path
+            self._player.set_mrl(path)
+            self._volume = self._global_volume
+            self.auto_manage_state()
+        else:
+            Verbose("No media to play")
+
+    @property
+    def _volume(self):
+        """Get current media player volume"""
+        return self._player.audio_get_volume()
+
+    @_volume.setter
+    def _volume(self, level):
+        """Set media player volume"""
+        if level < 0:
+            level = 0
+        if level > 100:
+            level = 100
+
+        self._player.audio_set_volume(level)
+        self._global_volume = level
+
+    def volume_up(self, level=5):
+        """Turn the media volume up"""
+        if not level and not isinstance(level, int):
+            return
+        self._volume += level
+
+    def volume_down(self, level=5):
+        """Turn the media volume down"""
+        if not level and not isinstance(level, int):
+            return
+        self._volume -= level
+
+    def volume(self, level):
+        """Set the volume to exact number"""
+        if not level or not isinstance(level, int):
+            return
+        self._volume = level
+
+    @property
     def play(self):
-        """ Play media song"""
-        if not self.state["stop"]:
-            if self._isTrackPaused:
+        """Play media song"""
+        if not self._track_stopped:
+            if self._track_paused:
                 # unpause if track is already playing but paused
                 self.pause
             else:
                 self._player.play()
-                
-            self._resetState(False, playing=True, load=True)
-            return
+
+            self._track_playing = True
         else:
             try:
-                self.setTrack(self._song, self._path)
-                self.state["stop"] = False
+                self.stop
+                self.set_track(self._song, self._path)
+                self.state["stopped"] = False
                 return self.play
             except RecursionError:
-                self.state["stop"] = True
+                self.state["stopped"] = True
 
     @property
     def pause(self):
         """Pause the media song"""
 
-        pause = self._isTrackPaused
-        self.isTrackPlaying = pause
+        is_paused = self._track_paused
+        self._track_playing = is_paused
         self._player.pause()
-        self._isTrackPaused = not pause
+        self._track_paused = not is_paused
 
     def _seeker(self, pos=10, rew=True):
-        if self._state["stop"]:
+        if self._state["stopped"]:
             return
         if rew:
             to_position = self._player.get_time() - (pos * 1000)
@@ -146,18 +123,18 @@ class VLCPlayer(BasePlayer):
 
     def rewind(self, pos=10):
         """Rewind track
-          @params: pos:: time(second) to rewind media. default:10(sec)
+        @params: pos:: time(second) to rewind media. default:10(sec)
         """
         self._seeker(pos, True)
 
     def ffwd(self, pos=10):
         """Fast forward track
-          vlc time is in milliseconds
-          @params: pos:: time(second) to rewind media. default:10(sec)
+        vlc time is in milliseconds
+        @params: pos:: time(second) to rewind media. default:10(sec)
         """
         self._seeker(pos, False)
 
     @property
     def stop(self):
         self._player.stop()
-        self._resetState(False, stop=True)
+        self._track_stopped = True

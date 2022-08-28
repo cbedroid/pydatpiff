@@ -1,5 +1,5 @@
 class Urls:
-    url = {
+    datpiff = {
         "base": "https://www.datpiff.com/",
         "album": "http://www.datpiff.com",
         "search": "https://www.datpiff.com/mixtapes-search",
@@ -20,5 +20,8 @@ class Urls:
 
     @staticmethod
     def payload(artist):
-        data = {"submit": "MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx", "criteria": artist}
+        data = {
+            "submit": "MTAxNTUuNzcxNTI5NDEyMzY0MTgwNzEx",
+            "criteria": artist,
+        }
         return data

@@ -1,60 +1,64 @@
-import os
-import subprocess
 import atexit
-from mutagen.mp3 import MP3
-from ..config import Threader
+import os
+import platform
+import subprocess
+
+from pydatpiff.errors import PlayerError
+from pydatpiff.utils.logging import logging
+from pydatpiff.utils.utils import threader_wrapper
+
+logger = logging.getLogger(__name__)
 
 
-class Popen(subprocess.Popen):
+class Popen(subprocess.Popen):  # pragma: no cover
     registered_popen = []
+    _player_PID = None
 
     def __init__(self, *args, **kwargs):
-        """ build subprocess Popen object"""
-
+        """build subprocess Popen object"""
         kwargs["stdin"] = subprocess.PIPE
         kwargs["stdout"] = subprocess.PIPE
         kwargs["stderr"] = subprocess.PIPE
         atexit.register(self.kill_on_quit)
-        super().__init__(*args, **kwargs)
-
-    @staticmethod
-    def _pid_of_mpv():
         try:
-            player = subprocess.check_output("pgrep -af mpv", shell=True)
-            if player:
-                return player.decode("utf8").split(" ")[0]
+            super().__init__(shell=False, *args, **kwargs)
+            self._player_PID = self.pid
         except:
-            return
+            logger.exception("PlayerPopenFailed")
+            # throws PlayerNotFoundError
+            raise PlayerError(6)
 
-    @classmethod
-    def stop_mpv(cls):
-        try:  # for Linux device, Mac,Ubuntu,Debain...etc
-            return subprocess.check_call("pkill -9 mpv", shell=True)
+    def stop_player(self):
+        if platform.system() == "Windows":
+            # https://tweaks.com/windows/39559/kill-processes-from-command-prompt/
+            kill_cmd = ("taskkill /pid {} /F",)
+        else:
+            # Systems: Linux, Darwin ..etc
+            kill_cmd = "kill -9 {}"
+
+        try:  # For Linux device, Mac, Ubuntu, Debain...etc
+            if self._player_PID:
+                return subprocess.check_call(
+                    kill_cmd.format(self._player_PID),
+                    shell=True,
+                    stderr=subprocess.PIPE,
+                )
         except subprocess.CalledProcessError:
-            pass
-
-        try:
-            pid = cls._pid_of_mpv()
-            if not pid:  # then mpv player was never invoked,we return here
-                return
-
-            return os.kill(int(pid), 9)  # kill mpv using os
-        except ProcessLookupError:
-            pass
-
-        try:  # For windows
-            return subprocess.check_call(
-                "taskkill /f /im mpv.exe", shell=True, stderr=subprocess.PIPE
-            )
+            return os.kill(int(self._player_PID), 9)  # kill mpv using os
         except:
-            pass
+            logger.exception("Failed to kill player")
 
-    @Threader
+    @threader_wrapper
     def register(self, callback=None, *args, **kwargs):
         """
-        Kills subprocess Popen when error occur or when 
-        process job finish"""
+        Kills subprocess Popen when error occur or when process job finish
+
+        Args:
+            callback (function, optional): Function to execute once player process dies.
+        """
         self.registered_popen.append(self)
+
+        # constantly probe Popen to check if player is running
         while True:
             if self.poll() is not None:
                 if callback:
@@ -67,28 +71,17 @@ class Popen(subprocess.Popen):
         """Unregister and terminate Popen process"""
         for popen in cls.registered_popen:
             popen.kill()
-        # cls.registered_popen = []
 
     @property
-    def is_Alive(self):
+    def is_alive(self):
         if self.poll() is None:
             return True
         return False
 
-    @classmethod
-    def kill_on_quit(cls):
-        cls.stop_mpv()
+    def kill_on_quit(self):
+        if self.is_alive:
+            self.stop_player()
 
-    @classmethod
-    def kill_on_start(cls):
+    def kill_on_start(self):
         for process in self.registered_popen:
             process.kill()
-
-
-class MetaData(MP3):
-    def __init__(self, track):
-        super().__init__(track)
-
-    @property
-    def trackDuration(self):
-        return self.info.length

@@ -1,0 +1,46 @@
+# .coveragerc to control coverage.py
+[run]
+branch = True
+omit=
+    *__init__*
+    *logging*
+    *tests/*
+    *venv/*
+    *errors.py
+    *constants.py
+
+[paths]
+source =
+    pydatpiff/*
+
+[report]
+#fail_under = 100
+include = pydatpiff/*
+show_missing = True
+omit=
+    *__init__*
+    *logging*
+    *tests/*
+
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__
+    def __str__
+    def __init__
+    if hasattr
+    if 0:
+    if self\.debug
+    raise NotImplementedError
+    return NotImplemented
+    except ImportError
+    raise MemoryError
+
+
+ignore_errors = True
+
+[html]
+directory = htmlcov

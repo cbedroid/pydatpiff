@@ -1,9 +1,2 @@
-verbose = True  # set verbose flag False to disable stdout
-
-
-def output():
-    return verbose
-
-
-from .mixtapes import Mixtapes
-from .media import Media
+""" Pydatpif Version Control """
+__version__ = "2.0.0"
