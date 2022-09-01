@@ -1,12 +1,12 @@
 """
    Custom printing function using logger.
 """
-from pydatpiff.utils.logging import logging
+import logging
 
 logger = logging.getLogger(__name__)
 
 
-def Verbose(*args):
+def Verbose(*args):  # noqa
     output = " ".join(args)
     logger.info(output)
 
