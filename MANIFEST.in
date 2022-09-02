@@ -1,5 +1,5 @@
 include *.md
 include *.txt
-include */*.json
-include */*.yaml
 include LICENSE
+global-include *.json
+global-include *.yaml

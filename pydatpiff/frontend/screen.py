@@ -1,7 +1,7 @@
 """
    Custom printing function using logger.
 """
-import logging
+from pydatpiff.utils.logging import logging
 
 logger = logging.getLogger(__name__)
 
