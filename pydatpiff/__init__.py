@@ -1,2 +1,2 @@
-""" Pydatpif Version Control """
-__version__ = "2.0.0"
+""" Pydatpiff Version Control """
+__version__ = "2.1.0"

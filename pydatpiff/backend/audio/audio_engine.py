@@ -1,10 +1,10 @@
 import atexit
+import logging
 import os
 import platform
 import subprocess
 
 from pydatpiff.errors import PlayerError
-from pydatpiff.utils.logging import logging
 from pydatpiff.utils.utils import threader_wrapper
 
 logger = logging.getLogger(__name__)

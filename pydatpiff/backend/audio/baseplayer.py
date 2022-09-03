@@ -226,13 +226,14 @@ class BasePlayer(metaclass=BaseMeta):
             state = self._state
 
         symbol = "[]"
-        if isinstance(state, str) and state == "NothingSpecial":
+        if isinstance(state, str) and state != "NothingSpecial":
             # convert state's str to key/value pairs.
             # On initialization, set all state values => False
+            vlc_state = state.lower()
+            # Reset state
             for k, v in self._state.items():
                 self._state[k] = False
 
-            vlc_state = state.lower()
             # See vlc.get_state docs for more info on VLC states
             self._state["playing"] = "playing" in vlc_state
             self._state["paused"] = "paused" in vlc_state
