@@ -1,5 +1,5 @@
 include *.md
 include *.txt
 include LICENSE
-global-include *.json
-global-include *.yaml
+include pydatpiff/utils/.logging_config.yaml
+recursive-include pydatpiff/utils/*.yaml
