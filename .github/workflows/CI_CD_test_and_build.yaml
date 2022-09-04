@@ -7,10 +7,20 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-
+env:
+ PR_NUMBER: ${{ github.event.number }}
+ SHOULD_RUN_TESTS: true
+ 
 jobs:
+  prcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          isNoIssuePR="$(gh pr view ${env.PR_NUMBER}  --json labels -q '.labels |  map(select(.name | contains("NoIsue")))'"
+          echo 'SHOULD_RUN_TESTS='$isNoIssePR' >> $GITHUN_ENV
+          echo 'SHOULD_RUN_TESTS='$isNoIssePR'  
   build:
-    if: ${{ github.event.label.name != 'NoIssue' }}
+    if: ${{ SHOULD_RUN_TESTS != [] }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
