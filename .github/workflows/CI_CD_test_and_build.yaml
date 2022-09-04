@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    if: ${{ github.event.label.name != 'NoIssue' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
