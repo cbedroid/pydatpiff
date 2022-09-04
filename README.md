@@ -105,7 +105,13 @@ mix.mixtapes
 ```
 ['Creative Control', 'Carter Collection (15th Anniversary)', 'Viva La Hova', 'The Best Of Jay-z                                                                                                : 25th Anniversary', 'Jay-z - If I Should Die Vol. 1 (the Best Of Jay-z)', 'Jay-Z: The Unheard C                                                                                                lassics', 'Jay-z Underground Mixes And Mashes Disk 2', 'Iceburgz Ent Dj Smokeshop Presents -big                                                                                                 Tingz-pt.1 Classic Beefs Nas,jay-z And More', 'The Best Of Jay-z Old Vs New', 'The Best Of Jay-z                                                                                                 & Biggie Smalls', 'Jay-z Live From Glastonbury ', 'Jay-z Underground Mixes And Mashes disk 1', 'Jay-z - Remixes',..etc ]
 
---- ---
+--- 
+
+
+![pydatpiff_mixtapes](https://user-images.githubusercontent.com/54720725/188326131-f2a7f648-0c23-48bd-b7c5-1c950e09ed97.gif)
+
+--- 
+
 
 ## Media
 
@@ -162,7 +168,8 @@ media.songs
 <img src="https://github.com/cbedroid/pydatpiff/raw/master/github/gif/gif_mixtapes.gif" alt="gif-mixtapes" border="0" align="center" min-width="300px" width="80%" height="100%"/>
 </a>
 
---- ---
+--
+
 
 ### PLAYING A SONG
 Songs can be played either by referencing the song  **index** or   **name**.
@@ -183,11 +190,9 @@ media.play(3)
 # Size:  1.91 MB
 ```
 
+![pydatpiff_media](https://user-images.githubusercontent.com/54720725/188327313-b770feba-d0d5-483d-a315-9dd5f39ed8d1.gif)
 
-&nbsp; &nbsp; &nbsp; <a>
-<img src="https://github.com/cbedroid/pydatpiff/raw/master/github/gif/gif_media.gif " alt="gif-media" border="0" align="center" min-width="300px" width="80%" height="100%"/>
-</a>
---- ---
+---
 
 
 ## FIND A SONG
