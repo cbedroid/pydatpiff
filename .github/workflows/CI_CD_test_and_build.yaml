@@ -12,15 +12,8 @@ env:
  SHOULD_RUN_TESTS: true
  
 jobs:
-  prcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          isNoIssuePR="$(gh pr view ${env.PR_NUMBER}  --json labels -q '.labels |  map(select(.name | contains("NoIsue")))'"
-          echo 'SHOULD_RUN_TESTS='$isNoIssePR' >> $GITHUN_ENV
-          echo 'SHOULD_RUN_TESTS='$isNoIssePR'  
   build:
-    if: contains(github.event.pull_request.labels.*.name,"NoIssue") == false
+    if: contains(github.event.pull_request.labels.*.name,'NoIssue') == false
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
