@@ -25,7 +25,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install OS dependencies
         run: |
-            echo "ISSUE LABEL ${{ github.event.label.name }}"
+            echo "PR LABEL ${{ github.event.pull_request.labels }}"
             if [ "$RUNNER_OS"  == "Linux" ]; then
               echo "Installing Ubuntu OS dependencies";
               sudo apt-get update && sudo apt-get install -y vlc mpv
