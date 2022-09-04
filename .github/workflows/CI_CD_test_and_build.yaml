@@ -20,7 +20,7 @@ jobs:
           echo 'SHOULD_RUN_TESTS='$isNoIssePR' >> $GITHUN_ENV
           echo 'SHOULD_RUN_TESTS='$isNoIssePR'  
   build:
-    if: ${{ SHOULD_RUN_TESTS != '[]' }}
+    if: contains(github.event.pull_request.labels.*.name,"NoIssue") == false
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
