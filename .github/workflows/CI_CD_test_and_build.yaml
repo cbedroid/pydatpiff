@@ -7,10 +7,10 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    types: [ labeled ]
 
 jobs:
   build:
+    echo "ISSUE LABEL ${{ github.event.label.name }}"
     if: ${{ github.event.label.name != 'NoIssue' }}
     runs-on: ${{ matrix.os }}
     strategy:
