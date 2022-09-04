@@ -7,13 +7,12 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-env:
- PR_NUMBER: ${{ github.event.number }}
- SHOULD_RUN_TESTS: true
+
  
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name,'NoIsse') == false
+    # Will skip test with PR labeled `NoIssue`. NOTE: Please view PR guideline before marking it as `NoIssue`. 
+    if: contains(github.event.pull_request.labels.*.name,'NoIssue') == false
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
