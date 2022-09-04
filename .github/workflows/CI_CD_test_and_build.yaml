@@ -13,7 +13,7 @@ env:
  
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name,'NoIssue') == false
+    if: contains(github.event.pull_request.labels.*.name,'NoIsse') == false
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
