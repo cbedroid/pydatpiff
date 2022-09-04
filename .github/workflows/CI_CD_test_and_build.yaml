@@ -10,7 +10,6 @@ on:
 
 jobs:
   build:
-    echo "ISSUE LABEL ${{ github.event.label.name }}"
     if: ${{ github.event.label.name != 'NoIssue' }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -26,6 +25,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install OS dependencies
         run: |
+            echo "ISSUE LABEL ${{ github.event.label.name }}"
             if [ "$RUNNER_OS"  == "Linux" ]; then
               echo "Installing Ubuntu OS dependencies";
               sudo apt-get update && sudo apt-get install -y vlc mpv
