@@ -5,11 +5,13 @@ name: Build & Test
 
 on:
   workflow_dispatch:
-  push:
   pull_request:
 
+ 
 jobs:
   build:
+    # Will skip test with PR labeled `NoIssue`. NOTE: Please view PR guideline before marking it as `NoIssue`. 
+    if: contains(github.event.pull_request.labels.*.name,'NoIssue') == false
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -24,6 +26,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install OS dependencies
         run: |
+            echo "PR LABEL ${{ github.event.pull_request.labels }}"
             if [ "$RUNNER_OS"  == "Linux" ]; then
               echo "Installing Ubuntu OS dependencies";
               sudo apt-get update && sudo apt-get install -y vlc mpv
