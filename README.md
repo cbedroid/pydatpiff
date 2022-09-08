@@ -8,6 +8,10 @@
   - supports windows, mac, and linux
   - python 3.7 - above
 
+[**Documentation**](https://cbedroid.github.io/pydatpiff/) is still undergoing, but you can still visit it here.
+
+**Full documentation** will be available soon!
+
 ## Dependencies
 
 **PyDatpiff requires:**
