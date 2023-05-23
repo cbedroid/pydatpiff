@@ -5,4 +5,4 @@ pylint
 pytest-cov==3.0.0
 python-vlc==3.0.16120
 pyyaml==6.0
-requests==2.26.0
+requests==2.31.0
